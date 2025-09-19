@@ -1,4 +1,4 @@
-# BeWell360
+# BeWell360: Your Daily Holistic Wellness Log
 
 ![BeWell360](https://github.com/yildiramdsa/BeWell360/blob/main/images/BeWell360-github.png)
 
