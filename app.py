@@ -23,37 +23,32 @@ st.markdown(
 nutrition_and_hydration = st.Page(
     "daily_log_pages/nutrition_and_hydration.py",
     title="Nutrition & Hydration",
-    icon=":apple:"
+    icon="🍎"
 )
 
 fitness_activities = st.Page(
     "daily_log_pages/fitness_activities.py",
-    title="Fitness Activities",
-    icon=":fitness_center:"
+    title="Fitness Activities"
 )
 
 sleep_schedule = st.Page(
     "daily_log_pages/sleep_schedule.py",
-    title="Sleep Schedule",
-    icon=":bed:"
+    title="Sleep Schedule"
 )
 
 body_composition = st.Page(
     "daily_log_pages/body_composition.py",
-    title="Body Composition",
-    icon=":bar_chart:"
+    title="Body Composition"
 )
 
 professional_development = st.Page(
     "logs/professional_development.py",
-    title="Professional Development",
-    icon=":school:"
+    title="Professional Development"
 )
 
 personal_growth = st.Page(
     "logs/personal_growth.py",
-    title="Personal Growth",
-    icon=":star2:"
+    title="Personal Growth"
 )
 
 # ---------------- Sidebar Navigation ----------------
