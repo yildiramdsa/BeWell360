@@ -82,9 +82,9 @@ with open("images/Oranlytix-lg.svg", "rb") as f:
     encoded_svg = base64.b64encode(svg_bytes).decode()
 footer_html = f"""
 <div style="text-align:center;">
-    <span style="font-size:12px;">Powered by</span>
+    <span style="font-size:12px; color:gray;">Powered by</span>
     <img src="data:image/svg+xml;base64,{encoded_svg}" width="100">
-    <div style="font-size:12px; margin-top:5px;">© 2025 BeWell360. All rights reserved.</div>
+    <div style="font-size:12px; color:gray; margin-top:5px;">© 2025 BeWell360. All rights reserved.</div>
 </div>
 """
 st.markdown(footer_html, unsafe_allow_html=True)
