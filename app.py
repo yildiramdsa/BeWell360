@@ -3,6 +3,7 @@ import pandas as pd
 from datetime import datetime
 import os
 import matplotlib.pyplot as plt
+import base64
 
 # ---------------- Page Config ----------------
 st.set_page_config(page_title="BeWell360", layout="wide")
@@ -15,9 +16,14 @@ if not os.path.exists(DATA_DIR):
 
 # ---------------- Footer ----------------
 st.markdown("<hr>", unsafe_allow_html=True)
-col1, col2, col3 = st.columns([1, 2, 1])
-with col2:
-    st.markdown("<span style='font-weight:bold; font-size:12px;'>Powered by</span>", unsafe_allow_html=True)
-    st.image("images/Oranlytix-lg.png", width=100)
-    st.markdown("<div style='font-size:12px; color:gray;'>© 2025 BeWell360. All rights reserved.</div>", unsafe_allow_html=True)
-
+with open("images/Oranlytix-lg.svg", "rb") as f:
+    svg_bytes = f.read()
+    encoded_svg = base64.b64encode(svg_bytes).decode()
+footer_html = f"""
+<div style="text-align:center;">
+    <span style="font-weight:bold; font-size:12px; margin-right:5px;">Powered by</span>
+    <img src="data:image/svg+xml;base64,{encoded_svg}" width="150">
+    <div style="font-size:12px; color:gray; margin-top:5px;">© 2025 BeWell360. All rights reserved.</div>
+</div>
+"""
+st.markdown(footer_html, unsafe_allow_html=True)
