@@ -25,7 +25,6 @@ if not os.path.exists(DATA_DIR):
     os.makedirs(DATA_DIR)
 
 # ---------------- Footer ----------------
-st.markdown("<hr>", unsafe_allow_html=True)
 with open("images/Oranlytix-lg.svg", "rb") as f:
     svg_bytes = f.read()
     encoded_svg = base64.b64encode(svg_bytes).decode()
