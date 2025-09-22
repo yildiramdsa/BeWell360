@@ -17,14 +17,11 @@ creds = Credentials.from_service_account_info(
 client = gspread.authorize(creds)
 
 SHEET_NAME = "sleep_schedule"
-
-sh = client.open(SHEET_NAME)
-ws = sh.get_worksheet(0)  # use first tab
+ws = client.open(SHEET_NAME).sheet1  # first worksheet
 
 # ---------------- Load or initialize data ----------------
 if "df" not in st.session_state:
-    records = ws.get_all_records()
-    st.session_state.df = pd.DataFrame(records)
+    st.session_state.df = pd.DataFrame(ws.get_all_records())
 
 # ---------------- Form ----------------
 st.title("🧸 Sleep Schedule")
@@ -35,35 +32,35 @@ default_end = time(6, 0)
 
 with st.form("sleep_form", clear_on_submit=False):
     entry_date = st.date_input("Date", today)
-    sleep_start = st.time_input("Sleep Start", default_start)
-    sleep_end = st.time_input("Sleep End", default_end)
+    
+    col1, col2 = st.columns(2)
+    sleep_start = col1.time_input("Sleep Start", default_start)
+    sleep_end = col2.time_input("Sleep End", default_end)
 
-    submitted = st.form_submit_button("☁️ Save")
+    if st.form_submit_button("☁️ Save"):
+        start_str, end_str = sleep_start.strftime("%H:%M"), sleep_end.strftime("%H:%M")
 
-    if submitted:
-        sleep_str = f"{sleep_start.strftime('%H:%M')} - {sleep_end.strftime('%H:%M')}"
+        # Check if entry exists
+        df_records = st.session_state.df.to_dict(orient="records")
+        existing_row_idx = next(
+            (i + 2 for i, row in enumerate(df_records) if str(row.get("date")) == str(entry_date)),
+            None
+        )
 
-        existing_row = None
-        for i, row in enumerate(st.session_state.df.to_dict(orient="records"), start=2):
-            if str(row.get("date")) == str(entry_date):
-                existing_row = i
-                break
-
-        if existing_row:
-            ws.update(f"B{existing_row}", [[sleep_str]])
+        if existing_row_idx:
+            ws.update(f"B{existing_row_idx}:C{existing_row_idx}", [[start_str, end_str]])
             st.success(f"✅ Updated sleep log for {entry_date}")
         else:
-            ws.append_row([str(entry_date), sleep_str])
+            ws.append_row([str(entry_date), start_str, end_str])
             st.success(f"✅ Added new sleep log for {entry_date}")
 
-        # Reload data after update
-        records = ws.get_all_records()
-        st.session_state.df = pd.DataFrame(records)
+        # Reload updated data
+        st.session_state.df = pd.DataFrame(ws.get_all_records())
 
 # ---------------- Display Table ----------------
 if not st.session_state.df.empty:
     df_display = st.session_state.df.copy()
     df_display["date"] = pd.to_datetime(df_display["date"]).dt.date
-    st.dataframe(df_display.sort_values("date", ascending=False), use_container_width=True)
+    st.dataframe(df_display.sort_values("date", ascending=False), width='stretch')
 else:
     st.info("No sleep logs yet.")
