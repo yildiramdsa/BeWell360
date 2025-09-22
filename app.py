@@ -46,12 +46,14 @@ body_composition = st.Page(
 
 professional_development = st.Page(
     "daily_log_pages/professional_development.py",
-    title="Professional Development"
+    title="Professional Development",
+    icon="📚"
 )
 
 personal_growth = st.Page(
     "daily_log_pages/personal_growth.py",
-    title="Personal Growth"
+    title="Personal Growth",
+    icon="🌱"
 )
 
 # ---------------- Sidebar Navigation ----------------
