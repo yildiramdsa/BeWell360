@@ -34,7 +34,8 @@ fitness_activities = st.Page(
 
 sleep_schedule = st.Page(
     "daily_log_pages/sleep_schedule.py",
-    title="Sleep Schedule"
+    title="Sleep Schedule",
+    icon="🧸"
 )
 
 body_composition = st.Page(
