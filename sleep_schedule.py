@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import gspread
 from google.oauth2.service_account import Credentials
-from datetime import date, time, datetime
+from datetime import date, time
 
 # ---------------- Google Sheets Setup ----------------
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
@@ -17,15 +17,18 @@ sh = client.open(SHEET_NAME)
 ws = sh.worksheet(WORKSHEET)
 
 # ---------------- Load Existing Data ----------------
-records = ws.get_all_records()
-df = pd.DataFrame(records)
+def load_sleep_data():
+    records = ws.get_all_records()
+    return pd.DataFrame(records)
+
+df = load_sleep_data()
 
 # ---------------- Form ----------------
 st.title("🧸 Sleep Schedule")
 
 today = date.today()
 default_start = time(22, 0)  # 22:00
-default_end = time(6, 0)    # 06:00
+default_end = time(6, 0)     # 06:00
 
 with st.form("sleep_form", clear_on_submit=False):
     entry_date = st.date_input("Date", today)
@@ -36,21 +39,25 @@ with st.form("sleep_form", clear_on_submit=False):
 
     if submitted:
         # Check if date already exists in sheet
+        records = ws.get_all_records()
         existing_row = None
         for i, row in enumerate(records, start=2):  # row 1 is headers
             if str(row["date"]) == str(entry_date):
                 existing_row = i
                 break
 
+        start_str = sleep_start.strftime("%H:%M")
+        end_str = sleep_end.strftime("%H:%M")
+
         if existing_row:
-            # Update existing row
-            ws.update(f"B{existing_row}", str(sleep_start))
-            ws.update(f"C{existing_row}", str(sleep_end))
+            ws.update(f"B{existing_row}", start_str)
+            ws.update(f"C{existing_row}", end_str)
             st.success(f"✅ Updated sleep log for {entry_date}")
         else:
-            # Append new row
-            ws.append_row([str(entry_date), str(sleep_start), str(sleep_end)])
+            ws.append_row([str(entry_date), start_str, end_str])
             st.success(f"✅ Added new sleep log for {entry_date}")
+
+        df = load_sleep_data()  # reload dataframe after changes
 
 # ---------------- Display Table ----------------
 if not df.empty:
