@@ -48,7 +48,7 @@ with st.form("sleep_form", clear_on_submit=False):
         )
 
         if existing_row_idx:
-            # Updated gspread syntax with named arguments
+            # ✅ Updated gspread syntax with named arguments
             ws.update(values=[[start_str, end_str]], range_name=f"B{existing_row_idx}:C{existing_row_idx}")
             st.success(f"✅ Updated sleep log for {entry_date}")
         else:
