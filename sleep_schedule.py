@@ -38,11 +38,10 @@ with st.form("sleep_form", clear_on_submit=False):
     sleep_start = st.time_input("Sleep Start", default_start)
     sleep_end = st.time_input("Sleep End", default_end)
 
-    submitted = st.form_submit_button("💾 Save")
+    submitted = st.form_submit_button("☁️ Save")
 
     if submitted:
-        start_str = sleep_start.strftime("%H:%M")
-        end_str = sleep_end.strftime("%H:%M")
+        sleep_str = f"{sleep_start.strftime('%H:%M')} - {sleep_end.strftime('%H:%M')}"
 
         existing_row = None
         for i, row in enumerate(st.session_state.df.to_dict(orient="records"), start=2):
@@ -51,10 +50,10 @@ with st.form("sleep_form", clear_on_submit=False):
                 break
 
         if existing_row:
-            ws.update(f"B{existing_row}:C{existing_row}", [[start_str, end_str]])
+            ws.update(f"B{existing_row}", [[sleep_str]])
             st.success(f"✅ Updated sleep log for {entry_date}")
         else:
-            ws.append_row([str(entry_date), start_str, end_str])
+            ws.append_row([str(entry_date), sleep_str])
             st.success(f"✅ Added new sleep log for {entry_date}")
 
         # Reload data after update
@@ -65,6 +64,6 @@ with st.form("sleep_form", clear_on_submit=False):
 if not st.session_state.df.empty:
     df_display = st.session_state.df.copy()
     df_display["date"] = pd.to_datetime(df_display["date"]).dt.date
-    st.dataframe(df_display.sort_values("date", ascending=False).reset_index(drop=True))
+    st.dataframe(df_display.sort_values("date", ascending=False), use_container_width=True)
 else:
-    st.info("No sleep logs yet. Add your first one above ⬆️")
+    st.info("No sleep logs yet.")
