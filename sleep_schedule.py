@@ -84,43 +84,63 @@ if not st.session_state.df.empty:
         m = int((avg_seconds % 3600) // 60)
         return time(h, m)
 
-    avg_sleep_start = average_time(df["sleep_start"])
-    avg_sleep_end = average_time(df["sleep_end"])
+    # ---------------- Date Range Filter ----------------
+    min_date = df["date"].min().date()
+    max_date = df["date"].max().date()
+
+    date_range = st.date_input(
+        "Filter by Date Range",
+        value=(min_date, max_date),
+        min_value=min_date,
+        max_value=max_date
+    )
+
+    start_filter, end_filter = date_range
+    filtered_df = df[(df["date"].dt.date >= start_filter) & (df["date"].dt.date <= end_filter)].copy()
 
     # ---------------- Metrics / Cards ----------------
-    col1, col2, col3 = st.columns(3)
-    col1.metric("Average Sleep Duration (hrs)", f"{df['Sleep Duration (hrs)'].mean():.2f}")
-    col2.metric("Average Sleep Start", avg_sleep_start.strftime("%H:%M"))
-    col3.metric("Average Sleep End", avg_sleep_end.strftime("%H:%M"))
+    if not filtered_df.empty:
+        avg_sleep_start = average_time(filtered_df["sleep_start"])
+        avg_sleep_end = average_time(filtered_df["sleep_end"])
 
-    # ---------------- Table ----------------
-    df_display = df.rename(columns={
-        "date": "Date",
-        "sleep_start": "Sleep Start",
-        "sleep_end": "Sleep End"
-    }).reset_index(drop=True)
+        col1, col2, col3 = st.columns(3)
+        col1.metric("Average Sleep Duration (hrs)", f"{filtered_df['Sleep Duration (hrs)'].mean():.2f}")
+        col2.metric("Average Sleep Start", avg_sleep_start.strftime("%H:%M"))
+        col3.metric("Average Sleep End", avg_sleep_end.strftime("%H:%M"))
 
-    st.dataframe(df_display.sort_values("Date", ascending=False), width='stretch')
+        # ---------------- Table ----------------
+        df_display = filtered_df.rename(columns={
+            "date": "Date",
+            "sleep_start": "Sleep Start",
+            "sleep_end": "Sleep End"
+        }).reset_index(drop=True)
 
-    # ---------------- Line Chart ----------------
-    duration_chart = df_display[["Date", "Sleep Duration (hrs)"]].sort_values("Date")
+        st.dataframe(df_display.sort_values("Date", ascending=False), width='stretch')
 
-    fig = px.line(
-        duration_chart,
-        x="Date",
-        y="Sleep Duration (hrs)",
-        markers=True,
-        title="Sleep Duration Over Time"
-    )
+        # ---------------- Improved Line Chart ----------------
+        duration_chart = df_display[["Date", "Sleep Duration (hrs)"]].sort_values("Date")
 
-    fig.update_layout(
-        xaxis_title="Date",
-        yaxis_title="Duration (hrs)",
-        xaxis=dict(tickformat="%Y-%m-%d", tickangle=0),  # horizontal labels
-        yaxis=dict(range=[0, max(duration_chart["Sleep Duration (hrs)"].max() + 1, 8)]),
-        template="plotly_white"
-    )
+        fig = px.line(
+            duration_chart,
+            x="Date",
+            y="Sleep Duration (hrs)",
+            markers=True,
+            title="Sleep Duration Over Time"
+        )
 
-    st.plotly_chart(fig, use_container_width=True)
+        fig.update_layout(
+            xaxis_title="Date",
+            yaxis_title="Duration (hrs)",
+            xaxis=dict(
+                tickformat="%d %b",  # day + short month
+                tickangle=0  # horizontal labels
+            ),
+            yaxis=dict(range=[0, max(duration_chart["Sleep Duration (hrs)"].max() + 1, 8)]),
+            template="plotly_white"
+        )
+
+        st.plotly_chart(fig, use_container_width=True)
+    else:
+        st.info("No sleep logs in the selected date range.")
 else:
     st.info("No sleep logs yet.")
