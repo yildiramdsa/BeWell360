@@ -16,17 +16,15 @@ if not os.path.exists(DATA_DIR):
 # ---------------- Footer ----------------
 st.markdown("<hr>", unsafe_allow_html=True)
 
-col1, col2, col3 = st.columns([1, 2, 1])
-
-with col2:
-    st.markdown(
-        "<div style='text-align: center;'>"
-        "<span style='margin-right:10px;'>Powered by</span>"
-        "</div>",
-        unsafe_allow_html=True
-    )
-    st.image("images/Oranlytix-lg.svg", width=150)
-    st.markdown(
-        "<div style='text-align:center; font-size:12px; color:gray;'>© 2025 BeWell360. All rights reserved.</div>",
-        unsafe_allow_html=True
-    )
+st.markdown(
+    """
+    <div style='text-align: center; display: flex; justify-content: center; align-items: center; gap: 10px;'>
+        <span style='font-weight:bold;'>Powered by</span>
+        <img src='images/Oranlytix-lg.svg' width='150'>
+    </div>
+    <div style='text-align:center; font-size:12px; color:gray; margin-top:5px;'>
+        © 2025 BeWell360. All rights reserved.
+    </div>
+    """,
+    unsafe_allow_html=True
+)
