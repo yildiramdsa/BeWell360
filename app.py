@@ -75,6 +75,25 @@ raw_data = st.Page(
     icon="🔍"
 )
 
+# ---------------- Life Mastery Planner Pages ----------------
+empowering_morning_routine = st.Page(
+    "life_mastery_planner_pages/empowering_morning_routine.py",
+    title="Empowering Morning Routine",
+    icon="☀️"
+)
+
+empowering_evening_routine = st.Page(
+    "life_mastery_planner_pages/empowering_evening_routine.py",
+    title="Empowering Evening Routine",
+    icon="🌙"
+)
+
+vision_board = st.Page(
+    "life_mastery_planner_pages/vision_board.py",
+    title="Vision Board",
+    icon="🎨"
+)
+
 # ---------------- Sidebar Navigation ----------------
 pg = st.navigation(
     {
@@ -91,6 +110,11 @@ pg = st.navigation(
             progress,
             raw_data,
         ],
+        "Life Mastery Planner": [
+            empowering_morning_routine,
+            empowering_evening_routine,
+            vision_board,
+        ]
     }
 )
 
