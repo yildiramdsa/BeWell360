@@ -7,7 +7,14 @@ import base64
 
 # ---------------- Page Config ----------------
 st.set_page_config(page_title="BeWell360", layout="wide")
-st.image("images/BeWell360-lg.svg", width=400)
+st.markdown(
+    """
+    <div style='text-align: center;'>
+        <img src='images/BeWell360-lg.svg' width='400'>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
 # ---------------- Data Folder ----------------
 DATA_DIR = "data"
