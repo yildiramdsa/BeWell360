@@ -7,10 +7,13 @@ import base64
 
 # ---------------- Page Config ----------------
 st.set_page_config(page_title="BeWell360", layout="wide")
+with open("images/BeWell360-lg.svg", "rb") as f:
+    svg_bytes = f.read()
+    encoded_svg = base64.b64encode(svg_bytes).decode()
 st.markdown(
-    """
-    <div style='text-align: center;'>
-        <img src='images/BeWell360-lg.svg' width='400'>
+    f"""
+    <div style="text-align:center;">
+        <img src="data:image/svg+xml;base64,{encoded_svg}" width="400">
     </div>
     """,
     unsafe_allow_html=True
