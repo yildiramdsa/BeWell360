@@ -10,47 +10,28 @@ SCOPES = [
     "https://www.googleapis.com/auth/drive"
 ]
 
-try:
-    creds = Credentials.from_service_account_info(
-        st.secrets["gcp_service_account"],
-        scopes=SCOPES
-    )
-    client = gspread.authorize(creds)
-except Exception as e:
-    st.error("❌ Google Sheets authentication failed.")
-    st.text(str(e))
-    st.stop()
+creds = Credentials.from_service_account_info(
+    st.secrets["gcp_service_account"],
+    scopes=SCOPES
+)
+client = gspread.authorize(creds)
 
 SHEET_NAME = "sleep_schedule"
 
-# Open spreadsheet and use first tab
-try:
-    sh = client.open(SHEET_NAME)
-    ws = sh.get_worksheet(0)  # first tab
-except Exception as e:
-    st.error(f"❌ Unable to open spreadsheet '{SHEET_NAME}' or its first tab")
-    st.text(str(e))
-    st.stop()
+sh = client.open(SHEET_NAME)
+ws = sh.get_worksheet(0)  # use first tab
 
-# ---------------- Load Existing Data ----------------
-@st.cache_data(ttl=60)
-def load_sleep_data():
-    try:
-        records = ws.get_all_records()
-        return pd.DataFrame(records)
-    except Exception as e:
-        st.error("❌ Failed to load data from Google Sheets.")
-        st.text(str(e))
-        return pd.DataFrame()
-
-df = load_sleep_data()
+# ---------------- Load or initialize data ----------------
+if "df" not in st.session_state:
+    records = ws.get_all_records()
+    st.session_state.df = pd.DataFrame(records)
 
 # ---------------- Form ----------------
 st.title("🧸 Sleep Schedule")
 
 today = date.today()
-default_start = time(22, 0)  # 22:00
-default_end = time(6, 0)     # 06:00
+default_start = time(22, 0)
+default_end = time(6, 0)
 
 with st.form("sleep_form", clear_on_submit=False):
     entry_date = st.date_input("Date", today)
@@ -63,33 +44,27 @@ with st.form("sleep_form", clear_on_submit=False):
         start_str = sleep_start.strftime("%H:%M")
         end_str = sleep_end.strftime("%H:%M")
 
-        try:
-            existing_row = None
-            for i, row in enumerate(df.to_dict(orient="records"), start=2):
-                if str(row.get("date")) == str(entry_date):
-                    existing_row = i
-                    break
+        existing_row = None
+        for i, row in enumerate(st.session_state.df.to_dict(orient="records"), start=2):
+            if str(row.get("date")) == str(entry_date):
+                existing_row = i
+                break
 
-            if existing_row:
-                # Update both cells at once using a 2D list
-                ws.update(f"B{existing_row}:C{existing_row}", [[start_str, end_str]])
-                st.success(f"✅ Updated sleep log for {entry_date}")
-            else:
-                ws.append_row([str(entry_date), start_str, end_str])
-                st.success(f"✅ Added new sleep log for {entry_date}")
+        if existing_row:
+            ws.update(f"B{existing_row}:C{existing_row}", [[start_str, end_str]])
+            st.success(f"✅ Updated sleep log for {entry_date}")
+        else:
+            ws.append_row([str(entry_date), start_str, end_str])
+            st.success(f"✅ Added new sleep log for {entry_date}")
 
-            df = load_sleep_data()  # reload dataframe after changes
-        except Exception as e:
-            st.error("❌ Failed to update Google Sheet.")
-            st.text(str(e))
+        # Reload data after update
+        records = ws.get_all_records()
+        st.session_state.df = pd.DataFrame(records)
 
 # ---------------- Display Table ----------------
-if not df.empty:
-    try:
-        df["date"] = pd.to_datetime(df["date"]).dt.date
-        st.dataframe(df.sort_values("date", ascending=False).reset_index(drop=True))
-    except Exception as e:
-        st.error("❌ Failed to display data table.")
-        st.text(str(e))
+if not st.session_state.df.empty:
+    df_display = st.session_state.df.copy()
+    df_display["date"] = pd.to_datetime(df_display["date"]).dt.date
+    st.dataframe(df_display.sort_values("date", ascending=False).reset_index(drop=True))
 else:
     st.info("No sleep logs yet. Add your first one above ⬆️")
