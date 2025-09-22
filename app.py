@@ -28,7 +28,8 @@ nutrition_and_hydration = st.Page(
 
 fitness_activities = st.Page(
     "daily_log_pages/fitness_activities.py",
-    title="Fitness Activities"
+    title="Fitness Activities",
+    icon="⚽"
 )
 
 sleep_schedule = st.Page(
