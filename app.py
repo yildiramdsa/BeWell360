@@ -22,8 +22,7 @@ st.markdown(
 # ---------------- Daily Log Pages ----------------
 nutrition_and_hydration = st.Page(
     "daily_log_pages/nutrition_and_hydration.py",
-    title="Nutrition & Hydration",
-    icon="🍎"
+    title="Nutrition & Hydration"
 )
 
 fitness_activities = st.Page(
@@ -42,12 +41,12 @@ body_composition = st.Page(
 )
 
 professional_development = st.Page(
-    "logs/professional_development.py",
+    "daily_log_pages/professional_development.py",
     title="Professional Development"
 )
 
 personal_growth = st.Page(
-    "logs/personal_growth.py",
+    "daily_log_pages/personal_growth.py",
     title="Personal Growth"
 )
 
