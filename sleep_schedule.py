@@ -1,73 +1,60 @@
 import streamlit as st
 import pandas as pd
-from datetime import datetime, date, time
-import os
+import gspread
+from google.oauth2.service_account import Credentials
+from datetime import date, time, datetime
 
-# ---------------- Constants ----------------
-DATA_DIR = "data"
-SLEEP_CSV = os.path.join(DATA_DIR, "sleep_schedule.csv")
+# ---------------- Google Sheets Setup ----------------
+SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
+creds = Credentials.from_service_account_info(st.secrets["gcp_service_account"], scopes=SCOPES)
+client = gspread.authorize(creds)
 
-# Ensure data folder exists
-os.makedirs(DATA_DIR, exist_ok=True)
+SHEET_NAME = "BeWell360_Data"
+WORKSHEET = "Sleep"
 
-# ---------------- Load existing data ----------------
-if os.path.exists(SLEEP_CSV):
-    df = pd.read_csv(SLEEP_CSV)
-    df["date"] = pd.to_datetime(df["date"], errors="coerce").dt.date
-else:
-    df = pd.DataFrame(columns=["date", "sleep_start", "sleep_end"])
+# open sheet
+sh = client.open(SHEET_NAME)
+ws = sh.worksheet(WORKSHEET)
 
-st.title("🧸 Sleep Schedule")
+# ---------------- Load Existing Data ----------------
+records = ws.get_all_records()
+df = pd.DataFrame(records)
 
 # ---------------- Form ----------------
-st.subheader("Add / Edit Sleep Entry")
+st.title("🧸 Sleep Schedule")
 
-# Default to today
-default_date = date.today()
+today = date.today()
+default_start = time(22, 0)  # 22:00
+default_end = time(6, 0)    # 06:00
 
-selected_date = st.date_input("Date", value=default_date)
+with st.form("sleep_form", clear_on_submit=False):
+    entry_date = st.date_input("Date", today)
+    sleep_start = st.time_input("Sleep Start", default_start)
+    sleep_end = st.time_input("Sleep End", default_end)
 
-# Check if entry exists
-existing_row = df[df["date"] == selected_date]
-
-if not existing_row.empty:
-    sleep_start_default = datetime.strptime(existing_row.iloc[0]["sleep_start"], "%H:%M").time()
-    sleep_end_default = datetime.strptime(existing_row.iloc[0]["sleep_end"], "%H:%M").time()
-else:
-    sleep_start_default = time(22, 0)
-    sleep_end_default = time(6, 0)
-
-with st.form("sleep_form"):
-    sleep_start = st.time_input("Sleep Start Time", value=sleep_start_default)
-    sleep_end = st.time_input("Sleep End Time", value=sleep_end_default)
-    submitted = st.form_submit_button("Save Entry")
+    submitted = st.form_submit_button("💾 Save")
 
     if submitted:
-        # Remove existing row if present
-        df = df[df["date"] != selected_date]
-        # Append new/updated row
-        new_row = pd.DataFrame({
-            "date": [selected_date],
-            "sleep_start": [sleep_start.strftime("%H:%M")],
-            "sleep_end": [sleep_end.strftime("%H:%M")]
-        })
-        df = pd.concat([df, new_row], ignore_index=True)
-        df.to_csv(SLEEP_CSV, index=False)
-        st.success("Sleep entry saved!")
+        # Check if date already exists in sheet
+        existing_row = None
+        for i, row in enumerate(records, start=2):  # row 1 is headers
+            if str(row["date"]) == str(entry_date):
+                existing_row = i
+                break
 
-# ---------------- Display Existing Data ----------------
+        if existing_row:
+            # Update existing row
+            ws.update(f"B{existing_row}", str(sleep_start))
+            ws.update(f"C{existing_row}", str(sleep_end))
+            st.success(f"✅ Updated sleep log for {entry_date}")
+        else:
+            # Append new row
+            ws.append_row([str(entry_date), str(sleep_start), str(sleep_end)])
+            st.success(f"✅ Added new sleep log for {entry_date}")
+
+# ---------------- Display Table ----------------
 if not df.empty:
-    st.subheader("Recent Sleep Logs")
-    # Show only rows with non-empty date and sort descending
-    df_display = df.dropna(subset=["date"]).sort_values("date", ascending=False)
-    st.dataframe(df_display.reset_index(drop=True))
-
-    # Add download button
-    st.download_button(
-        label="📥 Download Sleep Schedule CSV",
-        data=df.to_csv(index=False).encode("utf-8"),
-        file_name="sleep_schedule.csv",
-        mime="text/csv",
-    )
+    df["date"] = pd.to_datetime(df["date"]).dt.date
+    st.dataframe(df.sort_values("date", ascending=False).reset_index(drop=True))
 else:
-    st.info("No sleep logs found. Add a new entry above.")
+    st.info("No sleep logs yet. Add your first one above ⬆️")
