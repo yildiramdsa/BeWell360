@@ -19,6 +19,57 @@ st.markdown(
     unsafe_allow_html=True
 )
 
+# ---------------- Daily Log Pages ----------------
+nutrition_and_hydration = st.Page(
+    "logs/nutrition_and_hydration.py",
+    title="Nutrition & Hydration",
+    icon=":apple:"
+)
+
+fitness_activities = st.Page(
+    "logs/fitness_activities.py",
+    title="Fitness Activities",
+    icon=":fitness_center:"
+)
+
+sleep_schedule = st.Page(
+    "logs/sleep_schedule.py",
+    title="Sleep Schedule",
+    icon=":bed:"
+)
+
+body_composition = st.Page(
+    "logs/body_composition.py",
+    title="Body Composition",
+    icon=":bar_chart:"
+)
+
+professional_development = st.Page(
+    "logs/professional_development.py",
+    title="Professional Development",
+    icon=":school:"
+)
+
+personal_growth = st.Page(
+    "logs/personal_growth.py",
+    title="Personal Growth",
+    icon=":star2:"
+)
+
+# ---------------- Sidebar Navigation ----------------
+pg = st.navigation(
+    {
+        "Daily Log": [
+            nutrition_and_hydration,
+            fitness_activities,
+            sleep_schedule,
+            body_composition,
+            professional_development,
+            personal_growth,
+        ],
+    }
+)
+
 # ---------------- Data Folder ----------------
 DATA_DIR = "data"
 if not os.path.exists(DATA_DIR):
