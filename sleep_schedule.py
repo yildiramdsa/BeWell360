@@ -5,7 +5,10 @@ from google.oauth2.service_account import Credentials
 from datetime import date, time
 
 # ---------------- Google Sheets Setup ----------------
-SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
+SCOPES = [
+    "https://www.googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/auth/drive"
+]
 
 try:
     creds = Credentials.from_service_account_info(
