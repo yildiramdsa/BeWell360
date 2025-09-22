@@ -22,7 +22,8 @@ st.markdown(
 # ---------------- Daily Log Pages ----------------
 nutrition_and_hydration = st.Page(
     "daily_log_pages/nutrition_and_hydration.py",
-    title="Nutrition & Hydration"
+    title="Nutrition & Hydration",
+    icon="🍎"
 )
 
 fitness_activities = st.Page(
