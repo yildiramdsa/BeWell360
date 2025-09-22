@@ -21,25 +21,25 @@ st.markdown(
 
 # ---------------- Daily Log Pages ----------------
 nutrition_and_hydration = st.Page(
-    "logs/nutrition_and_hydration.py",
+    "daily_log_pages/nutrition_and_hydration.py",
     title="Nutrition & Hydration",
     icon=":apple:"
 )
 
 fitness_activities = st.Page(
-    "logs/fitness_activities.py",
+    "daily_log_pages/fitness_activities.py",
     title="Fitness Activities",
     icon=":fitness_center:"
 )
 
 sleep_schedule = st.Page(
-    "logs/sleep_schedule.py",
+    "daily_log_pages/sleep_schedule.py",
     title="Sleep Schedule",
     icon=":bed:"
 )
 
 body_composition = st.Page(
-    "logs/body_composition.py",
+    "daily_log_pages/body_composition.py",
     title="Body Composition",
     icon=":bar_chart:"
 )
