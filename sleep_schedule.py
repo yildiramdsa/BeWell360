@@ -116,7 +116,7 @@ if not st.session_state.df.empty:
     fig.update_layout(
         xaxis_title="Date",
         yaxis_title="Duration (hrs)",
-        xaxis=dict(tickformat="%Y-%m-%d", tickangle=-45),
+        xaxis=dict(tickformat="%Y-%m-%d", tickangle=0),  # horizontal labels
         yaxis=dict(range=[0, max(duration_chart["Sleep Duration (hrs)"].max() + 1, 8)]),
         template="plotly_white"
     )
