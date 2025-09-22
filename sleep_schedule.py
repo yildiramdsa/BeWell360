@@ -3,6 +3,7 @@ import pandas as pd
 import gspread
 from google.oauth2.service_account import Credentials
 from datetime import date, time, datetime, timedelta
+import plotly.express as px
 
 # ---------------- Google Sheets Setup ----------------
 SCOPES = [
@@ -102,7 +103,24 @@ if not st.session_state.df.empty:
     st.dataframe(df_display.sort_values("Date", ascending=False), width='stretch')
 
     # ---------------- Line Chart ----------------
-    duration_chart = df_display[["Date", "Sleep Duration (hrs)"]].set_index("Date").sort_index()
-    st.line_chart(duration_chart)
+    duration_chart = df_display[["Date", "Sleep Duration (hrs)"]].sort_values("Date")
+
+    fig = px.line(
+        duration_chart,
+        x="Date",
+        y="Sleep Duration (hrs)",
+        markers=True,
+        title="Sleep Duration Over Time"
+    )
+
+    fig.update_layout(
+        xaxis_title="Date",
+        yaxis_title="Duration (hrs)",
+        xaxis=dict(tickformat="%Y-%m-%d", tickangle=-45),
+        yaxis=dict(range=[0, max(duration_chart["Sleep Duration (hrs)"].max() + 1, 8)]),
+        template="plotly_white"
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
 else:
     st.info("No sleep logs yet.")
