@@ -22,7 +22,7 @@ df = pd.read_csv(SLEEP_FILE)
 df["date"] = df["date"].astype(str)
 
 # ---------------- Form ----------------
-st.title("🛌 Sleep Schedule")
+st.title("🧸 Sleep Schedule")
 
 # Default to today
 selected_date = st.date_input("Date", datetime.today())
