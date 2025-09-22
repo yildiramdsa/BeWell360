@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 # ---------------- Page Config ----------------
 st.set_page_config(page_title="BeWell360", layout="wide")
-st.image("images/BeWell360-lg.svg", width=200)
+st.image("images/BeWell360-lg.svg", width=300)
 
 # ---------------- Data Folder ----------------
 DATA_DIR = "data"
