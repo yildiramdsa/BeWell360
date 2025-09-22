@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 # ---------------- Page Config ----------------
 st.set_page_config(page_title="BeWell360", layout="wide")
-st.image("images/BeWell360-lg.png", width=200)
+st.image("images/BeWell360-lg.svg", width=200)
 
 # ---------------- Data Folder ----------------
 DATA_DIR = "data"
@@ -15,8 +15,12 @@ if not os.path.exists(DATA_DIR):
 
 # ---------------- Footer ----------------
 st.markdown("---")
-col1, col2 = st.columns([1, 0.2])
-with col1:
-    st.markdown("Powered by")
-with col2:
-    st.image("images/Oranlytix-lg.png", width=50)
+st.markdown(
+    """
+    <p style='display: flex; align-items: center;'>
+        <span style='margin-right:10px;'>Powered by</span>
+        <img src='images/Oranlytix-lg.svg' width='100'>
+    </p>
+    """,
+    unsafe_allow_html=True
+)
