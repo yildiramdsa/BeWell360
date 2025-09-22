@@ -63,17 +63,16 @@ with st.form("sleep_form", clear_on_submit=False):
         start_str = sleep_start.strftime("%H:%M")
         end_str = sleep_end.strftime("%H:%M")
 
-        # Check if date already exists
         try:
             existing_row = None
-            for i, row in enumerate(df.to_dict(orient="records"), start=2):  # row 1 = headers
+            for i, row in enumerate(df.to_dict(orient="records"), start=2):
                 if str(row.get("date")) == str(entry_date):
                     existing_row = i
                     break
 
             if existing_row:
-                ws.update(f"B{existing_row}", start_str)
-                ws.update(f"C{existing_row}", end_str)
+                # Update both cells at once using a 2D list
+                ws.update(f"B{existing_row}:C{existing_row}", [[start_str, end_str]])
                 st.success(f"✅ Updated sleep log for {entry_date}")
             else:
                 ws.append_row([str(entry_date), start_str, end_str])
