@@ -21,15 +21,14 @@ except Exception as e:
     st.text(str(e))
     st.stop()
 
-SHEET_NAME = "BeWell360_Data"
-WORKSHEET = "Sleep"
+SHEET_NAME = "sleep_schedule"
 
-# Open sheet safely
+# Open spreadsheet and use first tab
 try:
     sh = client.open(SHEET_NAME)
-    ws = sh.worksheet(WORKSHEET)
+    ws = sh.get_worksheet(0)  # first tab
 except Exception as e:
-    st.error(f"❌ Unable to open sheet '{SHEET_NAME}/{WORKSHEET}'")
+    st.error(f"❌ Unable to open spreadsheet '{SHEET_NAME}' or its first tab")
     st.text(str(e))
     st.stop()
 
