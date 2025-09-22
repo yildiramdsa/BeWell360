@@ -13,7 +13,7 @@ with open("images/BeWell360-lg.svg", "rb") as f:
 st.markdown(
     f"""
     <div style="text-align:center;">
-        <img src="data:image/svg+xml;base64,{encoded_svg}" width="400">
+        <img src="data:image/svg+xml;base64,{encoded_svg}" width="350">
     </div>
     """,
     unsafe_allow_html=True
