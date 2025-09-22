@@ -76,13 +76,12 @@ if not os.path.exists(DATA_DIR):
     os.makedirs(DATA_DIR)
 
 # ---------------- Footer ----------------
-st.markdown("<hr>", unsafe_allow_html=True)
 with open("images/Oranlytix-lg.svg", "rb") as f:
     svg_bytes = f.read()
     encoded_svg = base64.b64encode(svg_bytes).decode()
 footer_html = f"""
 <div style="text-align:center;">
-    <span style="font-size:10px; color:gray;">Powered by</span>
+    <span style="font-size:10px; color:gray; margin-top:50px;">Powered by</span>
     <img src="data:image/svg+xml;base64,{encoded_svg}" width="75">
     <div style="font-size:10px; color:gray; margin-top:5px;">© 2025 BeWell360. All rights reserved.</div>
 </div>
