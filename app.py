@@ -2,69 +2,67 @@ import streamlit as st
 import os
 import base64
 
+# ---------------- Constants ----------------
+DATA_DIR = "data"
+HEADER_SVG = "images/BeWell360-lg.svg"
+FOOTER_SVG = "images/Oranlytix-lg.svg"
+
 # ---------------- Page Config ----------------
 st.set_page_config(page_title="BeWell360", layout="wide")
 
-# Helper to load SVGs
+# ---------------- Helpers ----------------
 def load_svg(file_path):
+    """Load an SVG and encode it as base64."""
     with open(file_path, "rb") as f:
         return base64.b64encode(f.read()).decode()
+
+def create_pages(page_list):
+    """Create a list of st.Page objects from a list of tuples (path, title, icon)."""
+    return [st.Page(path, title=title, icon=icon) for path, title, icon in page_list]
 
 # ---------------- Header ----------------
 st.markdown(
     f"""
     <div style="text-align:center;">
-        <img src="data:image/svg+xml;base64,{load_svg('images/BeWell360-lg.svg')}" width="250">
+        <img src="data:image/svg+xml;base64,{load_svg(HEADER_SVG)}" width="250">
     </div>
     """,
     unsafe_allow_html=True
 )
 
-# ---------------- Daily Log Pages ----------------
-nutrition_and_hydration = st.Page("nutrition_and_hydration.py", title="Nutrition & Hydration", icon="🍎")
-fitness_activities = st.Page("fitness_activities.py", title="Fitness Activities", icon="⚽")
-sleep_schedule = st.Page("sleep_schedule.py", title="Sleep Schedule", icon="🧸")
-body_composition = st.Page("body_composition.py", title="Body Composition", icon="💪")
-professional_development = st.Page("professional_development.py", title="Professional Development", icon="📚")
-personal_growth = st.Page("personal_growth.py", title="Personal Growth", icon="🌱")
+# ---------------- Pages ----------------
+daily_log_pages = create_pages([
+    ("nutrition_and_hydration.py", "Nutrition & Hydration", "🍎"),
+    ("fitness_activities.py", "Fitness Activities", "⚽"),
+    ("sleep_schedule.py", "Sleep Schedule", "🧸"),
+    ("body_composition.py", "Body Composition", "💪"),
+    ("professional_development.py", "Professional Development", "📚"),
+    ("personal_growth.py", "Personal Growth", "🌱"),
+])
 
-# ---------------- Insights Pages ----------------
-dashboard = st.Page("dashboard.py", title="Dashboard", icon="📌")
-progress = st.Page("progress.py", title="Progress", icon="🗓")
-raw_data = st.Page("raw_data.py", title="Raw Data", icon="🔍")
+insights_pages = create_pages([
+    ("dashboard.py", "Dashboard", "📌"),
+    ("progress.py", "Progress", "🗓"),
+    ("raw_data.py", "Raw Data", "🔍"),
+])
 
-# ---------------- Life Mastery Planner Pages ----------------
-empowering_morning_routine = st.Page("empowering_morning_routine.py", title="Empowering Morning Routine", icon="☀️")
-empowering_evening_routine = st.Page("empowering_evening_routine.py", title="Empowering Evening Routine", icon="🌙")
-vision_board = st.Page("vision_board.py", title="Vision Board", icon="🎨")
+life_mastery_pages = create_pages([
+    ("empowering_morning_routine.py", "Empowering Morning Routine", "☀️"),
+    ("empowering_evening_routine.py", "Empowering Evening Routine", "🌙"),
+    ("vision_board.py", "Vision Board", "🎨"),
+])
 
-# ---------------- Sidebar Navigation ----------------
 pages = {
-    "Daily Log": [
-        nutrition_and_hydration,
-        fitness_activities,
-        sleep_schedule,
-        body_composition,
-        professional_development,
-        personal_growth,
-    ],
-    "Insights": [
-        dashboard,
-        progress,
-        raw_data,
-    ],
-    "Life Mastery Planner": [
-        empowering_morning_routine,
-        empowering_evening_routine,
-        vision_board,
-    ]
+    "Daily Log": daily_log_pages,
+    "Insights": insights_pages,
+    "Life Mastery Planner": life_mastery_pages,
 }
 
+# ---------------- Navigation ----------------
 pg = st.navigation(pages)
-pg.run()  # <-- execute the selected page
+pg.run()  # Execute the selected page
 
 # ---------------- Data Folder ----------------
-DATA_DIR = "data"
 os.makedirs(DATA_DIR, exist_ok=True)
 
 # ---------------- Footer ----------------
@@ -72,7 +70,7 @@ st.markdown("<hr>", unsafe_allow_html=True)
 footer_html = f"""
 <div style="text-align:center;">
     <span style="font-size:10px; color:gray;">Powered by</span>
-    <img src="data:image/svg+xml;base64,{load_svg('images/Oranlytix-lg.svg')}" width="75">
+    <img src="data:image/svg+xml;base64,{load_svg(FOOTER_SVG)}" width="75">
     <div style="font-size:10px; color:gray;">© 2025 BeWell360. All rights reserved.</div>
 </div>
 """
