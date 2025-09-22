@@ -21,75 +21,75 @@ st.markdown(
 
 # ---------------- Daily Log Pages ----------------
 nutrition_and_hydration = st.Page(
-    "daily_log_pages/nutrition_and_hydration.py",
+    "nutrition_and_hydration.py",
     title="Nutrition & Hydration",
     icon="🍎"
 )
 
 fitness_activities = st.Page(
-    "daily_log_pages/fitness_activities.py",
+    "fitness_activities.py",
     title="Fitness Activities",
     icon="⚽"
 )
 
 sleep_schedule = st.Page(
-    "daily_log_pages/sleep_schedule.py",
+    "sleep_schedule.py",
     title="Sleep Schedule",
     icon="🧸"
 )
 
 body_composition = st.Page(
-    "daily_log_pages/body_composition.py",
+    "body_composition.py",
     title="Body Composition",
     icon="💪"
 )
 
 professional_development = st.Page(
-    "daily_log_pages/professional_development.py",
+    "professional_development.py",
     title="Professional Development",
     icon="📚"
 )
 
 personal_growth = st.Page(
-    "daily_log_pages/personal_growth.py",
+    "personal_growth.py",
     title="Personal Growth",
     icon="🌱"
 )
 
 # ---------------- Insights Pages ----------------
 dashboard = st.Page(
-    "insights_pages/dashboard.py",
+    "dashboard.py",
     title="Dashboard",
     icon="📌"
 )
 
 progress = st.Page(
-    "insights_pages/progress.py",
+    "progress.py",
     title="Progress",
     icon="🗓"
 )
 
 raw_data = st.Page(
-    "insights_pages/raw_data.py",
+    "raw_data.py",
     title="Raw Data",
     icon="🔍"
 )
 
 # ---------------- Life Mastery Planner Pages ----------------
 empowering_morning_routine = st.Page(
-    "life_mastery_planner_pages/empowering_morning_routine.py",
+    "empowering_morning_routine.py",
     title="Empowering Morning Routine",
     icon="☀️"
 )
 
 empowering_evening_routine = st.Page(
-    "life_mastery_planner_pages/empowering_evening_routine.py",
+    "empowering_evening_routine.py",
     title="Empowering Evening Routine",
     icon="🌙"
 )
 
 vision_board = st.Page(
-    "life_mastery_planner_pages/vision_board.py",
+    "vision_board.py",
     title="Vision Board",
     icon="🎨"
 )
