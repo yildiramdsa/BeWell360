@@ -56,9 +56,21 @@ personal_growth = st.Page(
     icon="🌱"
 )
 
-# ---------------- Wellness Reports Pages ----------------
+# ---------------- Insights Pages ----------------
+dashboard = st.Page(
+    "insights_pages/dashboard.py",
+    title="Dashboard",
+    icon="📌"
+)
+
+progress = st.Page(
+    "insights_pages/progress.py",
+    title="Progress",
+    icon="🗓"
+)
+
 raw_data = st.Page(
-    "wellness_reports_pages/raw_data.py",
+    "insights_pages/raw_data.py",
     title="Raw Data",
     icon="🔍"
 )
@@ -74,7 +86,9 @@ pg = st.navigation(
             professional_development,
             personal_growth,
         ],
-        "Wellness Reports": [
+        "Insights": [
+            dashboard,
+            progress,
             raw_data,
         ],
     }
