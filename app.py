@@ -14,13 +14,4 @@ if not os.path.exists(DATA_DIR):
     os.makedirs(DATA_DIR)
 
 # ---------------- Footer ----------------
-st.markdown("---")
-st.markdown(
-    """
-    <p style='display: flex; align-items: center;'>
-        <span style='margin-right:10px;'>Powered by</span>
-        <img src='images/Oranlytix-lg.svg' width='100'>
-    </p>
-    """,
-    unsafe_allow_html=True
-)
+st.image("images/Oranlytix-lg.svg", width=150)
