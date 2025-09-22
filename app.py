@@ -14,4 +14,14 @@ if not os.path.exists(DATA_DIR):
     os.makedirs(DATA_DIR)
 
 # ---------------- Footer ----------------
-st.image("images/Oranlytix-lg.svg", width=150)
+st.markdown(
+    """
+    <div style='text-align: center; margin-top: 10px;'>
+        <span style='font-weight: bold; margin-right: 10px;'>Powered by</span>
+        <img src='images/Oranlytix-lg.svg' width='100'>
+        <br>
+        <span style='font-size:12px; color:gray;'>© 2025 BeWell360. All rights reserved.</span>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
