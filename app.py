@@ -16,7 +16,7 @@ if not os.path.exists(DATA_DIR):
 # ---------------- Footer ----------------
 st.markdown("<hr>", unsafe_allow_html=True)
 st.markdown("<div style='text-align:center;'>", unsafe_allow_html=True)
-st.markdown("<span style='font-weight:bold;'>Powered by</span>", unsafe_allow_html=True)
+st.markdown("<span style='font-weight:bold; style='font-size:12px;'>Powered by</span>", unsafe_allow_html=True)
 st.image("images/Oranlytix-lg.svg", width=100)
 st.markdown("<div style='font-size:12px; color:gray;'>© 2025 BeWell360. All rights reserved.</div>", unsafe_allow_html=True)
 st.markdown("</div>", unsafe_allow_html=True)
