@@ -84,11 +84,19 @@ if not st.session_state.df.empty:
         m = int((avg_seconds % 3600) // 60)
         return time(h, m)
 
-    # ---------------- Date Range Filter ----------------
+    # ---------------- Metrics / Cards + Date Filter ----------------
+    avg_sleep_start = average_time(df["sleep_start"])
+    avg_sleep_end = average_time(df["sleep_end"])
+
+    # Four columns: 3 metrics + date filter (date filter wider)
+    col1, col2, col3, col4 = st.columns([1, 1, 1, 2])
+    col1.metric("Average Sleep Duration (hrs)", f"{df['Sleep Duration (hrs)'].mean():.2f}")
+    col2.metric("Average Sleep Start", avg_sleep_start.strftime("%H:%M"))
+    col3.metric("Average Sleep End", avg_sleep_end.strftime("%H:%M"))
+
     min_date = df["date"].min().date()
     max_date = df["date"].max().date()
-
-    date_range = st.date_input(
+    date_range = col4.date_input(
         "Filter by Date Range",
         value=(min_date, max_date),
         min_value=min_date,
@@ -98,16 +106,9 @@ if not st.session_state.df.empty:
     start_filter, end_filter = date_range
     filtered_df = df[(df["date"].dt.date >= start_filter) & (df["date"].dt.date <= end_filter)].copy()
 
-    # ---------------- Metrics / Cards ----------------
-    if not filtered_df.empty:
-        avg_sleep_start = average_time(filtered_df["sleep_start"])
-        avg_sleep_end = average_time(filtered_df["sleep_end"])
-
-        col1, col2, col3 = st.columns(3)
-        col1.metric("Average Sleep Duration (hrs)", f"{filtered_df['Sleep Duration (hrs)'].mean():.2f}")
-        col2.metric("Average Sleep Start", avg_sleep_start.strftime("%H:%M"))
-        col3.metric("Average Sleep End", avg_sleep_end.strftime("%H:%M"))
-
+    if filtered_df.empty:
+        st.info("No sleep logs in the selected date range.")
+    else:
         # ---------------- Table ----------------
         df_display = filtered_df.rename(columns={
             "date": "Date",
@@ -140,7 +141,5 @@ if not st.session_state.df.empty:
         )
 
         st.plotly_chart(fig, use_container_width=True)
-    else:
-        st.info("No sleep logs in the selected date range.")
 else:
     st.info("No sleep logs yet.")
