@@ -56,6 +56,13 @@ personal_growth = st.Page(
     icon="🌱"
 )
 
+# ---------------- Wellness Reports Pages ----------------
+raw_data = st.Page(
+    "wellness_reports_pages/raw_data.py",
+    title="Raw Data",
+    icon="🔍"
+)
+
 # ---------------- Sidebar Navigation ----------------
 pg = st.navigation(
     {
@@ -66,6 +73,9 @@ pg = st.navigation(
             body_composition,
             professional_development,
             personal_growth,
+        ],
+        "Wellness Reports": [
+            raw_data,
         ],
     }
 )
