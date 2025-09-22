@@ -1,58 +1,49 @@
 import streamlit as st
 import pandas as pd
+from datetime import datetime
 import os
-from datetime import datetime, time
 
-# Path for sleep log data
-DATA_FILE = "data/sleep_schedule.csv"
+# ---------------- Page Config ----------------
+st.set_page_config(page_title="Sleep Schedule", layout="wide")
+st.title("Sleep Schedule")
 
-# Make sure data folder exists
-os.makedirs("data", exist_ok=True)
-
-# Load data if file exists
-if os.path.exists(DATA_FILE):
-    df = pd.read_csv(DATA_FILE, parse_dates=["date"])
-else:
+# ---------------- Data File ----------------
+DATA_DIR = "data"
+csv_file = os.path.join(DATA_DIR, "sleep_schedule.csv")
+if not os.path.exists(csv_file):
     df = pd.DataFrame(columns=["date", "sleep_start", "sleep_end"])
+    df.to_csv(csv_file, index=False)
+else:
+    df = pd.read_csv(csv_file)
 
-st.title("😴 Sleep Schedule")
-
-# Form
+# ---------------- Form ----------------
 with st.form("sleep_form"):
-    today = datetime.today().date()
-    selected_date = st.date_input("Date", value=today)
-
-    # If date already exists, load values
-    existing = df[df["date"] == pd.to_datetime(selected_date)]
-    if not existing.empty:
-        default_start = datetime.strptime(existing.iloc[0]["sleep_start"], "%H:%M:%S").time()
-        default_end = datetime.strptime(existing.iloc[0]["sleep_end"], "%H:%M:%S").time()
+    # Default date today
+    date = st.date_input("Date", datetime.today())
+    
+    # Check if row exists for this date
+    existing_row = df[df["date"] == date.strftime("%Y-%m-%d")]
+    if not existing_row.empty:
+        sleep_start = st.time_input("Sleep Start", datetime.strptime(existing_row.iloc[0]["sleep_start"], "%H:%M").time())
+        sleep_end = st.time_input("Sleep End", datetime.strptime(existing_row.iloc[0]["sleep_end"], "%H:%M").time())
     else:
-        default_start = time(23, 0)
-        default_end = time(7, 0)
+        sleep_start = st.time_input("Sleep Start")
+        sleep_end = st.time_input("Sleep End")
 
-    sleep_start = st.time_input("Sleep Start", value=default_start)
-    sleep_end = st.time_input("Sleep End", value=default_end)
-
-    submitted = st.form_submit_button("💾 Save")
-
+    submitted = st.form_submit_button("Save")
     if submitted:
-        # Remove old entry for that date if exists
-        df = df[df["date"] != pd.to_datetime(selected_date)]
+        # Update existing row or add new
+        if not existing_row.empty:
+            df.loc[df["date"] == date.strftime("%Y-%m-%d"), ["sleep_start", "sleep_end"]] = [sleep_start.strftime("%H:%M"), sleep_end.strftime("%H:%M")]
+        else:
+            df = pd.concat([df, pd.DataFrame([{
+                "date": date.strftime("%Y-%m-%d"),
+                "sleep_start": sleep_start.strftime("%H:%M"),
+                "sleep_end": sleep_end.strftime("%H:%M")
+            }])], ignore_index=True)
 
-        # Add new/updated entry
-        new_row = pd.DataFrame([{
-            "date": selected_date,
-            "sleep_start": sleep_start.strftime("%H:%M:%S"),
-            "sleep_end": sleep_end.strftime("%H:%M:%S")
-        }])
-        df = pd.concat([df, new_row], ignore_index=True)
+        df.to_csv(csv_file, index=False)
+        st.success("Saved successfully!")
 
-        # Save to CSV
-        df.to_csv(DATA_FILE, index=False)
-        st.success(f"Sleep data saved for {selected_date} ✅")
-
-# Show data table
-if not df.empty:
-    st.subheader("Your Sleep History")
-    st.dataframe(df.sort_values("date", ascending=False))
+# ---------------- Show Table ----------------
+st.dataframe(df.sort_values("date", ascending=False))
