@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-from datetime import datetime, date
+from datetime import datetime, date, time
 import os
 
 # ---------------- Constants ----------------
@@ -13,11 +13,11 @@ os.makedirs(DATA_DIR, exist_ok=True)
 # ---------------- Load existing data ----------------
 if os.path.exists(SLEEP_CSV):
     df = pd.read_csv(SLEEP_CSV)
-    df["date"] = pd.to_datetime(df["date"], errors="coerce")
+    df["date"] = pd.to_datetime(df["date"], errors="coerce").dt.date
 else:
     df = pd.DataFrame(columns=["date", "sleep_start", "sleep_end"])
 
-st.title("🛌 Sleep Schedule")
+st.title("🧸 Sleep Schedule")
 
 # ---------------- Form ----------------
 st.subheader("Add / Edit Sleep Entry")
@@ -28,26 +28,26 @@ default_date = date.today()
 selected_date = st.date_input("Date", value=default_date)
 
 # Check if entry exists
-existing_row = df[df["date"] == pd.to_datetime(selected_date)]
+existing_row = df[df["date"] == selected_date]
 
 if not existing_row.empty:
-    sleep_start_default = existing_row.iloc[0]["sleep_start"]
-    sleep_end_default = existing_row.iloc[0]["sleep_end"]
+    sleep_start_default = datetime.strptime(existing_row.iloc[0]["sleep_start"], "%H:%M").time()
+    sleep_end_default = datetime.strptime(existing_row.iloc[0]["sleep_end"], "%H:%M").time()
 else:
-    sleep_start_default = ""
-    sleep_end_default = ""
+    sleep_start_default = time(22, 0)
+    sleep_end_default = time(6, 0)
 
 with st.form("sleep_form"):
-    sleep_start = st.time_input("Sleep Start Time", value=pd.to_datetime(sleep_start_default).time() if sleep_start_default else datetime.now().time())
-    sleep_end = st.time_input("Sleep End Time", value=pd.to_datetime(sleep_end_default).time() if sleep_end_default else datetime.now().time())
+    sleep_start = st.time_input("Sleep Start Time", value=sleep_start_default)
+    sleep_end = st.time_input("Sleep End Time", value=sleep_end_default)
     submitted = st.form_submit_button("Save Entry")
 
     if submitted:
         # Remove existing row if present
-        df = df[df["date"] != pd.to_datetime(selected_date)]
+        df = df[df["date"] != selected_date]
         # Append new/updated row
         new_row = pd.DataFrame({
-            "date": [pd.to_datetime(selected_date)],
+            "date": [selected_date],
             "sleep_start": [sleep_start.strftime("%H:%M")],
             "sleep_end": [sleep_end.strftime("%H:%M")]
         })
@@ -58,6 +58,8 @@ with st.form("sleep_form"):
 # ---------------- Display Existing Data ----------------
 if not df.empty:
     st.subheader("Recent Sleep Logs")
-    st.dataframe(df.sort_values("date", ascending=False).reset_index(drop=True))
+    # Show only rows with non-empty date and sort descending
+    df_display = df.dropna(subset=["date"]).sort_values("date", ascending=False)
+    st.dataframe(df_display.reset_index(drop=True))
 else:
     st.info("No sleep logs found. Add a new entry above.")
