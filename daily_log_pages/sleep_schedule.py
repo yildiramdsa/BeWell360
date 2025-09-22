@@ -44,7 +44,7 @@ else:
 with st.form("sleep_form"):
     sleep_start = st.time_input("Sleep Start", value=default_start)
     sleep_end = st.time_input("Sleep End", value=default_end)
-    submitted = st.form_submit_button("💾 Save")
+    submitted = st.form_submit_button("🧸 Save")
 
 if submitted:
     # Update or add row
