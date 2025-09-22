@@ -48,7 +48,7 @@ with st.form("sleep_form", clear_on_submit=False):
         )
 
         if existing_row_idx:
-            # ✅ Updated gspread syntax with named arguments
+            # Updated gspread syntax with named arguments
             ws.update(values=[[start_str, end_str]], range_name=f"B{existing_row_idx}:C{existing_row_idx}")
             st.success(f"✅ Updated sleep log for {entry_date}")
         else:
@@ -61,7 +61,18 @@ with st.form("sleep_form", clear_on_submit=False):
 # ---------------- Display Table ----------------
 if not st.session_state.df.empty:
     df_display = st.session_state.df.copy()
+    
+    # Convert date column to datetime.date
     df_display["date"] = pd.to_datetime(df_display["date"]).dt.date
-    st.dataframe(df_display.sort_values("date", ascending=False), width='stretch')
+
+    # Rename columns for display
+    df_display = df_display.rename(columns={
+        "date": "Date",
+        "sleep_start": "Sleep Start",
+        "sleep_end": "Sleep End"
+    })
+
+    # Display table
+    st.dataframe(df_display.sort_values("Date", ascending=False), width='stretch')
 else:
     st.info("No sleep logs yet.")
