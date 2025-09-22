@@ -61,5 +61,13 @@ if not df.empty:
     # Show only rows with non-empty date and sort descending
     df_display = df.dropna(subset=["date"]).sort_values("date", ascending=False)
     st.dataframe(df_display.reset_index(drop=True))
+
+    # Add download button
+    st.download_button(
+        label="📥 Download Sleep Schedule CSV",
+        data=df.to_csv(index=False).encode("utf-8"),
+        file_name="sleep_schedule.csv",
+        mime="text/csv",
+    )
 else:
     st.info("No sleep logs found. Add a new entry above.")
