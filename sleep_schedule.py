@@ -136,8 +136,8 @@ if not st.session_state.df.empty:
             xaxis_title="Date",
             yaxis_title="Duration (hrs)",
             xaxis=dict(
-                tickformat="%d %b",  # day + short month
-                tickangle=0          # horizontal labels
+                tickformat="%d %b",
+                tickangle=0
             ),
             yaxis=dict(range=[0, max(duration_chart["Sleep Duration (hrs)"].max() + 1, 8)]),
             template="plotly_white"
@@ -150,13 +150,14 @@ if not st.session_state.df.empty:
             "date": "Date",
             "sleep_start": "Sleep Start",
             "sleep_end": "Sleep End"
-        }).reset_index(drop=True)
+        })
 
         # Format Date and Sleep Start/End columns
         df_display["Date"] = df_display["Date"].dt.date
         df_display["Sleep Start"] = df_display["Sleep Start"].apply(lambda t: t.strftime("%H:%M"))
         df_display["Sleep End"] = df_display["Sleep End"].apply(lambda t: t.strftime("%H:%M"))
 
-        st.dataframe(df_display.sort_values("Date", ascending=False), width='stretch')
+        # Display table without index
+        st.table(df_display.sort_values("Date", ascending=False))
 else:
     st.info("No sleep logs yet.")
