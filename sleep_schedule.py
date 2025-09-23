@@ -40,42 +40,47 @@ if "sleep_end" not in st.session_state:
 # ---------------- Sleep Entry ----------------
 entry_date = st.date_input("Date", st.session_state.entry_date, key="entry_date")
 
-# If existing date, prefill times
-df_records = st.session_state.df.to_dict(orient="records")
-existing_row_idx = None
-for i, row in enumerate(df_records, start=2):
-    if str(row.get("date")) == str(entry_date):
-        existing_row_idx = i
-        st.session_state.sleep_start = datetime.strptime(row["sleep_start"], "%H:%M").time()
-        st.session_state.sleep_end = datetime.strptime(row["sleep_end"], "%H:%M").time()
-        break
+# ---------------- Prefill times if entry exists ----------------
+df = st.session_state.df.copy()
+df["date"] = pd.to_datetime(df["date"]).dt.date
+
+existing_entry = df[df["date"] == entry_date]
+
+if not existing_entry.empty:
+    prefill_start = datetime.strptime(existing_entry.iloc[0]["sleep_start"], "%H:%M").time()
+    prefill_end = datetime.strptime(existing_entry.iloc[0]["sleep_end"], "%H:%M").time()
+else:
+    prefill_start = st.session_state.sleep_start
+    prefill_end = st.session_state.sleep_end
 
 col1, col2 = st.columns(2)
-sleep_start = col1.time_input("Sleep Start", st.session_state.sleep_start, key="sleep_start")
-sleep_end = col2.time_input("Sleep End", st.session_state.sleep_end, key="sleep_end")
+sleep_start = col1.time_input("Sleep Start", value=prefill_start, key="sleep_start")
+sleep_end = col2.time_input("Sleep End", value=prefill_end, key="sleep_end")
 
 # ---------------- Action Buttons ----------------
 col_save, col_delete = st.columns([1, 1])
-save_label = "☁️ Update" if existing_row_idx else "☁️ Save"
+save_label = "☁️ Update" if not existing_entry.empty else "☁️ Save"
 
 with col_save:
     save_clicked = st.button(save_label)
 with col_delete:
-    delete_clicked = st.button("🗑️ Delete", disabled=(existing_row_idx is None))
+    delete_clicked = st.button("🗑️ Delete", disabled=existing_entry.empty)
 
 # ---------------- Handle Save/Delete ----------------
 if save_clicked:
     start_str, end_str = sleep_start.strftime("%H:%M"), sleep_end.strftime("%H:%M")
-    if existing_row_idx:
-        ws.update(values=[[start_str, end_str]], range_name=f"B{existing_row_idx}:C{existing_row_idx}")
+    if not existing_entry.empty:
+        row_idx = df.index[df["date"] == entry_date][0] + 2  # gsheet rows start at 1 + header
+        ws.update(values=[[start_str, end_str]], range_name=f"B{row_idx}:C{row_idx}")
         st.success(f"☁️ Updated sleep log for {entry_date}")
     else:
         ws.append_row([str(entry_date), start_str, end_str])
         st.success(f"☁️ Added new sleep log for {entry_date}")
     st.session_state.df = pd.DataFrame(ws.get_all_records())
 
-if delete_clicked and existing_row_idx:
-    ws.delete_rows(existing_row_idx)
+if delete_clicked and not existing_entry.empty:
+    row_idx = df.index[df["date"] == entry_date][0] + 2
+    ws.delete_rows(row_idx)
     st.success(f"🗑️ Deleted sleep log for {entry_date}")
     st.session_state.df = pd.DataFrame(ws.get_all_records())
     # Reset form to defaults
