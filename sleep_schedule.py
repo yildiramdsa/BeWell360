@@ -91,17 +91,18 @@ if not st.session_state.df.empty:
     if "end_filter" not in st.session_state:
         st.session_state.end_filter = max_date
 
-    start_filter = col1.date_input("Start Date", min_value=min_date, max_value=max_date, value=st.session_state.start_filter, key="start_filter")
-    end_filter = col2.date_input("End Date", min_value=min_date, max_value=max_date, value=st.session_state.end_filter, key="end_filter")
+    start_filter = col1.date_input("Start Date", min_value=min_date, max_value=max_date, key="start_filter")
+    end_filter = col2.date_input("End Date", min_value=min_date, max_value=max_date, key="end_filter")
 
+    # Validate date range
     if start_filter > end_filter:
         st.warning("⚠️ Invalid date range: Start Date cannot be after End Date.")
         filtered_df = pd.DataFrame()
     else:
         filtered_df = df[(df["date"].dt.date >= start_filter) & (df["date"].dt.date <= end_filter)].copy()
 
+    # ---------------- Metrics ----------------
     if not filtered_df.empty:
-        # --- Helper to compute average times ---
         def average_time(times):
             seconds = [t.hour * 3600 + t.minute * 60 + t.second for t in times]
             avg_seconds = sum(seconds) / len(seconds)
@@ -111,14 +112,12 @@ if not st.session_state.df.empty:
 
         avg_start = average_time(filtered_df["sleep_start"])
         avg_end = average_time(filtered_df["sleep_end"])
-        avg_duration = filtered_df["Sleep Duration (hrs)"].mean()
 
-        # --- Metrics ---
         col3.metric("Avg. Sleep Start", avg_start.strftime("%H:%M"))
         col4.metric("Avg. Sleep End", avg_end.strftime("%H:%M"))
-        col5.metric("Avg. Sleep Duration (hrs)", f"{avg_duration:.2f}")
+        col5.metric("Avg. Sleep Duration (hrs)", f"{filtered_df['Sleep Duration (hrs)'].mean():.2f}")
 
-        # --- Line Chart ---
+        # ---------------- Line Chart ----------------
         duration_chart = filtered_df[["date", "Sleep Duration (hrs)"]].sort_values("date")
         fig = px.line(
             duration_chart,
@@ -152,7 +151,7 @@ if not st.session_state.df.empty:
         )
         st.plotly_chart(fig, use_container_width=True)
 
-        # --- Interactive Table ---
+        # ---------------- Interactive Table ----------------
         df_display = filtered_df.rename(columns={
             "date": "Date",
             "sleep_start": "Sleep Start",
