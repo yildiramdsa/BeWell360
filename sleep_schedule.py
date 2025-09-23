@@ -89,25 +89,21 @@ if not st.session_state.df.empty:
     avg_sleep_start = average_time(df["sleep_start"])
     avg_sleep_end = average_time(df["sleep_end"])
 
-    col1, col2, col3, col4 = st.columns([2, 1, 1, 1])
+    # Columns: start date, end date, then 3 metrics
+    col1, col2, col3, col4, col5 = st.columns([1, 1, 1, 1, 1])
 
-    # Date range filter first
     min_date = df["date"].min().date()
     max_date = df["date"].max().date()
-    date_range = col1.date_input(
-        "Filter by Date Range",
-        value=(min_date, max_date),
-        min_value=min_date,
-        max_value=max_date
-    )
 
-    # Metrics after the filter
-    col2.metric("Avg. Sleep Duration (hrs)", f"{df['Sleep Duration (hrs)'].mean():.2f}")
-    col3.metric("Avg. Sleep Start", avg_sleep_start.strftime("%H:%M"))
-    col4.metric("Avg. Sleep End", avg_sleep_end.strftime("%H:%M"))
+    start_filter = col1.date_input("Start Date", min_value=min_date, max_value=max_date, value=min_date)
+    end_filter = col2.date_input("End Date", min_value=min_date, max_value=max_date, value=max_date)
+
+    # Metrics
+    col3.metric("Avg. Sleep Duration (hrs)", f"{df['Sleep Duration (hrs)'].mean():.2f}")
+    col4.metric("Avg. Sleep Start", avg_sleep_start.strftime("%H:%M"))
+    col5.metric("Avg. Sleep End", avg_sleep_end.strftime("%H:%M"))
 
     # Apply filter
-    start_filter, end_filter = date_range
     filtered_df = df[(df["date"].dt.date >= start_filter) & (df["date"].dt.date <= end_filter)].copy()
 
     if filtered_df.empty:
@@ -119,6 +115,11 @@ if not st.session_state.df.empty:
             "sleep_start": "Sleep Start",
             "sleep_end": "Sleep End"
         }).reset_index(drop=True)
+
+        # Format Date and Sleep Start/End columns
+        df_display["Date"] = df_display["Date"].dt.date  # remove time
+        df_display["Sleep Start"] = df_display["Sleep Start"].apply(lambda t: t.strftime("%H:%M"))
+        df_display["Sleep End"] = df_display["Sleep End"].apply(lambda t: t.strftime("%H:%M"))
 
         st.dataframe(df_display.sort_values("Date", ascending=False), width='stretch')
 
@@ -138,7 +139,7 @@ if not st.session_state.df.empty:
             yaxis_title="Duration (hrs)",
             xaxis=dict(
                 tickformat="%d %b",  # day + short month
-                tickangle=0          # keep labels horizontal
+                tickangle=0          # horizontal labels
             ),
             yaxis=dict(range=[0, max(duration_chart["Sleep Duration (hrs)"].max() + 1, 8)]),
             template="plotly_white"
