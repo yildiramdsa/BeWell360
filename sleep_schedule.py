@@ -35,18 +35,19 @@ with st.form("sleep_form", clear_on_submit=False):
     sleep_start = col1.time_input("Sleep Start", default_start)
     sleep_end = col2.time_input("Sleep End", default_end)
 
+    # Check if entry exists
     df_records = st.session_state.df.to_dict(orient="records")
     existing_row_idx = next(
         (i + 2 for i, row in enumerate(df_records) if str(row.get("date")) == str(entry_date)),
         None
     )
 
-    # Buttons aligned side by side
+    # Buttons side by side
     btn_col1, btn_col2 = st.columns([1, 1])
     with btn_col1:
         save_clicked = st.form_submit_button("☁️ Save")
     with btn_col2:
-        delete_clicked = st.form_submit_button("🗑️ Delete", disabled=(existing_row_idx is None))
+        delete_clicked = st.button("🗑️ Delete", disabled=(existing_row_idx is None))
 
     if save_clicked:
         start_str, end_str = sleep_start.strftime("%H:%M"), sleep_end.strftime("%H:%M")
