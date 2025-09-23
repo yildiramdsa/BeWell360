@@ -1,162 +1,76 @@
 import streamlit as st
-import pandas as pd
-import gspread
-from google.oauth2.service_account import Credentials
-from datetime import date, time, datetime, timedelta
-import plotly.express as px
+import os
+import base64
 
-# ---------------- Google Sheets Setup ----------------
-SCOPES = [
-    "https://www.googleapis.com/auth/spreadsheets",
-    "https://www.googleapis.com/auth/drive"
-]
+# ---------------- Constants ----------------
+DATA_DIR = "data"
+HEADER_SVG = "images/BeWell360-lg.svg"
+FOOTER_SVG = "images/Oranlytix-lg.svg"
 
-creds = Credentials.from_service_account_info(
-    st.secrets["gcp_service_account"],
-    scopes=SCOPES
+# ---------------- Page Config ----------------
+st.set_page_config(page_title="BeWell360", layout="wide")
+
+# ---------------- Helpers ----------------
+def load_svg(file_path):
+    """Load an SVG and encode it as base64."""
+    with open(file_path, "rb") as f:
+        return base64.b64encode(f.read()).decode()
+
+def create_pages(page_list):
+    """Create a list of st.Page objects from a list of tuples (path, title, icon)."""
+    return [st.Page(path, title=title, icon=icon) for path, title, icon in page_list]
+
+# ---------------- Header ----------------
+st.markdown(
+    f"""
+    <div style="text-align:center;">
+        <img src="data:image/svg+xml;base64,{load_svg(HEADER_SVG)}" width="250">
+    </div>
+    """,
+    unsafe_allow_html=True
 )
-client = gspread.authorize(creds)
 
-SHEET_NAME = "sleep_schedule"
-ws = client.open(SHEET_NAME).sheet1  # first worksheet
+# ---------------- Pages ----------------
+daily_log_pages = create_pages([
+    ("nutrition_and_hydration.py", "Nutrition & Hydration", "🍎"),
+    ("fitness_activities.py", "Fitness Activities", "⚽"),
+    ("sleep_schedule.py", "Sleep Schedule", "🧸"),
+    ("body_composition.py", "Body Composition", "💪"),
+    ("professional_development.py", "Professional Development", "📚"),
+    ("personal_growth.py", "Personal Growth", "🌱"),
+])
 
-# ---------------- Load or initialize data ----------------
-if "df" not in st.session_state:
-    st.session_state.df = pd.DataFrame(ws.get_all_records())
+insights_pages = create_pages([
+    ("dashboard.py", "Dashboard", "📌"),
+    ("progress.py", "Progress", "🗓"),
+    ("raw_data.py", "Raw Data", "🔍"),
+])
 
-# ---------------- Form ----------------
-st.title("🧸 Sleep Schedule")
+life_mastery_pages = create_pages([
+    ("empowering_morning_routine.py", "Empowering Morning Routine", "☀️"),
+    ("empowering_evening_routine.py", "Empowering Evening Routine", "🌙"),
+    ("vision_board.py", "Vision Board", "🎨"),
+])
 
-today = date.today()
-default_start = time(22, 0)
-default_end = time(6, 0)
+pages = {
+    "Daily Log": daily_log_pages,
+    "Insights": insights_pages,
+    "Life Mastery Planner": life_mastery_pages,
+}
 
-with st.form("sleep_form", clear_on_submit=False):
-    entry_date = st.date_input("Date", today)
+# ---------------- Navigation ----------------
+pg = st.navigation(pages)
+pg.run()  # Execute the selected page
 
-    col1, col2 = st.columns(2)
-    sleep_start = col1.time_input("Sleep Start", default_start)
-    sleep_end = col2.time_input("Sleep End", default_end)
+# ---------------- Data Folder ----------------
+os.makedirs(DATA_DIR, exist_ok=True)
 
-    if st.form_submit_button("☁️ Save"):
-        start_str, end_str = sleep_start.strftime("%H:%M"), sleep_end.strftime("%H:%M")
-
-        # Check if entry exists
-        df_records = st.session_state.df.to_dict(orient="records")
-        existing_row_idx = next(
-            (i + 2 for i, row in enumerate(df_records) if str(row.get("date")) == str(entry_date)),
-            None
-        )
-
-        if existing_row_idx:
-            ws.update(values=[[start_str, end_str]], range_name=f"B{existing_row_idx}:C{existing_row_idx}")
-            st.success(f"✅ Updated sleep log for {entry_date}")
-        else:
-            ws.append_row([str(entry_date), start_str, end_str])
-            st.success(f"✅ Added new sleep log for {entry_date}")
-
-        # Refresh data
-        st.session_state.df = pd.DataFrame(ws.get_all_records())
-
-# ---------------- Display Table and Analytics ----------------
-if not st.session_state.df.empty:
-    df = st.session_state.df.copy()
-
-    # Convert columns
-    df["date"] = pd.to_datetime(df["date"])
-    df["sleep_start"] = pd.to_datetime(df["sleep_start"], format="%H:%M").dt.time
-    df["sleep_end"] = pd.to_datetime(df["sleep_end"], format="%H:%M").dt.time
-
-    # Compute sleep duration in hours
-    def calc_duration(row):
-        start_dt = datetime.combine(row["date"], row["sleep_start"])
-        end_dt = datetime.combine(row["date"], row["sleep_end"])
-        if end_dt <= start_dt:  # handle overnight sleep
-            end_dt += timedelta(days=1)
-        return round((end_dt - start_dt).total_seconds() / 3600, 2)  # rounded to 2 decimals
-
-    df["Sleep Duration (hrs)"] = df.apply(calc_duration, axis=1)
-
-    # Helper to compute average time correctly
-    def average_time(times):
-        seconds = [t.hour * 3600 + t.minute * 60 + t.second for t in times]
-        avg_seconds = sum(seconds) / len(seconds)
-        h = int(avg_seconds // 3600) % 24
-        m = int((avg_seconds % 3600) // 60)
-        return time(h, m)
-
-    # ---------------- Date Filter + Metrics Row ----------------
-    avg_sleep_start = average_time(df["sleep_start"])
-    avg_sleep_end = average_time(df["sleep_end"])
-
-    col1, col2, col3, col4, col5 = st.columns([1, 1, 1, 1, 1])
-
-    min_date = df["date"].min().date()
-    max_date = df["date"].max().date()
-
-    start_filter = col1.date_input("Start Date", min_value=min_date, max_value=max_date, value=min_date)
-    end_filter = col2.date_input("End Date", min_value=min_date, max_value=max_date, value=max_date)
-
-    # Metrics
-    col3.metric("Avg. Sleep Duration (hrs)", f"{df['Sleep Duration (hrs)'].mean():.2f}")
-    col4.metric("Avg. Sleep Start", avg_sleep_start.strftime("%H:%M"))
-    col5.metric("Avg. Sleep End", avg_sleep_end.strftime("%H:%M"))
-
-    # ---------------- Validate Date Range ----------------
-    if start_filter > end_filter:
-        st.warning("⚠️ Invalid date range: Start Date cannot be after End Date.")
-        filtered_df = pd.DataFrame()
-    else:
-        filtered_df = df[(df["date"].dt.date >= start_filter) & (df["date"].dt.date <= end_filter)].copy()
-
-    if not filtered_df.empty:
-        # ---------------- Line Chart ----------------
-        duration_chart = filtered_df[["date", "Sleep Duration (hrs)"]].sort_values("date")
-
-        fig = px.line(
-            duration_chart,
-            x="date",
-            y="Sleep Duration (hrs)",
-            markers=True,
-            color_discrete_sequence=["#028283"],
-            title="Sleep Duration Over Time"
-        )
-
-        # Add constant line at 7 hours
-        fig.add_hline(
-            y=7,
-            line_dash="dash",
-            line_color="#e7541e",
-            annotation_text="Target Sleep (7 hrs)",
-            annotation_position="top left"
-        )
-
-        fig.update_layout(
-            xaxis_title="Date",
-            yaxis_title="Duration (hrs)",
-            xaxis=dict(
-                tickformat="%d %b",
-                tickangle=0
-            ),
-            yaxis=dict(range=[0, max(duration_chart["Sleep Duration (hrs)"].max() + 1, 8)]),
-            template="plotly_white"
-        )
-
-        st.plotly_chart(fig, use_container_width=True)
-
-        # ---------------- Interactive Table ----------------
-        df_display = filtered_df.rename(columns={
-            "date": "Date",
-            "sleep_start": "Sleep Start",
-            "sleep_end": "Sleep End"
-        })
-
-        # Format columns
-        df_display["Date"] = df_display["Date"].dt.date
-        df_display["Sleep Start"] = df_display["Sleep Start"].apply(lambda t: t.strftime("%H:%M"))
-        df_display["Sleep End"] = df_display["Sleep End"].apply(lambda t: t.strftime("%H:%M"))
-
-        # Display interactive table
-        st.dataframe(df_display.sort_values("Date", ascending=False), width='stretch')
-else:
-    st.info("No sleep logs yet.")
+# ---------------- Footer ----------------
+footer_html = f"""
+<div style="text-align:center;">
+    <span style="font-size:10px; color:gray;">Powered by</span>
+    <img src="data:image/svg+xml;base64,{load_svg(FOOTER_SVG)}" width="75">
+    <div style="font-size:10px; color:gray;">© 2025 BeWell360. All rights reserved.</div>
+</div>
+"""
+st.markdown(footer_html, unsafe_allow_html=True)

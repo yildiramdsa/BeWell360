@@ -73,7 +73,7 @@ if not st.session_state.df.empty:
         end_dt = datetime.combine(row["date"], row["sleep_end"])
         if end_dt <= start_dt:  # handle overnight sleep
             end_dt += timedelta(days=1)
-        return (end_dt - start_dt).total_seconds() / 3600
+        return round((end_dt - start_dt).total_seconds() / 3600, 2)  # rounded to 2 decimals
 
     df["Sleep Duration (hrs)"] = df.apply(calc_duration, axis=1)
 
@@ -89,7 +89,6 @@ if not st.session_state.df.empty:
     avg_sleep_start = average_time(df["sleep_start"])
     avg_sleep_end = average_time(df["sleep_end"])
 
-    # Columns: start date, end date, then 3 metrics
     col1, col2, col3, col4, col5 = st.columns([1, 1, 1, 1, 1])
 
     min_date = df["date"].min().date()
@@ -103,48 +102,61 @@ if not st.session_state.df.empty:
     col4.metric("Avg. Sleep Start", avg_sleep_start.strftime("%H:%M"))
     col5.metric("Avg. Sleep End", avg_sleep_end.strftime("%H:%M"))
 
-    # Apply filter
-    filtered_df = df[(df["date"].dt.date >= start_filter) & (df["date"].dt.date <= end_filter)].copy()
-
-    if filtered_df.empty:
-        st.info("No sleep logs in the selected date range.")
+    # ---------------- Validate Date Range ----------------
+    if start_filter > end_filter:
+        st.warning("⚠️ Invalid date range: Start Date cannot be after End Date.")
+        filtered_df = pd.DataFrame()
     else:
-        # ---------------- Table ----------------
-        df_display = filtered_df.rename(columns={
-            "date": "Date",
-            "sleep_start": "Sleep Start",
-            "sleep_end": "Sleep End"
-        }).reset_index(drop=True)
+        filtered_df = df[(df["date"].dt.date >= start_filter) & (df["date"].dt.date <= end_filter)].copy()
 
-        # Format Date and Sleep Start/End columns
-        df_display["Date"] = df_display["Date"].dt.date  # remove time
-        df_display["Sleep Start"] = df_display["Sleep Start"].apply(lambda t: t.strftime("%H:%M"))
-        df_display["Sleep End"] = df_display["Sleep End"].apply(lambda t: t.strftime("%H:%M"))
-
-        st.dataframe(df_display.sort_values("Date", ascending=False), width='stretch')
-
+    if not filtered_df.empty:
         # ---------------- Line Chart ----------------
-        duration_chart = df_display[["Date", "Sleep Duration (hrs)"]].sort_values("Date")
+        duration_chart = filtered_df[["date", "Sleep Duration (hrs)"]].sort_values("date")
 
         fig = px.line(
             duration_chart,
-            x="Date",
+            x="date",
             y="Sleep Duration (hrs)",
             markers=True,
+            color_discrete_sequence=["#028283"],
             title="Sleep Duration Over Time"
+        )
+
+        # Add constant line at 7 hours
+        fig.add_hline(
+            y=7,
+            line_dash="dash",
+            line_color="#e7541e",
+            annotation_text="Target Sleep (7 hrs)",
+            annotation_position="top left"
         )
 
         fig.update_layout(
             xaxis_title="Date",
             yaxis_title="Duration (hrs)",
             xaxis=dict(
-                tickformat="%d %b",  # day + short month
-                tickangle=0          # horizontal labels
+                tickformat="%d %b",
+                tickangle=0
             ),
             yaxis=dict(range=[0, max(duration_chart["Sleep Duration (hrs)"].max() + 1, 8)]),
             template="plotly_white"
         )
 
         st.plotly_chart(fig, use_container_width=True)
+
+        # ---------------- Interactive Table ----------------
+        df_display = filtered_df.rename(columns={
+            "date": "Date",
+            "sleep_start": "Sleep Start",
+            "sleep_end": "Sleep End"
+        })
+
+        # Format columns
+        df_display["Date"] = df_display["Date"].dt.date
+        df_display["Sleep Start"] = df_display["Sleep Start"].apply(lambda t: t.strftime("%H:%M"))
+        df_display["Sleep End"] = df_display["Sleep End"].apply(lambda t: t.strftime("%H:%M"))
+
+        # Display interactive table
+        st.dataframe(df_display.sort_values("Date", ascending=False), width='stretch')
 else:
     st.info("No sleep logs yet.")
