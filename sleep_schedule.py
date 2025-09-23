@@ -24,45 +24,43 @@ if "df" not in st.session_state:
 
 st.title("🧸 Sleep Schedule")
 
-# ---------------- Sleep Entry Form ----------------
 today = date.today()
 default_start = time(22, 0)
 default_end = time(6, 0)
 
+# ---------------- Sleep Entry Form ----------------
 with st.form("sleep_form", clear_on_submit=False):
     entry_date = st.date_input("Date", today)
     col1, col2 = st.columns(2)
     sleep_start = col1.time_input("Sleep Start", default_start)
     sleep_end = col2.time_input("Sleep End", default_end)
+    save_clicked = st.form_submit_button("☁️ Save")
 
-    # Check if entry exists
+# Delete button outside form for dynamic enabling
+btn_col1, btn_col2 = st.columns([1, 1])
+with btn_col2:
     df_records = st.session_state.df.to_dict(orient="records")
     existing_row_idx = next(
         (i + 2 for i, row in enumerate(df_records) if str(row.get("date")) == str(entry_date)),
         None
     )
+    delete_clicked = st.button("🗑️ Delete", disabled=(existing_row_idx is None))
 
-    # Save/Delete buttons side by side
-    btn_col1, btn_col2 = st.columns([1, 1])
-    with btn_col1:
-        save_clicked = st.form_submit_button("☁️ Save")
-    with btn_col2:
-        delete_clicked = st.form_submit_button("🗑️ Delete", disabled=(existing_row_idx is None))
+# ---------------- Handle Save/Delete ----------------
+if save_clicked:
+    start_str, end_str = sleep_start.strftime("%H:%M"), sleep_end.strftime("%H:%M")
+    if existing_row_idx:
+        ws.update(values=[[start_str, end_str]], range_name=f"B{existing_row_idx}:C{existing_row_idx}")
+        st.success(f"✅ Updated sleep log for {entry_date}")
+    else:
+        ws.append_row([str(entry_date), start_str, end_str])
+        st.success(f"✅ Added new sleep log for {entry_date}")
+    st.session_state.df = pd.DataFrame(ws.get_all_records())
 
-    if save_clicked:
-        start_str, end_str = sleep_start.strftime("%H:%M"), sleep_end.strftime("%H:%M")
-        if existing_row_idx:
-            ws.update(values=[[start_str, end_str]], range_name=f"B{existing_row_idx}:C{existing_row_idx}")
-            st.success(f"✅ Updated sleep log for {entry_date}")
-        else:
-            ws.append_row([str(entry_date), start_str, end_str])
-            st.success(f"✅ Added new sleep log for {entry_date}")
-        st.session_state.df = pd.DataFrame(ws.get_all_records())
-
-    if delete_clicked and existing_row_idx:
-        ws.delete_rows(existing_row_idx)
-        st.success(f"🗑️ Deleted sleep log for {entry_date}")
-        st.session_state.df = pd.DataFrame(ws.get_all_records())
+if delete_clicked and existing_row_idx:
+    ws.delete_rows(existing_row_idx)
+    st.success(f"🗑️ Deleted sleep log for {entry_date}")
+    st.session_state.df = pd.DataFrame(ws.get_all_records())
 
 # ---------------- Display Analytics ----------------
 if not st.session_state.df.empty:
@@ -81,7 +79,7 @@ if not st.session_state.df.empty:
 
     df["Sleep Duration (hrs)"] = df.apply(calc_duration, axis=1)
 
-    # Compute average time
+    # Compute average times
     def average_time(times):
         seconds = [t.hour * 3600 + t.minute * 60 + t.second for t in times]
         avg_seconds = sum(seconds) / len(seconds)
