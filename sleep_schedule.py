@@ -98,9 +98,9 @@ if not st.session_state.df.empty:
     end_filter = col2.date_input("End Date", min_value=min_date, max_value=max_date, value=max_date)
 
     # Metrics
-    col3.metric("Avg. Sleep Duration (hrs)", f"{df['Sleep Duration (hrs)'].mean():.2f}")
-    col4.metric("Avg. Sleep Start", avg_sleep_start.strftime("%H:%M"))
-    col5.metric("Avg. Sleep End", avg_sleep_end.strftime("%H:%M"))
+    col3.metric("Avg. Sleep Start", avg_sleep_start.strftime("%H:%M"))
+    col4.metric("Avg. Sleep End", avg_sleep_end.strftime("%H:%M"))
+    col5.metric("Avg. Sleep Duration (hrs)", f"{df['Sleep Duration (hrs)'].mean():.2f}")
 
     # ---------------- Validate Date Range ----------------
     if start_filter > end_filter:
