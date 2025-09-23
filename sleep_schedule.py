@@ -33,7 +33,7 @@ default_end = time(6, 0)
 
 with st.form("sleep_form", clear_on_submit=False):
     entry_date = st.date_input("Date", today)
-    
+
     col1, col2 = st.columns(2)
     sleep_start = col1.time_input("Sleep Start", default_start)
     sleep_end = col2.time_input("Sleep End", default_end)
@@ -55,12 +55,13 @@ with st.form("sleep_form", clear_on_submit=False):
             ws.append_row([str(entry_date), start_str, end_str])
             st.success(f"✅ Added new sleep log for {entry_date}")
 
+        # Refresh data
         st.session_state.df = pd.DataFrame(ws.get_all_records())
 
 # ---------------- Display Table and Analytics ----------------
 if not st.session_state.df.empty:
     df = st.session_state.df.copy()
-    
+
     # Convert columns
     df["date"] = pd.to_datetime(df["date"])
     df["sleep_start"] = pd.to_datetime(df["sleep_start"], format="%H:%M").dt.time
@@ -84,25 +85,28 @@ if not st.session_state.df.empty:
         m = int((avg_seconds % 3600) // 60)
         return time(h, m)
 
-    # ---------------- Metrics / Cards + Date Filter ----------------
+    # ---------------- Date Filter + Metrics Row ----------------
     avg_sleep_start = average_time(df["sleep_start"])
     avg_sleep_end = average_time(df["sleep_end"])
 
-    # Four columns: 3 metrics + date filter (date filter wider)
-    col1, col2, col3, col4 = st.columns([1, 1, 1, 2])
-    col1.metric("Average Sleep Duration (hrs)", f"{df['Sleep Duration (hrs)'].mean():.2f}")
-    col2.metric("Average Sleep Start", avg_sleep_start.strftime("%H:%M"))
-    col3.metric("Average Sleep End", avg_sleep_end.strftime("%H:%M"))
+    col1, col2, col3, col4 = st.columns([2, 1, 1, 1])
 
+    # Date range filter first
     min_date = df["date"].min().date()
     max_date = df["date"].max().date()
-    date_range = col4.date_input(
+    date_range = col1.date_input(
         "Filter by Date Range",
         value=(min_date, max_date),
         min_value=min_date,
         max_value=max_date
     )
 
+    # Metrics after the filter
+    col2.metric("Avg. Sleep Duration (hrs)", f"{df['Sleep Duration (hrs)'].mean():.2f}")
+    col3.metric("Avg. Sleep Start", avg_sleep_start.strftime("%H:%M"))
+    col4.metric("Avg. Sleep End", avg_sleep_end.strftime("%H:%M"))
+
+    # Apply filter
     start_filter, end_filter = date_range
     filtered_df = df[(df["date"].dt.date >= start_filter) & (df["date"].dt.date <= end_filter)].copy()
 
@@ -118,7 +122,7 @@ if not st.session_state.df.empty:
 
         st.dataframe(df_display.sort_values("Date", ascending=False), width='stretch')
 
-        # ---------------- Improved Line Chart ----------------
+        # ---------------- Line Chart ----------------
         duration_chart = df_display[["Date", "Sleep Duration (hrs)"]].sort_values("Date")
 
         fig = px.line(
@@ -134,7 +138,7 @@ if not st.session_state.df.empty:
             yaxis_title="Duration (hrs)",
             xaxis=dict(
                 tickformat="%d %b",  # day + short month
-                tickangle=0  # horizontal labels
+                tickangle=0          # keep labels horizontal
             ),
             yaxis=dict(range=[0, max(duration_chart["Sleep Duration (hrs)"].max() + 1, 8)]),
             template="plotly_white"
