@@ -42,12 +42,12 @@ with st.form("sleep_form", clear_on_submit=False):
         None
     )
 
-    # Buttons side by side
+    # Save/Delete buttons side by side
     btn_col1, btn_col2 = st.columns([1, 1])
     with btn_col1:
         save_clicked = st.form_submit_button("☁️ Save")
     with btn_col2:
-        delete_clicked = st.button("🗑️ Delete", disabled=(existing_row_idx is None))
+        delete_clicked = st.form_submit_button("🗑️ Delete", disabled=(existing_row_idx is None))
 
     if save_clicked:
         start_str, end_str = sleep_start.strftime("%H:%M"), sleep_end.strftime("%H:%M")
@@ -59,11 +59,10 @@ with st.form("sleep_form", clear_on_submit=False):
             st.success(f"✅ Added new sleep log for {entry_date}")
         st.session_state.df = pd.DataFrame(ws.get_all_records())
 
-    if delete_clicked:
-        if existing_row_idx:
-            ws.delete_rows(existing_row_idx)
-            st.success(f"🗑️ Deleted sleep log for {entry_date}")
-            st.session_state.df = pd.DataFrame(ws.get_all_records())
+    if delete_clicked and existing_row_idx:
+        ws.delete_rows(existing_row_idx)
+        st.success(f"🗑️ Deleted sleep log for {entry_date}")
+        st.session_state.df = pd.DataFrame(ws.get_all_records())
 
 # ---------------- Display Analytics ----------------
 if not st.session_state.df.empty:
@@ -72,7 +71,7 @@ if not st.session_state.df.empty:
     df["sleep_start"] = pd.to_datetime(df["sleep_start"], format="%H:%M").dt.time
     df["sleep_end"] = pd.to_datetime(df["sleep_end"], format="%H:%M").dt.time
 
-    # Compute sleep duration in hours
+    # Compute sleep duration
     def calc_duration(row):
         start_dt = datetime.combine(row["date"], row["sleep_start"])
         end_dt = datetime.combine(row["date"], row["sleep_end"])
@@ -82,7 +81,7 @@ if not st.session_state.df.empty:
 
     df["Sleep Duration (hrs)"] = df.apply(calc_duration, axis=1)
 
-    # Helper to compute average time
+    # Compute average time
     def average_time(times):
         seconds = [t.hour * 3600 + t.minute * 60 + t.second for t in times]
         avg_seconds = sum(seconds) / len(seconds)
@@ -104,7 +103,7 @@ if not st.session_state.df.empty:
     col4.metric("Avg. Sleep End", avg_end.strftime("%H:%M"))
     col5.metric("Avg. Sleep Duration (hrs)", f"{df['Sleep Duration (hrs)'].mean():.2f}")
 
-    # ---------------- Validate Date Range ----------------
+    # Validate date range
     if start_filter > end_filter:
         st.warning("⚠️ Invalid date range: Start Date cannot be after End Date.")
         filtered_df = pd.DataFrame()
