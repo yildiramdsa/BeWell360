@@ -41,10 +41,12 @@ with st.form("sleep_form", clear_on_submit=False):
         None
     )
 
-    # Buttons side by side
+    # Buttons aligned side by side
     btn_col1, btn_col2 = st.columns([1, 1])
-    save_clicked = btn_col1.form_submit_button("☁️ Save")
-    delete_clicked = btn_col2.form_submit_button("🗑️ Delete", disabled=(existing_row_idx is None))
+    with btn_col1:
+        save_clicked = st.form_submit_button("☁️ Save")
+    with btn_col2:
+        delete_clicked = st.form_submit_button("🗑️ Delete", disabled=(existing_row_idx is None))
 
     if save_clicked:
         start_str, end_str = sleep_start.strftime("%H:%M"), sleep_end.strftime("%H:%M")
