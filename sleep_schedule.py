@@ -41,9 +41,10 @@ with st.form("sleep_form", clear_on_submit=False):
         None
     )
 
-    col3, col4 = st.columns([1, 1])
-    save_clicked = col3.form_submit_button("☁️ Save")
-    delete_clicked = col4.form_submit_button("🗑️ Delete", disabled=(existing_row_idx is None))
+    # Buttons side by side
+    btn_col1, btn_col2 = st.columns([1, 1])
+    save_clicked = btn_col1.form_submit_button("☁️ Save")
+    delete_clicked = btn_col2.form_submit_button("🗑️ Delete", disabled=(existing_row_idx is None))
 
     if save_clicked:
         start_str, end_str = sleep_start.strftime("%H:%M"), sleep_end.strftime("%H:%M")
@@ -89,6 +90,7 @@ if not st.session_state.df.empty:
     avg_start = average_time(df["sleep_start"])
     avg_end = average_time(df["sleep_end"])
 
+    # ---------------- Date Filter + Metrics ----------------
     col1, col2, col3, col4, col5 = st.columns([1, 1, 1, 1, 1])
     min_date = df["date"].min().date()
     max_date = df["date"].max().date()
@@ -99,6 +101,7 @@ if not st.session_state.df.empty:
     col4.metric("Avg. Sleep End", avg_end.strftime("%H:%M"))
     col5.metric("Avg. Sleep Duration (hrs)", f"{df['Sleep Duration (hrs)'].mean():.2f}")
 
+    # ---------------- Validate Date Range ----------------
     if start_filter > end_filter:
         st.warning("⚠️ Invalid date range: Start Date cannot be after End Date.")
         filtered_df = pd.DataFrame()
