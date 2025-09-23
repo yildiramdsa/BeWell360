@@ -89,7 +89,6 @@ if not st.session_state.df.empty:
     avg_sleep_start = average_time(df["sleep_start"])
     avg_sleep_end = average_time(df["sleep_end"])
 
-    # Columns: start date, end date, 3 metrics
     col1, col2, col3, col4, col5 = st.columns([1, 1, 1, 1, 1])
 
     min_date = df["date"].min().date()
@@ -120,7 +119,7 @@ if not st.session_state.df.empty:
             y="Sleep Duration (hrs)",
             markers=True,
             title="Sleep Duration Over Time",
-            color_discrete_sequence=["#028283"]  # data line color
+            color_discrete_sequence=["#028283"]
         )
 
         # Add constant line at 7 hours
@@ -152,10 +151,11 @@ if not st.session_state.df.empty:
             "sleep_end": "Sleep End"
         })
 
-        # Format Date and Sleep Start/End columns
+        # Format columns
         df_display["Date"] = df_display["Date"].dt.date
         df_display["Sleep Start"] = df_display["Sleep Start"].apply(lambda t: t.strftime("%H:%M"))
         df_display["Sleep End"] = df_display["Sleep End"].apply(lambda t: t.strftime("%H:%M"))
+        df_display["Sleep Duration (hrs)"] = df_display["Sleep Duration (hrs)"].round(2)
 
         # Display table without index
         st.table(df_display.sort_values("Date", ascending=False))
