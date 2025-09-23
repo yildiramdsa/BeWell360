@@ -73,7 +73,7 @@ if not st.session_state.df.empty:
         end_dt = datetime.combine(row["date"], row["sleep_end"])
         if end_dt <= start_dt:  # handle overnight sleep
             end_dt += timedelta(days=1)
-        return (end_dt - start_dt).total_seconds() / 3600
+        return round((end_dt - start_dt).total_seconds() / 3600, 2)  # rounded to 2 decimals
 
     df["Sleep Duration (hrs)"] = df.apply(calc_duration, axis=1)
 
@@ -144,7 +144,7 @@ if not st.session_state.df.empty:
 
         st.plotly_chart(fig, use_container_width=True)
 
-        # ---------------- Table ----------------
+        # ---------------- Interactive Table ----------------
         df_display = filtered_df.rename(columns={
             "date": "Date",
             "sleep_start": "Sleep Start",
@@ -155,9 +155,8 @@ if not st.session_state.df.empty:
         df_display["Date"] = df_display["Date"].dt.date
         df_display["Sleep Start"] = df_display["Sleep Start"].apply(lambda t: t.strftime("%H:%M"))
         df_display["Sleep End"] = df_display["Sleep End"].apply(lambda t: t.strftime("%H:%M"))
-        df_display["Sleep Duration (hrs)"] = df_display["Sleep Duration (hrs)"].apply(lambda x: f"{x:.2f}")
 
-        # Display table without index
-        st.table(df_display.sort_values("Date", ascending=False))
+        # Display interactive table
+        st.dataframe(df_display.sort_values("Date", ascending=False), width='stretch')
 else:
     st.info("No sleep logs yet.")
