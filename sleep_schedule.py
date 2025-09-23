@@ -73,7 +73,7 @@ if not st.session_state.df.empty:
         end_dt = datetime.combine(row["date"], row["sleep_end"])
         if end_dt <= start_dt:  # handle overnight sleep
             end_dt += timedelta(days=1)
-        return round((end_dt - start_dt).total_seconds() / 3600, 2)  # rounded to 2 decimals
+        return round((end_dt - start_dt).total_seconds() / 3600, 2)
 
     df["Sleep Duration (hrs)"] = df.apply(calc_duration, axis=1)
 
@@ -131,16 +131,17 @@ if not st.session_state.df.empty:
             annotation_position="top left"
         )
 
-        # Remove grid
+        # Remove x-axis line, vertical grid, and dynamic y-axis
         fig.update_layout(
             xaxis=dict(
                 tickformat="%d %b",
                 tickangle=0,
-                showgrid=False,    # remove grid
-                showline=False     # remove x-axis line
+                showgrid=False,
+                showline=False
             ),
             yaxis=dict(
-                range=[0, max(duration_chart["Sleep Duration (hrs)"].max() + 1, 8)],
+                range=[duration_chart["Sleep Duration (hrs)"].min() - 0.5,
+                       duration_chart["Sleep Duration (hrs)"].max() + 0.5],
                 showgrid=False
             ),
             template="plotly_white"
