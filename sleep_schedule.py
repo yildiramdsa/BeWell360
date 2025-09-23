@@ -37,11 +37,11 @@ existing_row_idx = None
 existing_row = None
 for i, row in enumerate(df_records):
     if str(row.get("date")) == str(entry_date):
-        existing_row_idx = i + 2  # account for header row
+        existing_row_idx = i + 2  # account for header row in Google Sheets
         existing_row = row
         break
 
-# Prefill values if record exists
+# Prefill form values if record exists
 if existing_row:
     prefill_start = datetime.strptime(existing_row["sleep_start"], "%H:%M").time()
     prefill_end = datetime.strptime(existing_row["sleep_end"], "%H:%M").time()
@@ -49,28 +49,41 @@ else:
     prefill_start = default_start
     prefill_end = default_end
 
+# ---------------- Time Inputs ----------------
 col1, col2 = st.columns(2)
 sleep_start = col1.time_input("Sleep Start", prefill_start)
 sleep_end = col2.time_input("Sleep End", prefill_end)
 
 # ---------------- Action Buttons ----------------
-col_save, col_delete = st.columns([1, 1])
+col_save, col_update, col_delete = st.columns([1, 1, 1])
+
+# Save button for new entries
 with col_save:
-    save_clicked = st.button("☁️ Save")
+    save_clicked = st.button("☁️ Save", disabled=(existing_row is not None))
+
+# Update button for existing entries
+with col_update:
+    update_clicked = st.button("🔄 Update", disabled=(existing_row is None))
+
+# Delete button for existing entries
 with col_delete:
     delete_clicked = st.button("🗑️ Delete", disabled=(existing_row_idx is None))
 
-# ---------------- Handle Save/Delete ----------------
+# ---------------- Handle Save ----------------
 if save_clicked:
     start_str, end_str = sleep_start.strftime("%H:%M"), sleep_end.strftime("%H:%M")
-    if existing_row_idx:
-        ws.update(values=[[start_str, end_str]], range_name=f"B{existing_row_idx}:C{existing_row_idx}")
-        st.success(f"☁️ Updated sleep log for {entry_date}")
-    else:
-        ws.append_row([str(entry_date), start_str, end_str])
-        st.success(f"☁️ Added new sleep log for {entry_date}")
+    ws.append_row([str(entry_date), start_str, end_str])
+    st.success(f"☁️ Added new sleep log for {entry_date}")
     st.session_state.df = pd.DataFrame(ws.get_all_records())
 
+# ---------------- Handle Update ----------------
+if update_clicked and existing_row_idx:
+    start_str, end_str = sleep_start.strftime("%H:%M"), sleep_end.strftime("%H:%M")
+    ws.update(values=[[start_str, end_str]], range_name=f"B{existing_row_idx}:C{existing_row_idx}")
+    st.success(f"🔄 Updated sleep log for {entry_date}")
+    st.session_state.df = pd.DataFrame(ws.get_all_records())
+
+# ---------------- Handle Delete ----------------
 if delete_clicked and existing_row_idx:
     ws.delete_rows(existing_row_idx)
     st.success(f"🗑️ Deleted sleep log for {entry_date}")
@@ -83,7 +96,7 @@ if not st.session_state.df.empty:
     df["sleep_start"] = pd.to_datetime(df["sleep_start"], format="%H:%M").dt.time
     df["sleep_end"] = pd.to_datetime(df["sleep_end"], format="%H:%M").dt.time
 
-    # Compute sleep duration in hours
+    # Compute sleep duration
     def calc_duration(row):
         start_dt = datetime.combine(row["date"], row["sleep_start"])
         end_dt = datetime.combine(row["date"], row["sleep_end"])
@@ -105,8 +118,8 @@ if not st.session_state.df.empty:
     col1, col2, col3, col4, col5 = st.columns([1, 1, 1, 1, 1])
     min_date = df["date"].min().date()
     max_date = df["date"].max().date()
-    start_filter = col1.date_input("Start Date", min_value=min_date, max_value=max_date, value=min_date)
-    end_filter = col2.date_input("End Date", min_value=min_date, max_value=max_date, value=max_date)
+    start_filter = col1.date_input("Start Date", min_value=min_date, max_value=max_date, value=min_date, key="start_filter")
+    end_filter = col2.date_input("End Date", min_value=min_date, max_value=max_date, value=max_date, key="end_filter")
 
     filtered_df = pd.DataFrame()
     if start_filter > end_filter:
