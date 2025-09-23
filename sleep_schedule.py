@@ -89,7 +89,7 @@ if not st.session_state.df.empty:
     avg_sleep_start = average_time(df["sleep_start"])
     avg_sleep_end = average_time(df["sleep_end"])
 
-    # Columns: start date, end date, then 3 metrics
+    # Columns: start date, end date, 3 metrics
     col1, col2, col3, col4, col5 = st.columns([1, 1, 1, 1, 1])
 
     min_date = df["date"].min().date()
@@ -111,29 +111,25 @@ if not st.session_state.df.empty:
         filtered_df = df[(df["date"].dt.date >= start_filter) & (df["date"].dt.date <= end_filter)].copy()
 
     if not filtered_df.empty:
-        # ---------------- Table ----------------
-        df_display = filtered_df.rename(columns={
-            "date": "Date",
-            "sleep_start": "Sleep Start",
-            "sleep_end": "Sleep End"
-        }).reset_index(drop=True)
-
-        # Format Date and Sleep Start/End columns
-        df_display["Date"] = df_display["Date"].dt.date  # remove time
-        df_display["Sleep Start"] = df_display["Sleep Start"].apply(lambda t: t.strftime("%H:%M"))
-        df_display["Sleep End"] = df_display["Sleep End"].apply(lambda t: t.strftime("%H:%M"))
-
-        st.dataframe(df_display.sort_values("Date", ascending=False), width='stretch')
-
         # ---------------- Line Chart ----------------
-        duration_chart = df_display[["Date", "Sleep Duration (hrs)"]].sort_values("Date")
+        duration_chart = filtered_df[["date", "Sleep Duration (hrs)"]].sort_values("date")
 
         fig = px.line(
             duration_chart,
-            x="Date",
+            x="date",
             y="Sleep Duration (hrs)",
             markers=True,
-            title="Sleep Duration Over Time"
+            title="Sleep Duration Over Time",
+            color_discrete_sequence=["#028283"]  # data line color
+        )
+
+        # Add constant line at 7 hours
+        fig.add_hline(
+            y=7,
+            line_dash="dash",
+            line_color="#e7541e",
+            annotation_text="Target Sleep (7 hrs)",
+            annotation_position="top left"
         )
 
         fig.update_layout(
@@ -148,5 +144,19 @@ if not st.session_state.df.empty:
         )
 
         st.plotly_chart(fig, use_container_width=True)
+
+        # ---------------- Table ----------------
+        df_display = filtered_df.rename(columns={
+            "date": "Date",
+            "sleep_start": "Sleep Start",
+            "sleep_end": "Sleep End"
+        }).reset_index(drop=True)
+
+        # Format Date and Sleep Start/End columns
+        df_display["Date"] = df_display["Date"].dt.date
+        df_display["Sleep Start"] = df_display["Sleep Start"].apply(lambda t: t.strftime("%H:%M"))
+        df_display["Sleep End"] = df_display["Sleep End"].apply(lambda t: t.strftime("%H:%M"))
+
+        st.dataframe(df_display.sort_values("Date", ascending=False), width='stretch')
 else:
     st.info("No sleep logs yet.")
