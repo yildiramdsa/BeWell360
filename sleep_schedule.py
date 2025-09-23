@@ -129,6 +129,8 @@ if not st.session_state.df.empty:
             annotation_position="top left"
         )
         fig.update_layout(
+            xaxis_title="Date",  # Capitalized
+            yaxis_title="Duration (hrs)",
             xaxis=dict(
                 tickformat="%d %b",
                 tickangle=0,
