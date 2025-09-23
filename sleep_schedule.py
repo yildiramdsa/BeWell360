@@ -103,12 +103,14 @@ if not st.session_state.df.empty:
     col4.metric("Avg. Sleep Start", avg_sleep_start.strftime("%H:%M"))
     col5.metric("Avg. Sleep End", avg_sleep_end.strftime("%H:%M"))
 
-    # Apply filter
-    filtered_df = df[(df["date"].dt.date >= start_filter) & (df["date"].dt.date <= end_filter)].copy()
-
-    if filtered_df.empty:
-        st.info("No sleep logs in the selected date range.")
+    # ---------------- Validate Date Range ----------------
+    if start_filter > end_filter:
+        st.warning("⚠️ Invalid date range: Start Date cannot be after End Date.")
+        filtered_df = pd.DataFrame()  # empty dataframe to prevent rendering
     else:
+        filtered_df = df[(df["date"].dt.date >= start_filter) & (df["date"].dt.date <= end_filter)].copy()
+
+    if not filtered_df.empty:
         # ---------------- Table ----------------
         df_display = filtered_df.rename(columns={
             "date": "Date",
