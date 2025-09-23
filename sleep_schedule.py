@@ -133,12 +133,11 @@ if not st.session_state.df.empty:
 
         # Remove grid
         fig.update_layout(
-            xaxis_title="Date",
-            yaxis_title="Duration (hrs)",
             xaxis=dict(
                 tickformat="%d %b",
                 tickangle=0,
-                showgrid=False
+                showgrid=False,    # remove grid
+                showline=False     # remove x-axis line
             ),
             yaxis=dict(
                 range=[0, max(duration_chart["Sleep Duration (hrs)"].max() + 1, 8)],
