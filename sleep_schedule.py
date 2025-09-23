@@ -5,7 +5,7 @@ from google.oauth2.service_account import Credentials
 from datetime import date, time, datetime, timedelta
 import plotly.express as px
 
-# ---------------- Google Sheets Setup ----------------
+# Google Sheets setup
 SCOPES = [
     "https://www.googleapis.com/auth/spreadsheets",
     "https://www.googleapis.com/auth/drive"
@@ -16,32 +16,27 @@ creds = Credentials.from_service_account_info(
     scopes=SCOPES
 )
 client = gspread.authorize(creds)
+ws = client.open("sleep_schedule").sheet1
 
-SHEET_NAME = "sleep_schedule"
-ws = client.open(SHEET_NAME).sheet1  # first worksheet
-
-# ---------------- Load or initialize data ----------------
+# Load data into session state
 if "df" not in st.session_state:
     st.session_state.df = pd.DataFrame(ws.get_all_records())
 
-# ---------------- Form ----------------
 st.title("🧸 Sleep Schedule")
 
+# Sleep entry form
 today = date.today()
 default_start = time(22, 0)
 default_end = time(6, 0)
 
 with st.form("sleep_form", clear_on_submit=False):
     entry_date = st.date_input("Date", today)
-
     col1, col2 = st.columns(2)
     sleep_start = col1.time_input("Sleep Start", default_start)
     sleep_end = col2.time_input("Sleep End", default_end)
 
     if st.form_submit_button("☁️ Save"):
         start_str, end_str = sleep_start.strftime("%H:%M"), sleep_end.strftime("%H:%M")
-
-        # Check if entry exists
         df_records = st.session_state.df.to_dict(orient="records")
         existing_row_idx = next(
             (i + 2 for i, row in enumerate(df_records) if str(row.get("date")) == str(entry_date)),
@@ -55,29 +50,26 @@ with st.form("sleep_form", clear_on_submit=False):
             ws.append_row([str(entry_date), start_str, end_str])
             st.success(f"✅ Added new sleep log for {entry_date}")
 
-        # Refresh data
         st.session_state.df = pd.DataFrame(ws.get_all_records())
 
-# ---------------- Display Table and Analytics ----------------
+# Display chart and interactive table
 if not st.session_state.df.empty:
     df = st.session_state.df.copy()
-
-    # Convert columns
     df["date"] = pd.to_datetime(df["date"])
     df["sleep_start"] = pd.to_datetime(df["sleep_start"], format="%H:%M").dt.time
     df["sleep_end"] = pd.to_datetime(df["sleep_end"], format="%H:%M").dt.time
 
-    # Compute sleep duration in hours
+    # Compute sleep duration
     def calc_duration(row):
         start_dt = datetime.combine(row["date"], row["sleep_start"])
         end_dt = datetime.combine(row["date"], row["sleep_end"])
-        if end_dt <= start_dt:  # handle overnight sleep
+        if end_dt <= start_dt:
             end_dt += timedelta(days=1)
         return round((end_dt - start_dt).total_seconds() / 3600, 2)
 
     df["Sleep Duration (hrs)"] = df.apply(calc_duration, axis=1)
 
-    # Helper to compute average time correctly
+    # Compute average time
     def average_time(times):
         seconds = [t.hour * 3600 + t.minute * 60 + t.second for t in times]
         avg_seconds = sum(seconds) / len(seconds)
@@ -85,24 +77,19 @@ if not st.session_state.df.empty:
         m = int((avg_seconds % 3600) // 60)
         return time(h, m)
 
-    # ---------------- Date Filter + Metrics Row ----------------
-    avg_sleep_start = average_time(df["sleep_start"])
-    avg_sleep_end = average_time(df["sleep_end"])
+    avg_start = average_time(df["sleep_start"])
+    avg_end = average_time(df["sleep_end"])
 
     col1, col2, col3, col4, col5 = st.columns([1, 1, 1, 1, 1])
-
     min_date = df["date"].min().date()
     max_date = df["date"].max().date()
-
     start_filter = col1.date_input("Start Date", min_value=min_date, max_value=max_date, value=min_date)
     end_filter = col2.date_input("End Date", min_value=min_date, max_value=max_date, value=max_date)
 
-    # Metrics
-    col3.metric("Avg. Sleep Start", avg_sleep_start.strftime("%H:%M"))
-    col4.metric("Avg. Sleep End", avg_sleep_end.strftime("%H:%M"))
+    col3.metric("Avg. Sleep Start", avg_start.strftime("%H:%M"))
+    col4.metric("Avg. Sleep End", avg_end.strftime("%H:%M"))
     col5.metric("Avg. Sleep Duration (hrs)", f"{df['Sleep Duration (hrs)'].mean():.2f}")
 
-    # ---------------- Validate Date Range ----------------
     if start_filter > end_filter:
         st.warning("⚠️ Invalid date range: Start Date cannot be after End Date.")
         filtered_df = pd.DataFrame()
@@ -110,9 +97,8 @@ if not st.session_state.df.empty:
         filtered_df = df[(df["date"].dt.date >= start_filter) & (df["date"].dt.date <= end_filter)].copy()
 
     if not filtered_df.empty:
-        # ---------------- Line Chart ----------------
+        # Line chart
         duration_chart = filtered_df[["date", "Sleep Duration (hrs)"]].sort_values("date")
-
         fig = px.line(
             duration_chart,
             x="date",
@@ -121,8 +107,6 @@ if not st.session_state.df.empty:
             color_discrete_sequence=["#028283"],
             title="Sleep Duration Over Time"
         )
-
-        # Add constant line at 7 hours
         fig.add_hline(
             y=7,
             line_dash="dash",
@@ -130,8 +114,6 @@ if not st.session_state.df.empty:
             annotation_text="Target Sleep (7 hrs)",
             annotation_position="top left"
         )
-
-        # Remove x-axis line, vertical grid, and dynamic y-axis
         fig.update_layout(
             xaxis=dict(
                 tickformat="%d %b",
@@ -146,22 +128,18 @@ if not st.session_state.df.empty:
             ),
             template="plotly_white"
         )
-
         st.plotly_chart(fig, use_container_width=True)
 
-        # ---------------- Interactive Table ----------------
+        # Interactive table
         df_display = filtered_df.rename(columns={
             "date": "Date",
             "sleep_start": "Sleep Start",
             "sleep_end": "Sleep End"
         })
-
-        # Format columns
         df_display["Date"] = df_display["Date"].dt.date
         df_display["Sleep Start"] = df_display["Sleep Start"].apply(lambda t: t.strftime("%H:%M"))
         df_display["Sleep End"] = df_display["Sleep End"].apply(lambda t: t.strftime("%H:%M"))
 
-        # Display interactive table
         st.dataframe(df_display.sort_values("Date", ascending=False), width='stretch')
 else:
     st.info("No sleep logs yet.")
