@@ -66,7 +66,6 @@ pg.run()  # Execute the selected page
 os.makedirs(DATA_DIR, exist_ok=True)
 
 # ---------------- Footer ----------------
-st.markdown("<hr>", unsafe_allow_html=True)
 footer_html = f"""
 <div style="text-align:center;">
     <span style="font-size:10px; color:gray;">Powered by</span>
