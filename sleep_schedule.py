@@ -28,28 +28,25 @@ today = date.today()
 default_start = time(22, 0)
 default_end = time(6, 0)
 
-# ---------------- Sleep Entry Form ----------------
-with st.form("sleep_form", clear_on_submit=False):
-    entry_date = st.date_input("Date", today)
-    col1, col2 = st.columns(2)
-    sleep_start = col1.time_input("Sleep Start", default_start)
-    sleep_end = col2.time_input("Sleep End", default_end)
-    save_clicked = st.form_submit_button("☁️ Save")
+# ---------------- Sleep Entry ----------------
+entry_date = st.date_input("Date", today)
+col1, col2 = st.columns(2)
+sleep_start = col1.time_input("Sleep Start", default_start)
+sleep_end = col2.time_input("Sleep End", default_end)
 
-# ---------------- Buttons Container ----------------
-button_container = st.container()
-with button_container:
-    col1_btn, col2_btn = st.columns([1, 1])
-    with col1_btn:
-        pass  # empty, Save button is inside form
-    with col2_btn:
-        # Recompute existing_row_idx dynamically
-        df_records = st.session_state.df.to_dict(orient="records")
-        existing_row_idx = next(
-            (i + 2 for i, row in enumerate(df_records) if str(row.get("date")) == str(entry_date)),
-            None
-        )
-        delete_clicked = st.button("🗑️ Delete", disabled=(existing_row_idx is None))
+# ---------------- Buttons ----------------
+col_save, col_delete = st.columns([1, 1])
+
+with col_save:
+    save_clicked = st.button("☁️ Save")
+
+with col_delete:
+    df_records = st.session_state.df.to_dict(orient="records")
+    existing_row_idx = next(
+        (i + 2 for i, row in enumerate(df_records) if str(row.get("date")) == str(entry_date)),
+        None
+    )
+    delete_clicked = st.button("🗑️ Delete", disabled=(existing_row_idx is None))
 
 # ---------------- Handle Save/Delete ----------------
 if save_clicked:
