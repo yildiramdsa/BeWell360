@@ -34,7 +34,7 @@ col1, col2 = st.columns(2)
 sleep_start = col1.time_input("Sleep Start", default_start)
 sleep_end = col2.time_input("Sleep End", default_end)
 
-# ---------------- Buttons ----------------
+# ---------------- Action Buttons ----------------
 col_save, col_delete = st.columns([1, 1])
 
 with col_save:
@@ -53,10 +53,10 @@ if save_clicked:
     start_str, end_str = sleep_start.strftime("%H:%M"), sleep_end.strftime("%H:%M")
     if existing_row_idx:
         ws.update(values=[[start_str, end_str]], range_name=f"B{existing_row_idx}:C{existing_row_idx}")
-        st.success(f"✅ Updated sleep log for {entry_date}")
+        st.success(f"☁️ Updated sleep log for {entry_date}")
     else:
         ws.append_row([str(entry_date), start_str, end_str])
-        st.success(f"✅ Added new sleep log for {entry_date}")
+        st.success(f"☁️ Added new sleep log for {entry_date}")
     st.session_state.df = pd.DataFrame(ws.get_all_records())
 
 if delete_clicked and existing_row_idx:
@@ -64,14 +64,14 @@ if delete_clicked and existing_row_idx:
     st.success(f"🗑️ Deleted sleep log for {entry_date}")
     st.session_state.df = pd.DataFrame(ws.get_all_records())
 
-# ---------------- Display Analytics ----------------
+# ---------------- Analytics ----------------
 if not st.session_state.df.empty:
     df = st.session_state.df.copy()
     df["date"] = pd.to_datetime(df["date"])
     df["sleep_start"] = pd.to_datetime(df["sleep_start"], format="%H:%M").dt.time
     df["sleep_end"] = pd.to_datetime(df["sleep_end"], format="%H:%M").dt.time
 
-    # Compute sleep duration
+    # Compute sleep duration in hours
     def calc_duration(row):
         start_dt = datetime.combine(row["date"], row["sleep_start"])
         end_dt = datetime.combine(row["date"], row["sleep_end"])
