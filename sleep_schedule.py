@@ -36,15 +36,20 @@ with st.form("sleep_form", clear_on_submit=False):
     sleep_end = col2.time_input("Sleep End", default_end)
     save_clicked = st.form_submit_button("☁️ Save")
 
-# Delete button outside form for dynamic enabling
-btn_col1, btn_col2 = st.columns([1, 1])
-with btn_col2:
-    df_records = st.session_state.df.to_dict(orient="records")
-    existing_row_idx = next(
-        (i + 2 for i, row in enumerate(df_records) if str(row.get("date")) == str(entry_date)),
-        None
-    )
-    delete_clicked = st.button("🗑️ Delete", disabled=(existing_row_idx is None))
+# ---------------- Buttons Container ----------------
+button_container = st.container()
+with button_container:
+    col1_btn, col2_btn = st.columns([1, 1])
+    with col1_btn:
+        pass  # empty, Save button is inside form
+    with col2_btn:
+        # Recompute existing_row_idx dynamically
+        df_records = st.session_state.df.to_dict(orient="records")
+        existing_row_idx = next(
+            (i + 2 for i, row in enumerate(df_records) if str(row.get("date")) == str(entry_date)),
+            None
+        )
+        delete_clicked = st.button("🗑️ Delete", disabled=(existing_row_idx is None))
 
 # ---------------- Handle Save/Delete ----------------
 if save_clicked:
