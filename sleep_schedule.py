@@ -30,22 +30,34 @@ default_end = time(6, 0)
 
 # ---------------- Sleep Entry ----------------
 entry_date = st.date_input("Date", today)
+
+# Find existing record
+df_records = st.session_state.df.to_dict(orient="records")
+existing_row_idx = None
+existing_row = None
+for i, row in enumerate(df_records):
+    if str(row.get("date")) == str(entry_date):
+        existing_row_idx = i + 2  # account for header row
+        existing_row = row
+        break
+
+# Prefill values if record exists
+if existing_row:
+    prefill_start = datetime.strptime(existing_row["sleep_start"], "%H:%M").time()
+    prefill_end = datetime.strptime(existing_row["sleep_end"], "%H:%M").time()
+else:
+    prefill_start = default_start
+    prefill_end = default_end
+
 col1, col2 = st.columns(2)
-sleep_start = col1.time_input("Sleep Start", default_start)
-sleep_end = col2.time_input("Sleep End", default_end)
+sleep_start = col1.time_input("Sleep Start", prefill_start)
+sleep_end = col2.time_input("Sleep End", prefill_end)
 
 # ---------------- Action Buttons ----------------
 col_save, col_delete = st.columns([1, 1])
-
 with col_save:
     save_clicked = st.button("☁️ Save")
-
 with col_delete:
-    df_records = st.session_state.df.to_dict(orient="records")
-    existing_row_idx = next(
-        (i + 2 for i, row in enumerate(df_records) if str(row.get("date")) == str(entry_date)),
-        None
-    )
     delete_clicked = st.button("🗑️ Delete", disabled=(existing_row_idx is None))
 
 # ---------------- Handle Save/Delete ----------------
@@ -81,41 +93,35 @@ if not st.session_state.df.empty:
 
     df["Sleep Duration (hrs)"] = df.apply(calc_duration, axis=1)
 
-    # ---------------- Date Filter ----------------
+    # Compute average times
+    def average_time(times):
+        seconds = [t.hour * 3600 + t.minute * 60 + t.second for t in times]
+        avg_seconds = sum(seconds) / len(seconds)
+        h = int(avg_seconds // 3600) % 24
+        m = int((avg_seconds % 3600) // 60)
+        return time(h, m)
+
+    # ---------------- Date Filter + Metrics ----------------
     col1, col2, col3, col4, col5 = st.columns([1, 1, 1, 1, 1])
     min_date = df["date"].min().date()
     max_date = df["date"].max().date()
+    start_filter = col1.date_input("Start Date", min_value=min_date, max_value=max_date, value=min_date)
+    end_filter = col2.date_input("End Date", min_value=min_date, max_value=max_date, value=max_date)
 
-    if "start_filter" not in st.session_state:
-        st.session_state.start_filter = min_date
-    if "end_filter" not in st.session_state:
-        st.session_state.end_filter = max_date
-
-    start_filter = col1.date_input("Start Date", min_value=min_date, max_value=max_date, key="start_filter")
-    end_filter = col2.date_input("End Date", min_value=min_date, max_value=max_date, key="end_filter")
-
-    # Validate date range
+    filtered_df = pd.DataFrame()
     if start_filter > end_filter:
         st.warning("⚠️ Invalid date range: Start Date cannot be after End Date.")
-        filtered_df = pd.DataFrame()
     else:
         filtered_df = df[(df["date"].dt.date >= start_filter) & (df["date"].dt.date <= end_filter)].copy()
 
-    # ---------------- Metrics ----------------
     if not filtered_df.empty:
-        def average_time(times):
-            seconds = [t.hour * 3600 + t.minute * 60 + t.second for t in times]
-            avg_seconds = sum(seconds) / len(seconds)
-            h = int(avg_seconds // 3600) % 24
-            m = int((avg_seconds % 3600) // 60)
-            return time(h, m)
-
         avg_start = average_time(filtered_df["sleep_start"])
         avg_end = average_time(filtered_df["sleep_end"])
+        avg_duration = filtered_df["Sleep Duration (hrs)"].mean()
 
         col3.metric("Avg. Sleep Start", avg_start.strftime("%H:%M"))
         col4.metric("Avg. Sleep End", avg_end.strftime("%H:%M"))
-        col5.metric("Avg. Sleep Duration (hrs)", f"{filtered_df['Sleep Duration (hrs)'].mean():.2f}")
+        col5.metric("Avg. Sleep Duration (hrs)", f"{avg_duration:.2f}")
 
         # ---------------- Line Chart ----------------
         duration_chart = filtered_df[["date", "Sleep Duration (hrs)"]].sort_values("date")
