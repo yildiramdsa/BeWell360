@@ -282,7 +282,7 @@ if not st.session_state.df.empty:
             xaxis_title="Date",
             yaxis_title="Weight (lb)",
             xaxis=dict(tickformat="%d %b", showgrid=False, showline=False),
-            yaxis=dict(showgrid=False),
+            yaxis=dict(showgrid=False, showline=False),
             template="plotly_white"
         )
         st.plotly_chart(fig_wt, use_container_width=True)
@@ -299,7 +299,7 @@ if not st.session_state.df.empty:
             xaxis_title="Date",
             yaxis_title="Percentage (%)",
             xaxis=dict(tickformat="%d %b", showgrid=False, showline=False),
-            yaxis=dict(showgrid=False),
+            yaxis=dict(showgrid=False, showline=False),
             template="plotly_white",
             legend_title_text=""
         )
