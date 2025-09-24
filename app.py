@@ -36,8 +36,7 @@ daily_log_pages = create_pages([
     ("fitness_activities.py", "Fitness Activities", "⚽"),
     ("sleep_schedule.py", "Sleep Schedule", "🧸"),
     ("body_composition.py", "Body Composition", "💪"),
-    ("professional_development.py", "Professional Development", "📚"),
-    ("personal_growth.py", "Personal Growth", "🌱"),
+    ("professional_and_personal_growth.py", "Professional & Personal Growth", "🌱"),
 ])
 
 insights_pages = create_pages([
