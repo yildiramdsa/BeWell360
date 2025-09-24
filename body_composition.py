@@ -16,7 +16,7 @@ creds = Credentials.from_service_account_info(
     scopes=SCOPES
 )
 client = gspread.authorize(creds)
-ws = client.open("body_composition").sheet1  # <-- change sheet name if needed
+ws = client.open("body_composition").sheet1
 
 # ---------------- Load Data ----------------
 if "df" not in st.session_state:
@@ -34,7 +34,7 @@ df_records = st.session_state.df.to_dict(orient="records")
 existing_row_idx, existing_row = None, None
 for i, row in enumerate(df_records):
     if str(row.get("date")) == str(entry_date):
-        existing_row_idx = i + 2  # account for header row
+        existing_row_idx = i + 2
         existing_row = row
         break
 
@@ -102,11 +102,13 @@ if not st.session_state.df.empty:
     df["skeletal_muscle_percent"] = pd.to_numeric(df["skeletal_muscle_percent"], errors="coerce")
 
     # ---------------- Date Filter (same line) ----------------
-    filter_col1, filter_col2 = st.columns(2)
     min_date = df["date"].min().date()
     max_date = df["date"].max().date()
-    start_filter = filter_col1.date_input("Start Date", min_value=min_date, max_value=max_date, value=min_date)
-    end_filter = filter_col2.date_input("End Date", min_value=min_date, max_value=max_date, value=max_date)
+    filter_col1, filter_col2 = st.columns(2)
+    with filter_col1:
+        start_filter = st.date_input("Start Date", min_value=min_date, max_value=max_date, value=min_date)
+    with filter_col2:
+        end_filter = st.date_input("End Date", min_value=min_date, max_value=max_date, value=max_date)
 
     if start_filter > end_filter:
         st.warning("⚠️ Invalid date range: Start Date cannot be after End Date.")
@@ -117,9 +119,12 @@ if not st.session_state.df.empty:
     if not filtered_df.empty:
         # ---------------- Metrics (same line) ----------------
         metric_col1, metric_col2, metric_col3 = st.columns(3)
-        metric_col1.metric("Avg. Weight (lb)", f"{filtered_df['weight_lb'].mean():.1f}")
-        metric_col2.metric("Avg. Body Fat (%)", f"{filtered_df['body_fat_percent'].mean():.1f}")
-        metric_col3.metric("Avg. Muscle (%)", f"{filtered_df['skeletal_muscle_percent'].mean():.1f}")
+        with metric_col1:
+            st.metric("Avg. Weight (lb)", f"{filtered_df['weight_lb'].mean():.1f}")
+        with metric_col2:
+            st.metric("Avg. Body Fat (%)", f"{filtered_df['body_fat_percent'].mean():.1f}")
+        with metric_col3:
+            st.metric("Avg. Muscle (%)", f"{filtered_df['skeletal_muscle_percent'].mean():.1f}")
 
         st.subheader("📊 Trends")
 
