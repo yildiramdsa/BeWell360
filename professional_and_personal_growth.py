@@ -1,3 +1,3 @@
 import streamlit as st
 
-st.header("📚 Professional Development")
+st.header("🌱 Professional & Personal Growth")
