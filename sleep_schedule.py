@@ -137,8 +137,8 @@ client = gspread.authorize(creds)
 ws = client.open("sleep_schedule").sheet1
 
 # ---------------- Load Data ----------------
-if "df" not in st.session_state:
-    st.session_state.df = pd.DataFrame(ws.get_all_records())
+if "sleep_df" not in st.session_state:
+    st.session_state.sleep_df = pd.DataFrame(ws.get_all_records())
 
 st.title("🧸 Sleep Schedule")
 
@@ -150,7 +150,7 @@ default_end = time(6, 0)
 entry_date = st.date_input("Date", today)
 
 # Find existing record
-df_records = st.session_state.df.to_dict(orient="records")
+df_records = st.session_state.sleep_df.to_dict(orient="records")
 existing_row_idx = None
 existing_row = None
 for i, row in enumerate(df_records):
@@ -182,16 +182,16 @@ if save_clicked:
     else:
         ws.append_row([str(entry_date), start_str, end_str])
         st.success(f"☁️ Added new sleep log for {entry_date}")
-    st.session_state.df = pd.DataFrame(ws.get_all_records())
+    st.session_state.sleep_df = pd.DataFrame(ws.get_all_records())
 
 if delete_clicked and existing_row_idx:
     ws.delete_rows(existing_row_idx)
     st.success(f"🗑️ Deleted sleep log for {entry_date}")
-    st.session_state.df = pd.DataFrame(ws.get_all_records())
+    st.session_state.sleep_df = pd.DataFrame(ws.get_all_records())
 
 # ---------------- Analytics ----------------
-if not st.session_state.df.empty:
-    df = st.session_state.df.copy()
+if not st.session_state.sleep_df.empty:
+    df = st.session_state.sleep_df.copy()
     df["date"] = pd.to_datetime(df["date"])
     
     # Find sleep columns
