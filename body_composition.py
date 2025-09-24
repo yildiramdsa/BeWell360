@@ -143,40 +143,40 @@ for i, row in enumerate(df_records):
 # Prefill values
 prefill_weight, prefill_bodyfat, prefill_muscle = get_prefill_values(existing_row)
 
-with st.form("body_composition_form", clear_on_submit=False):
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        weight_lb = st.number_input(
-            "Weight (lb)",
-            min_value=0.0,
-            step=0.1,
-            format="%.1f",
-            value=float(prefill_weight)
-        )
-    with col2:
-        body_fat = st.number_input(
-            "Body Fat (%)",
-            min_value=0.0,
-            max_value=100.0,
-            step=0.1,
-            format="%.1f",
-            value=float(prefill_bodyfat)
-        )
-    with col3:
-        muscle = st.number_input(
-            "Skeletal Muscle (%)",
-            min_value=0.0,
-            max_value=100.0,
-            step=0.1,
-            format="%.1f",
-            value=float(prefill_muscle)
-        )
+col1, col2, col3 = st.columns(3)
+with col1:
+    weight_lb = st.number_input(
+        "Weight (lb)",
+        min_value=0.0,
+        step=0.1,
+        format="%.1f",
+        value=float(prefill_weight)
+    )
+with col2:
+    body_fat = st.number_input(
+        "Body Fat (%)",
+        min_value=0.0,
+        max_value=100.0,
+        step=0.1,
+        format="%.1f",
+        value=float(prefill_bodyfat)
+    )
+with col3:
+    muscle = st.number_input(
+        "Skeletal Muscle (%)",
+        min_value=0.0,
+        max_value=100.0,
+        step=0.1,
+        format="%.1f",
+        value=float(prefill_muscle)
+    )
 
-    col_save, col_delete = st.columns([1, 1])
-    with col_save:
-        save_clicked = st.form_submit_button("💾 Save")
-    with col_delete:
-        delete_clicked = st.form_submit_button("🗑️ Delete", disabled=(existing_row_idx is None))
+# ---------------- Action Buttons ----------------
+col_save, col_delete = st.columns([1, 1])
+with col_save:
+    save_clicked = st.button("💾 Save")
+with col_delete:
+    delete_clicked = st.button("🗑️ Delete", disabled=(existing_row_idx is None))
 
 # ---------------- Handle Save/Delete ----------------
 if save_clicked:
