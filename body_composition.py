@@ -187,10 +187,10 @@ if save_clicked:
         else:
             if existing_row_idx:
                 ws.update(values=[[weight_lb, body_fat, muscle]], range_name=f"B{existing_row_idx}:D{existing_row_idx}")
-                st.success(f"Updated body composition log for {entry_date}")
+                st.success(f"Updated body composition log for {entry_date}.")
             else:
                 ws.append_row([str(entry_date), weight_lb, body_fat, muscle])
-                st.success(f"Added new body composition log for {entry_date}")
+                st.success(f"Added new body composition log for {entry_date}.")
             st.session_state.body_comp_df = pd.DataFrame(ws.get_all_records())
     except Exception as e:
         st.error(f"Error saving data: {str(e)}")
@@ -198,7 +198,7 @@ if save_clicked:
 if delete_clicked and existing_row_idx:
     try:
         ws.delete_rows(existing_row_idx)
-        st.success(f"Deleted body composition log for {entry_date}")
+        st.success(f"Deleted body composition log for {entry_date}.")
         st.session_state.body_comp_df = pd.DataFrame(ws.get_all_records())
     except Exception as e:
         st.error(f"Error deleting data: {str(e)}")
