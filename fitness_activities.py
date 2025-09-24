@@ -189,15 +189,18 @@ if not st.session_state.fitness_df.empty:
         exercises_with_weight = (
             weighted_df["exercise"].dropna().astype(str).sort_values().unique().tolist()
         )
+        
+        # Always show the selector, even if empty
         sel_col1, _ = st.columns([1, 3])
         with sel_col1:
             selected_exercise = st.selectbox(
                 "Exercise (weight):",
-                options=exercises_with_weight,
+                options=exercises_with_weight if exercises_with_weight else ["No weight data"],
                 index=0 if exercises_with_weight else None,
                 disabled=(len(exercises_with_weight) == 0)
             )
-        if exercises_with_weight:
+        
+        if exercises_with_weight and selected_exercise != "No weight data":
             ex_df = weighted_df[weighted_df["exercise"].astype(str) == selected_exercise].copy()
             ex_df = ex_df.sort_values("date")
             if not ex_df.empty:
@@ -228,6 +231,8 @@ if not st.session_state.fitness_df.empty:
                     template="plotly_white"
                 )
                 st.plotly_chart(fig_w, use_container_width=True)
+        else:
+            st.info("No exercises with weight data in the selected range.")
 
         # ---------------- Distance Progression Chart ----------------
         # Only include entries where distance is present (> 0)
