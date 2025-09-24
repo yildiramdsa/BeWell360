@@ -229,6 +229,57 @@ if not st.session_state.fitness_df.empty:
                 )
                 st.plotly_chart(fig_w, use_container_width=True)
 
+        # ---------------- Distance Progression Chart ----------------
+        # Only include entries where distance is present (> 0)
+        distance_df = filtered_df.copy()
+        distance_df["distance_km"] = pd.to_numeric(distance_df.get("distance_km", 0), errors="coerce")
+        distance_df = distance_df.dropna(subset=["distance_km"]) 
+        distance_df = distance_df[distance_df["distance_km"] > 0]
+
+        exercises_with_distance = (
+            distance_df["exercise"].dropna().astype(str).sort_values().unique().tolist()
+        )
+        if exercises_with_distance:
+            sel_col2, _ = st.columns([1, 3])
+            with sel_col2:
+                selected_exercise_dist = st.selectbox(
+                    "Exercise (distance):",
+                    options=exercises_with_distance,
+                    index=0 if exercises_with_distance else None,
+                    disabled=(len(exercises_with_distance) == 0)
+                )
+            if exercises_with_distance:
+                ex_df_dist = distance_df[distance_df["exercise"].astype(str) == selected_exercise_dist].copy()
+                ex_df_dist = ex_df_dist.sort_values("date")
+                if not ex_df_dist.empty:
+                    import plotly.express as px
+                    fig_d = px.line(
+                        ex_df_dist,
+                        x="date",
+                        y="distance_km",
+                        markers=True,
+                        color_discrete_sequence=["#e7541e"],
+                        title=f"Distance over Time • {selected_exercise_dist}"
+                    )
+                    fig_d.update_layout(
+                        xaxis_title="Date",
+                        yaxis_title="Distance (km)",
+                        xaxis=dict(
+                            tickformat="%d %b",
+                            tickangle=0,
+                            showgrid=False,
+                            showline=False,
+                            zeroline=False
+                        ),
+                        yaxis=dict(
+                            showgrid=False,
+                            showline=False,
+                            zeroline=False
+                        ),
+                        template="plotly_white"
+                    )
+                    st.plotly_chart(fig_d, use_container_width=True)
+
         # Interactive table
         df_display = filtered_df.rename(columns={
             "date": "Date",
