@@ -224,10 +224,25 @@ if not st.session_state.df.empty:
     
     df = df_clean
 
-    # ---------------- Date Filter (same line) ----------------
-    min_date = df["date"].min().date()
-    max_date = df["date"].max().date()
-    filter_col1, filter_col2 = st.columns(2)
+    # ---------------- Date Filter + Metrics ----------------
+    # Handle potential NaT values in date columns
+    valid_dates = df["date"].dropna()
+    if valid_dates.empty:
+        st.warning("No valid dates found in the data.")
+        st.stop()
+    
+    min_date = valid_dates.min().date()
+    max_date = valid_dates.max().date()
+    
+    # Use today's date as fallback if min/max dates are invalid
+    today = date.today()
+    if pd.isna(min_date) or pd.isna(max_date):
+        min_date = today
+        max_date = today
+    
+    # Create columns for date filters and metrics on the same row
+    filter_col1, filter_col2, metric_col1, metric_col2, metric_col3 = st.columns([1, 1, 1, 1, 1])
+    
     with filter_col1:
         start_filter = st.date_input("Start Date", min_value=min_date, max_value=max_date, value=min_date)
     with filter_col2:
@@ -241,7 +256,6 @@ if not st.session_state.df.empty:
 
     if not filtered_df.empty:
         # ---------------- Metrics (same line) ----------------
-        metric_col1, metric_col2, metric_col3 = st.columns(3)
         with metric_col1:
             st.metric("Avg. Weight (lb)", f"{filtered_df['weight_lb'].mean():.1f}")
         with metric_col2:

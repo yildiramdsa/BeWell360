@@ -230,8 +230,22 @@ if not st.session_state.df.empty:
 
     # ---------------- Date Filter + Metrics ----------------
     col1, col2, col3, col4, col5 = st.columns([1, 1, 1, 1, 1])
-    min_date = df["date"].min().date()
-    max_date = df["date"].max().date()
+    
+    # Handle potential NaT values in date columns
+    valid_dates = df["date"].dropna()
+    if valid_dates.empty:
+        st.warning("No valid dates found in the data.")
+        st.stop()
+    
+    min_date = valid_dates.min().date()
+    max_date = valid_dates.max().date()
+    
+    # Use today's date as fallback if min/max dates are invalid
+    today = date.today()
+    if pd.isna(min_date) or pd.isna(max_date):
+        min_date = today
+        max_date = today
+    
     start_filter = col1.date_input("Start Date", min_value=min_date, max_value=max_date, value=min_date)
     end_filter = col2.date_input("End Date", min_value=min_date, max_value=max_date, value=max_date)
 
