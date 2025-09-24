@@ -5,6 +5,124 @@ from google.oauth2.service_account import Credentials
 from datetime import date, time, datetime, timedelta
 import plotly.express as px
 
+# ---------------- Helper Functions ----------------
+def find_sleep_columns(df):
+    """Find sleep start and end columns in the dataframe."""
+    sleep_start_col = None
+    sleep_end_col = None
+    
+    # Check for expected column names first
+    if "sleep_start" in df.columns:
+        sleep_start_col = "sleep_start"
+    elif "sleep_end" in df.columns:
+        sleep_end_col = "sleep_end"
+    
+    # If not found, search for alternative names
+    if not sleep_start_col:
+        possible_start_cols = [col for col in df.columns if 'start' in col.lower() or 'sleep' in col.lower()]
+        sleep_start_col = possible_start_cols[0] if possible_start_cols else None
+    
+    if not sleep_end_col:
+        possible_end_cols = [col for col in df.columns if 'end' in col.lower() or 'wake' in col.lower()]
+        sleep_end_col = possible_end_cols[0] if possible_end_cols else None
+    
+    # Fallback to positional columns
+    if not sleep_start_col and len(df.columns) > 1:
+        sleep_start_col = df.columns[1]
+    if not sleep_end_col and len(df.columns) > 2:
+        sleep_end_col = df.columns[2]
+    
+    return sleep_start_col, sleep_end_col
+
+
+def parse_time_safe(time_series):
+    """Safely parse time values from a series with multiple format support."""
+    parsed_times = []
+    for time_val in time_series:
+        if pd.isna(time_val) or str(time_val).strip() == '':
+            parsed_times.append(None)
+            continue
+        
+        time_str = str(time_val).strip()
+        try:
+            # Try HH:MM format first (most common)
+            if ':' in time_str and len(time_str.split(':')) == 2:
+                hour, minute = time_str.split(':')
+                if hour.isdigit() and minute.isdigit():
+                    parsed_time = time(int(hour), int(minute))
+                    parsed_times.append(parsed_time)
+                    continue
+            
+            # Try other common formats
+            for fmt in ['%H:%M', '%I:%M %p', '%I:%M%p', '%H.%M']:
+                try:
+                    parsed_time = datetime.strptime(time_str, fmt).time()
+                    parsed_times.append(parsed_time)
+                    break
+                except ValueError:
+                    continue
+            else:
+                # If no format works, skip this value
+                parsed_times.append(None)
+        except:
+            parsed_times.append(None)
+    
+    return parsed_times
+
+
+def clean_sleep_data(df, sleep_start_col, sleep_end_col):
+    """Clean and parse sleep data from the dataframe."""
+    try:
+        # Clean the data first - remove any empty or invalid values
+        df_clean = df.dropna(subset=[sleep_start_col, sleep_end_col])
+        df_clean = df_clean[df_clean[sleep_start_col].astype(str).str.strip() != '']
+        df_clean = df_clean[df_clean[sleep_end_col].astype(str).str.strip() != '']
+        
+        if df_clean.empty:
+            return None
+        
+        # Parse time values
+        df_clean["sleep_start"] = parse_time_safe(df_clean[sleep_start_col])
+        df_clean["sleep_end"] = parse_time_safe(df_clean[sleep_end_col])
+        
+        # Remove rows where time parsing failed
+        df_clean = df_clean.dropna(subset=["sleep_start", "sleep_end"])
+        
+        return df_clean if not df_clean.empty else None
+        
+    except Exception as e:
+        st.error(f"Error parsing time data: {str(e)}")
+        return None
+
+
+def get_prefill_times(existing_row):
+    """Get prefill times from existing row data."""
+    if not existing_row:
+        return default_start, default_end
+    
+    # Find sleep columns in existing row
+    start_col, end_col = find_sleep_columns(pd.DataFrame([existing_row]))
+    
+    if start_col and end_col and existing_row.get(start_col) and existing_row.get(end_col):
+        try:
+            start_str = str(existing_row[start_col]).strip()
+            end_str = str(existing_row[end_col]).strip()
+            
+            if start_str and end_str:
+                # Try multiple time formats
+                for fmt in ['%H:%M', '%I:%M %p', '%I:%M%p', '%H.%M']:
+                    try:
+                        prefill_start = datetime.strptime(start_str, fmt).time()
+                        prefill_end = datetime.strptime(end_str, fmt).time()
+                        return prefill_start, prefill_end
+                    except ValueError:
+                        continue
+        except:
+            pass
+    
+    return default_start, default_end
+
+
 # ---------------- Google Sheets Setup ----------------
 SCOPES = [
     "https://www.googleapis.com/auth/spreadsheets",
@@ -42,54 +160,7 @@ for i, row in enumerate(df_records):
         break
 
 # Prefill values if record exists
-if existing_row:
-    # Find the actual column names for sleep start and end
-    start_col = None
-    end_col = None
-    
-    for col in existing_row.keys():
-        if 'start' in col.lower() or 'sleep' in col.lower():
-            start_col = col
-        elif 'end' in col.lower() or 'wake' in col.lower():
-            end_col = col
-    
-    # Fallback to positional columns if names not found
-    if not start_col and len(existing_row) > 1:
-        start_col = list(existing_row.keys())[1]
-    if not end_col and len(existing_row) > 2:
-        end_col = list(existing_row.keys())[2]
-    
-    if start_col and end_col and existing_row.get(start_col) and existing_row.get(end_col):
-        try:
-            # Try to parse the existing time values with error handling
-            start_str = str(existing_row[start_col]).strip()
-            end_str = str(existing_row[end_col]).strip()
-            
-            if start_str and end_str:
-                # Try multiple time formats
-                for fmt in ['%H:%M', '%I:%M %p', '%I:%M%p', '%H.%M']:
-                    try:
-                        prefill_start = datetime.strptime(start_str, fmt).time()
-                        prefill_end = datetime.strptime(end_str, fmt).time()
-                        break
-                    except ValueError:
-                        continue
-                else:
-                    # If no format works, use defaults
-                    prefill_start = default_start
-                    prefill_end = default_end
-            else:
-                prefill_start = default_start
-                prefill_end = default_end
-        except:
-            prefill_start = default_start
-            prefill_end = default_end
-    else:
-        prefill_start = default_start
-        prefill_end = default_end
-else:
-    prefill_start = default_start
-    prefill_end = default_end
+prefill_start, prefill_end = get_prefill_times(existing_row)
 
 col1, col2 = st.columns(2)
 sleep_start = col1.time_input("Sleep Start", prefill_start)
@@ -121,99 +192,23 @@ if delete_clicked and existing_row_idx:
 # ---------------- Analytics ----------------
 if not st.session_state.df.empty:
     df = st.session_state.df.copy()
+    df["date"] = pd.to_datetime(df["date"])
     
+    # Find sleep columns
+    sleep_start_col, sleep_end_col = find_sleep_columns(df)
     
-    # Check if the expected columns exist, if not, try alternative names
-    if "sleep_start" not in df.columns:
-        # Try to find columns that might contain sleep start time
-        possible_start_cols = [col for col in df.columns if 'start' in col.lower() or 'sleep' in col.lower()]
-        if possible_start_cols:
-            sleep_start_col = possible_start_cols[0]
-        else:
-            # If no matching columns found, use the second column (assuming first is date)
-            sleep_start_col = df.columns[1] if len(df.columns) > 1 else None
-    else:
-        sleep_start_col = "sleep_start"
-    
-    if "sleep_end" not in df.columns:
-        # Try to find columns that might contain sleep end time
-        possible_end_cols = [col for col in df.columns if 'end' in col.lower() or 'wake' in col.lower()]
-        if possible_end_cols:
-            sleep_end_col = possible_end_cols[0]
-        else:
-            # If no matching columns found, use the third column (assuming first is date, second is start)
-            sleep_end_col = df.columns[2] if len(df.columns) > 2 else None
-    else:
-        sleep_end_col = "sleep_end"
-    
-    if sleep_start_col and sleep_end_col:
-        df["date"] = pd.to_datetime(df["date"])
-        
-        # Handle time parsing with error handling
-        try:
-            # Clean the data first - remove any empty or invalid values
-            df_clean = df.dropna(subset=[sleep_start_col, sleep_end_col])
-            df_clean = df_clean[df_clean[sleep_start_col].astype(str).str.strip() != '']
-            df_clean = df_clean[df_clean[sleep_end_col].astype(str).str.strip() != '']
-            
-            if df_clean.empty:
-                st.warning("No valid sleep data found in the selected columns.")
-                st.stop()
-            
-            # Try to parse times with multiple format attempts
-            def parse_time_safe(time_series, col_name):
-                parsed_times = []
-                for time_val in time_series:
-                    if pd.isna(time_val) or str(time_val).strip() == '':
-                        parsed_times.append(None)
-                        continue
-                    
-                    time_str = str(time_val).strip()
-                    try:
-                        # Try HH:MM format first
-                        if ':' in time_str and len(time_str.split(':')) == 2:
-                            hour, minute = time_str.split(':')
-                            if hour.isdigit() and minute.isdigit():
-                                parsed_time = time(int(hour), int(minute))
-                                parsed_times.append(parsed_time)
-                                continue
-                        
-                        # Try other common formats
-                        for fmt in ['%H:%M', '%I:%M %p', '%I:%M%p', '%H.%M']:
-                            try:
-                                parsed_time = datetime.strptime(time_str, fmt).time()
-                                parsed_times.append(parsed_time)
-                                break
-                            except ValueError:
-                                continue
-                        else:
-                            # If no format works, skip this value
-                            parsed_times.append(None)
-                    except:
-                        parsed_times.append(None)
-                
-                return parsed_times
-            
-            df_clean["sleep_start"] = parse_time_safe(df_clean[sleep_start_col], sleep_start_col)
-            df_clean["sleep_end"] = parse_time_safe(df_clean[sleep_end_col], sleep_end_col)
-            
-            # Remove rows where time parsing failed
-            df_clean = df_clean.dropna(subset=["sleep_start", "sleep_end"])
-            
-            if df_clean.empty:
-                st.warning("No valid sleep data could be parsed from the time columns.")
-                st.stop()
-            
-            # Update df to use the cleaned data
-            df = df_clean
-            
-        except Exception as e:
-            st.error(f"Error parsing time data: {str(e)}")
-            st.error("Please check that your time columns contain valid time values in HH:MM format.")
-            st.stop()
-    else:
+    if not sleep_start_col or not sleep_end_col:
         st.error("Could not find sleep start and end time columns in the data.")
         st.stop()
+    
+    # Clean and parse the data
+    df_clean = clean_sleep_data(df, sleep_start_col, sleep_end_col)
+    
+    if df_clean is None:
+        st.warning("No valid sleep data found in the selected columns.")
+        st.stop()
+    
+    df = df_clean
 
     # Compute sleep duration in hours
     def calc_duration(row):
