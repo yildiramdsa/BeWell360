@@ -101,12 +101,12 @@ if not st.session_state.df.empty:
     df["body_fat_percent"] = pd.to_numeric(df["body_fat_percent"], errors="coerce")
     df["skeletal_muscle_percent"] = pd.to_numeric(df["skeletal_muscle_percent"], errors="coerce")
 
-    # ---------------- Date Filter ----------------
-    col1, col2 = st.columns(2)
+    # ---------------- Date Filter (same line) ----------------
+    filter_col1, filter_col2 = st.columns(2)
     min_date = df["date"].min().date()
     max_date = df["date"].max().date()
-    start_filter = col1.date_input("Start Date", min_value=min_date, max_value=max_date, value=min_date)
-    end_filter = col2.date_input("End Date", min_value=min_date, max_value=max_date, value=max_date)
+    start_filter = filter_col1.date_input("Start Date", min_value=min_date, max_value=max_date, value=min_date)
+    end_filter = filter_col2.date_input("End Date", min_value=min_date, max_value=max_date, value=max_date)
 
     if start_filter > end_filter:
         st.warning("⚠️ Invalid date range: Start Date cannot be after End Date.")
@@ -115,11 +115,11 @@ if not st.session_state.df.empty:
         filtered_df = df[(df["date"].dt.date >= start_filter) & (df["date"].dt.date <= end_filter)].copy()
 
     if not filtered_df.empty:
-        # ---------------- Metrics ----------------
-        col1, col2, col3 = st.columns(3)
-        col1.metric("Avg. Weight (lb)", f"{filtered_df['weight_lb'].mean():.1f}")
-        col2.metric("Avg. Body Fat (%)", f"{filtered_df['body_fat_percent'].mean():.1f}")
-        col3.metric("Avg. Muscle (%)", f"{filtered_df['skeletal_muscle_percent'].mean():.1f}")
+        # ---------------- Metrics (same line) ----------------
+        metric_col1, metric_col2, metric_col3 = st.columns(3)
+        metric_col1.metric("Avg. Weight (lb)", f"{filtered_df['weight_lb'].mean():.1f}")
+        metric_col2.metric("Avg. Body Fat (%)", f"{filtered_df['body_fat_percent'].mean():.1f}")
+        metric_col3.metric("Avg. Muscle (%)", f"{filtered_df['skeletal_muscle_percent'].mean():.1f}")
 
         st.subheader("📊 Trends")
 
