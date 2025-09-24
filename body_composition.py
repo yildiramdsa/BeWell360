@@ -101,64 +101,80 @@ if not st.session_state.df.empty:
     df["body_fat_percent"] = pd.to_numeric(df["body_fat_percent"], errors="coerce")
     df["skeletal_muscle_percent"] = pd.to_numeric(df["skeletal_muscle_percent"], errors="coerce")
 
-    # ---------------- Metrics ----------------
-    col1, col2, col3 = st.columns(3)
-    col1.metric("Avg. Weight (lb)", f"{df['weight_lb'].mean():.1f}")
-    col2.metric("Avg. Body Fat (%)", f"{df['body_fat_percent'].mean():.1f}")
-    col3.metric("Avg. Muscle (%)", f"{df['skeletal_muscle_percent'].mean():.1f}")
+    # ---------------- Date Filter ----------------
+    col1, col2 = st.columns(2)
+    min_date = df["date"].min().date()
+    max_date = df["date"].max().date()
+    start_filter = col1.date_input("Start Date", min_value=min_date, max_value=max_date, value=min_date)
+    end_filter = col2.date_input("End Date", min_value=min_date, max_value=max_date, value=max_date)
 
-    st.subheader("📊 Trends")
+    if start_filter > end_filter:
+        st.warning("⚠️ Invalid date range: Start Date cannot be after End Date.")
+        filtered_df = pd.DataFrame()
+    else:
+        filtered_df = df[(df["date"].dt.date >= start_filter) & (df["date"].dt.date <= end_filter)].copy()
 
-    # Weight trend
-    fig_wt = px.line(
-        df.sort_values("date"),
-        x="date",
-        y="weight_lb",
-        markers=True,
-        color_discrete_sequence=["#028283"]
-    )
-    fig_wt.add_hline(
-        y=df["weight_lb"].mean(),
-        line_dash="dash",
-        line_color="#e7541e",
-        annotation_text="Avg. Weight",
-        annotation_position="top left"
-    )
-    fig_wt.update_layout(
-        xaxis_title="Date",
-        yaxis_title="Weight (lb)",
-        xaxis=dict(tickformat="%d %b", showgrid=False, showline=False),
-        yaxis=dict(showgrid=False),
-        template="plotly_white"
-    )
-    st.plotly_chart(fig_wt, use_container_width=True)
+    if not filtered_df.empty:
+        # ---------------- Metrics ----------------
+        col1, col2, col3 = st.columns(3)
+        col1.metric("Avg. Weight (lb)", f"{filtered_df['weight_lb'].mean():.1f}")
+        col2.metric("Avg. Body Fat (%)", f"{filtered_df['body_fat_percent'].mean():.1f}")
+        col3.metric("Avg. Muscle (%)", f"{filtered_df['skeletal_muscle_percent'].mean():.1f}")
 
-    # Body fat & muscle trend
-    fig_bf = px.line(
-        df.sort_values("date"),
-        x="date",
-        y=["body_fat_percent", "skeletal_muscle_percent"],
-        markers=True,
-        color_discrete_sequence=["#e7541e", "#028283"]
-    )
-    fig_bf.update_layout(
-        xaxis_title="Date",
-        yaxis_title="Percentage (%)",
-        xaxis=dict(tickformat="%d %b", showgrid=False, showline=False),
-        yaxis=dict(showgrid=False),
-        template="plotly_white",
-        legend_title_text=""
-    )
-    st.plotly_chart(fig_bf, use_container_width=True)
+        st.subheader("📊 Trends")
 
-    # ---------------- Interactive Table ----------------
-    df_display = df.rename(columns={
-        "date": "Date",
-        "weight_lb": "Weight (lb)",
-        "body_fat_percent": "Body Fat (%)",
-        "skeletal_muscle_percent": "Muscle (%)"
-    })
-    df_display["Date"] = df_display["Date"].dt.date
-    st.dataframe(df_display.sort_values("Date", ascending=False), width="stretch")
+        # Weight trend
+        fig_wt = px.line(
+            filtered_df.sort_values("date"),
+            x="date",
+            y="weight_lb",
+            markers=True,
+            color_discrete_sequence=["#028283"]
+        )
+        fig_wt.add_hline(
+            y=filtered_df["weight_lb"].mean(),
+            line_dash="dash",
+            line_color="#e7541e",
+            annotation_text="Avg. Weight",
+            annotation_position="top left"
+        )
+        fig_wt.update_layout(
+            xaxis_title="Date",
+            yaxis_title="Weight (lb)",
+            xaxis=dict(tickformat="%d %b", showgrid=False, showline=False),
+            yaxis=dict(showgrid=False),
+            template="plotly_white"
+        )
+        st.plotly_chart(fig_wt, use_container_width=True)
+
+        # Body fat & muscle trend
+        fig_bf = px.line(
+            filtered_df.sort_values("date"),
+            x="date",
+            y=["body_fat_percent", "skeletal_muscle_percent"],
+            markers=True,
+            color_discrete_sequence=["#e7541e", "#028283"]
+        )
+        fig_bf.update_layout(
+            xaxis_title="Date",
+            yaxis_title="Percentage (%)",
+            xaxis=dict(tickformat="%d %b", showgrid=False, showline=False),
+            yaxis=dict(showgrid=False),
+            template="plotly_white",
+            legend_title_text=""
+        )
+        st.plotly_chart(fig_bf, use_container_width=True)
+
+        # ---------------- Interactive Table ----------------
+        df_display = filtered_df.rename(columns={
+            "date": "Date",
+            "weight_lb": "Weight (lb)",
+            "body_fat_percent": "Body Fat (%)",
+            "skeletal_muscle_percent": "Muscle (%)"
+        })
+        df_display["Date"] = df_display["Date"].dt.date
+        st.dataframe(df_display.sort_values("Date", ascending=False), width="stretch")
+    else:
+        st.info("No records in selected date range.")
 else:
     st.info("No body composition logs yet.")
