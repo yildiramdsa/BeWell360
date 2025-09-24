@@ -16,7 +16,7 @@ creds = Credentials.from_service_account_info(
     scopes=SCOPES
 )
 client = gspread.authorize(creds)
-ws = client.open("body_composition").sheet1
+ws = client.open("body_composition").sheet1  # <-- change sheet name if needed
 
 # ---------------- Load Data ----------------
 if "df" not in st.session_state:
@@ -43,26 +43,29 @@ prefill_weight = existing_row["weight_lb"] if existing_row else 0.0
 prefill_bodyfat = existing_row["body_fat_percent"] if existing_row else 0.0
 prefill_muscle = existing_row["skeletal_muscle_percent"] if existing_row else 0.0
 
-col1, col2, col3 = st.columns(3)
-weight_lb = col1.number_input("Weight (lb)", min_value=0.0, format="%.1f", value=float(prefill_weight))
-body_fat = col2.number_input("Body Fat (%)", min_value=0.0, max_value=100.0, format="%.1f", value=float(prefill_bodyfat))
-muscle = col3.number_input("Skeletal Muscle (%)", min_value=0.0, max_value=100.0, format="%.1f", value=float(prefill_muscle))
+with st.form("body_composition_form", clear_on_submit=False):
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        weight_lb = st.number_input("Weight (lb)", min_value=0.0, format="%.1f", value=float(prefill_weight))
+    with col2:
+        body_fat = st.number_input("Body Fat (%)", min_value=0.0, max_value=100.0, format="%.1f", value=float(prefill_bodyfat))
+    with col3:
+        muscle = st.number_input("Skeletal Muscle (%)", min_value=0.0, max_value=100.0, format="%.1f", value=float(prefill_muscle))
 
-# ---------------- Action Buttons ----------------
-col_save, col_delete = st.columns([1, 1])
-with col_save:
-    save_clicked = st.button("💾 Save")
-with col_delete:
-    delete_clicked = st.button("🗑️ Delete", disabled=(existing_row_idx is None))
+    col_save, col_delete = st.columns([1, 1])
+    with col_save:
+        save_clicked = st.form_submit_button("💾 Save")
+    with col_delete:
+        delete_clicked = st.form_submit_button("🗑️ Delete", disabled=(existing_row_idx is None))
 
 # ---------------- Handle Save/Delete ----------------
 if save_clicked:
     if existing_row_idx:
         ws.update(values=[[weight_lb, body_fat, muscle]], range_name=f"B{existing_row_idx}:D{existing_row_idx}")
-        st.success(f"☁️ Updated body composition log for {entry_date}")
+        st.success(f"💾 Updated body composition log for {entry_date}")
     else:
         ws.append_row([str(entry_date), weight_lb, body_fat, muscle])
-        st.success(f"☁️ Added new body composition log for {entry_date}")
+        st.success(f"✅ Added new body composition log for {entry_date}")
     st.session_state.df = pd.DataFrame(ws.get_all_records())
 
 if delete_clicked and existing_row_idx:
