@@ -43,8 +43,28 @@ for i, row in enumerate(df_records):
 
 # Prefill values if record exists
 if existing_row:
-    prefill_start = datetime.strptime(existing_row["sleep_start"], "%H:%M").time()
-    prefill_end = datetime.strptime(existing_row["sleep_end"], "%H:%M").time()
+    # Find the actual column names for sleep start and end
+    start_col = None
+    end_col = None
+    
+    for col in existing_row.keys():
+        if 'start' in col.lower() or 'sleep' in col.lower():
+            start_col = col
+        elif 'end' in col.lower() or 'wake' in col.lower():
+            end_col = col
+    
+    # Fallback to positional columns if names not found
+    if not start_col and len(existing_row) > 1:
+        start_col = list(existing_row.keys())[1]
+    if not end_col and len(existing_row) > 2:
+        end_col = list(existing_row.keys())[2]
+    
+    if start_col and end_col and existing_row.get(start_col) and existing_row.get(end_col):
+        prefill_start = datetime.strptime(existing_row[start_col], "%H:%M").time()
+        prefill_end = datetime.strptime(existing_row[end_col], "%H:%M").time()
+    else:
+        prefill_start = default_start
+        prefill_end = default_end
 else:
     prefill_start = default_start
     prefill_end = default_end
@@ -79,9 +99,38 @@ if delete_clicked and existing_row_idx:
 # ---------------- Analytics ----------------
 if not st.session_state.df.empty:
     df = st.session_state.df.copy()
-    df["date"] = pd.to_datetime(df["date"])
-    df["sleep_start"] = pd.to_datetime(df["sleep_start"], format="%H:%M").dt.time
-    df["sleep_end"] = pd.to_datetime(df["sleep_end"], format="%H:%M").dt.time
+    
+    
+    # Check if the expected columns exist, if not, try alternative names
+    if "sleep_start" not in df.columns:
+        # Try to find columns that might contain sleep start time
+        possible_start_cols = [col for col in df.columns if 'start' in col.lower() or 'sleep' in col.lower()]
+        if possible_start_cols:
+            sleep_start_col = possible_start_cols[0]
+        else:
+            # If no matching columns found, use the second column (assuming first is date)
+            sleep_start_col = df.columns[1] if len(df.columns) > 1 else None
+    else:
+        sleep_start_col = "sleep_start"
+    
+    if "sleep_end" not in df.columns:
+        # Try to find columns that might contain sleep end time
+        possible_end_cols = [col for col in df.columns if 'end' in col.lower() or 'wake' in col.lower()]
+        if possible_end_cols:
+            sleep_end_col = possible_end_cols[0]
+        else:
+            # If no matching columns found, use the third column (assuming first is date, second is start)
+            sleep_end_col = df.columns[2] if len(df.columns) > 2 else None
+    else:
+        sleep_end_col = "sleep_end"
+    
+    if sleep_start_col and sleep_end_col:
+        df["date"] = pd.to_datetime(df["date"])
+        df["sleep_start"] = pd.to_datetime(df[sleep_start_col], format="%H:%M").dt.time
+        df["sleep_end"] = pd.to_datetime(df[sleep_end_col], format="%H:%M").dt.time
+    else:
+        st.error("Could not find sleep start and end time columns in the data.")
+        st.stop()
 
     # Compute sleep duration in hours
     def calc_duration(row):
