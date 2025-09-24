@@ -101,6 +101,12 @@ if not st.session_state.df.empty:
     df["body_fat_percent"] = pd.to_numeric(df["body_fat_percent"], errors="coerce")
     df["skeletal_muscle_percent"] = pd.to_numeric(df["skeletal_muscle_percent"], errors="coerce")
 
+    # ---------------- Metrics ----------------
+    col1, col2, col3 = st.columns(3)
+    col1.metric("Avg. Weight (lb)", f"{df['weight_lb'].mean():.1f}")
+    col2.metric("Avg. Body Fat (%)", f"{df['body_fat_percent'].mean():.1f}")
+    col3.metric("Avg. Muscle (%)", f"{df['skeletal_muscle_percent'].mean():.1f}")
+
     st.subheader("📊 Trends")
 
     # Weight trend
@@ -109,10 +115,22 @@ if not st.session_state.df.empty:
         x="date",
         y="weight_lb",
         markers=True,
-        title="Weight Over Time",
         color_discrete_sequence=["#028283"]
     )
-    fig_wt.update_layout(template="plotly_white")
+    fig_wt.add_hline(
+        y=df["weight_lb"].mean(),
+        line_dash="dash",
+        line_color="#e7541e",
+        annotation_text="Avg. Weight",
+        annotation_position="top left"
+    )
+    fig_wt.update_layout(
+        xaxis_title="Date",
+        yaxis_title="Weight (lb)",
+        xaxis=dict(tickformat="%d %b", showgrid=False, showline=False),
+        yaxis=dict(showgrid=False),
+        template="plotly_white"
+    )
     st.plotly_chart(fig_wt, use_container_width=True)
 
     # Body fat & muscle trend
@@ -121,10 +139,16 @@ if not st.session_state.df.empty:
         x="date",
         y=["body_fat_percent", "skeletal_muscle_percent"],
         markers=True,
-        title="Body Fat % and Muscle % Over Time",
         color_discrete_sequence=["#e7541e", "#028283"]
     )
-    fig_bf.update_layout(template="plotly_white")
+    fig_bf.update_layout(
+        xaxis_title="Date",
+        yaxis_title="Percentage (%)",
+        xaxis=dict(tickformat="%d %b", showgrid=False, showline=False),
+        yaxis=dict(showgrid=False),
+        template="plotly_white",
+        legend_title_text=""
+    )
     st.plotly_chart(fig_bf, use_container_width=True)
 
     # ---------------- Interactive Table ----------------
