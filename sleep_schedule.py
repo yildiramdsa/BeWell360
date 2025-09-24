@@ -178,15 +178,15 @@ if save_clicked:
     start_str, end_str = sleep_start.strftime("%H:%M"), sleep_end.strftime("%H:%M")
     if existing_row_idx:
         ws.update(values=[[start_str, end_str]], range_name=f"B{existing_row_idx}:C{existing_row_idx}")
-        st.success(f"☁️ Updated sleep log for {entry_date}")
+        st.success(f"Updated sleep log for {entry_date}")
     else:
         ws.append_row([str(entry_date), start_str, end_str])
-        st.success(f"☁️ Added new sleep log for {entry_date}")
+        st.success(f"Added new sleep log for {entry_date}")
     st.session_state.sleep_df = pd.DataFrame(ws.get_all_records())
 
 if delete_clicked and existing_row_idx:
     ws.delete_rows(existing_row_idx)
-    st.success(f"🗑️ Deleted sleep log for {entry_date}")
+    st.success(f"Deleted sleep log for {entry_date}")
     st.session_state.sleep_df = pd.DataFrame(ws.get_all_records())
 
 # ---------------- Analytics ----------------
