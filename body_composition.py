@@ -5,6 +5,108 @@ from google.oauth2.service_account import Credentials
 from datetime import date
 import plotly.express as px
 
+# ---------------- Helper Functions ----------------
+def find_body_composition_columns(df):
+    """Find body composition columns in the dataframe."""
+    weight_col = None
+    body_fat_col = None
+    muscle_col = None
+    
+    # Check for expected column names first
+    expected_columns = {
+        'weight': ['weight_lb', 'weight', 'weight_pounds'],
+        'body_fat': ['body_fat_percent', 'body_fat', 'bodyfat_percent', 'fat_percent'],
+        'muscle': ['skeletal_muscle_percent', 'muscle_percent', 'muscle', 'skeletal_muscle']
+    }
+    
+    # Find weight column
+    for col in df.columns:
+        col_lower = col.lower()
+        if any(keyword in col_lower for keyword in ['weight', 'lb', 'pound']):
+            weight_col = col
+            break
+    
+    # Find body fat column
+    for col in df.columns:
+        col_lower = col.lower()
+        if any(keyword in col_lower for keyword in ['fat', 'bodyfat']):
+            body_fat_col = col
+            break
+    
+    # Find muscle column
+    for col in df.columns:
+        col_lower = col.lower()
+        if any(keyword in col_lower for keyword in ['muscle', 'skeletal']):
+            muscle_col = col
+            break
+    
+    # Fallback to positional columns if names not found
+    if not weight_col and len(df.columns) > 1:
+        weight_col = df.columns[1]
+    if not body_fat_col and len(df.columns) > 2:
+        body_fat_col = df.columns[2]
+    if not muscle_col and len(df.columns) > 3:
+        muscle_col = df.columns[3]
+    
+    return weight_col, body_fat_col, muscle_col
+
+
+def clean_body_composition_data(df, weight_col, body_fat_col, muscle_col):
+    """Clean and parse body composition data from the dataframe."""
+    try:
+        # Clean the data first - remove any empty or invalid values
+        df_clean = df.dropna(subset=[weight_col, body_fat_col, muscle_col])
+        
+        # Convert to numeric with error handling
+        df_clean[weight_col] = pd.to_numeric(df_clean[weight_col], errors='coerce')
+        df_clean[body_fat_col] = pd.to_numeric(df_clean[body_fat_col], errors='coerce')
+        df_clean[muscle_col] = pd.to_numeric(df_clean[muscle_col], errors='coerce')
+        
+        # Remove rows where conversion failed
+        df_clean = df_clean.dropna(subset=[weight_col, body_fat_col, muscle_col])
+        
+        # Validate reasonable ranges
+        df_clean = df_clean[
+            (df_clean[weight_col] > 0) & (df_clean[weight_col] < 1000) &  # Reasonable weight range
+            (df_clean[body_fat_col] >= 0) & (df_clean[body_fat_col] <= 100) &  # Body fat percentage
+            (df_clean[muscle_col] >= 0) & (df_clean[muscle_col] <= 100)  # Muscle percentage
+        ]
+        
+        if df_clean.empty:
+            return None
+        
+        # Rename columns to standard names
+        df_clean = df_clean.rename(columns={
+            weight_col: 'weight_lb',
+            body_fat_col: 'body_fat_percent',
+            muscle_col: 'skeletal_muscle_percent'
+        })
+        
+        return df_clean
+        
+    except Exception as e:
+        st.error(f"Error processing body composition data: {str(e)}")
+        return None
+
+
+def get_prefill_values(existing_row):
+    """Get prefill values from existing row data."""
+    if not existing_row:
+        return 0.0, 0.0, 0.0
+    
+    # Find columns in existing row
+    weight_col, body_fat_col, muscle_col = find_body_composition_columns(pd.DataFrame([existing_row]))
+    
+    try:
+        weight_val = float(existing_row.get(weight_col, 0)) if weight_col and existing_row.get(weight_col) else 0.0
+        body_fat_val = float(existing_row.get(body_fat_col, 0)) if body_fat_col and existing_row.get(body_fat_col) else 0.0
+        muscle_val = float(existing_row.get(muscle_col, 0)) if muscle_col and existing_row.get(muscle_col) else 0.0
+        
+        return weight_val, body_fat_val, muscle_val
+    except:
+        return 0.0, 0.0, 0.0
+
+
 # ---------------- Google Sheets Setup ----------------
 SCOPES = [
     "https://www.googleapis.com/auth/spreadsheets",
@@ -39,9 +141,7 @@ for i, row in enumerate(df_records):
         break
 
 # Prefill values
-prefill_weight = existing_row["weight_lb"] if existing_row else 0.0
-prefill_bodyfat = existing_row["body_fat_percent"] if existing_row else 0.0
-prefill_muscle = existing_row["skeletal_muscle_percent"] if existing_row else 0.0
+prefill_weight, prefill_bodyfat, prefill_muscle = get_prefill_values(existing_row)
 
 with st.form("body_composition_form", clear_on_submit=False):
     col1, col2, col3 = st.columns(3)
@@ -80,26 +180,49 @@ with st.form("body_composition_form", clear_on_submit=False):
 
 # ---------------- Handle Save/Delete ----------------
 if save_clicked:
-    if existing_row_idx:
-        ws.update(values=[[weight_lb, body_fat, muscle]], range_name=f"B{existing_row_idx}:D{existing_row_idx}")
-        st.success(f"💾 Updated body composition log for {entry_date}")
-    else:
-        ws.append_row([str(entry_date), weight_lb, body_fat, muscle])
-        st.success(f"✅ Added new body composition log for {entry_date}")
-    st.session_state.df = pd.DataFrame(ws.get_all_records())
+    try:
+        # Validate input values
+        if weight_lb <= 0 or body_fat < 0 or body_fat > 100 or muscle < 0 or muscle > 100:
+            st.error("Please enter valid values: Weight > 0, Body Fat 0-100%, Muscle 0-100%")
+        else:
+            if existing_row_idx:
+                ws.update(values=[[weight_lb, body_fat, muscle]], range_name=f"B{existing_row_idx}:D{existing_row_idx}")
+                st.success(f"💾 Updated body composition log for {entry_date}")
+            else:
+                ws.append_row([str(entry_date), weight_lb, body_fat, muscle])
+                st.success(f"✅ Added new body composition log for {entry_date}")
+            st.session_state.df = pd.DataFrame(ws.get_all_records())
+    except Exception as e:
+        st.error(f"Error saving data: {str(e)}")
 
 if delete_clicked and existing_row_idx:
-    ws.delete_rows(existing_row_idx)
-    st.success(f"🗑️ Deleted body composition log for {entry_date}")
-    st.session_state.df = pd.DataFrame(ws.get_all_records())
+    try:
+        ws.delete_rows(existing_row_idx)
+        st.success(f"🗑️ Deleted body composition log for {entry_date}")
+        st.session_state.df = pd.DataFrame(ws.get_all_records())
+    except Exception as e:
+        st.error(f"Error deleting data: {str(e)}")
 
 # ---------------- Analytics ----------------
 if not st.session_state.df.empty:
     df = st.session_state.df.copy()
     df["date"] = pd.to_datetime(df["date"])
-    df["weight_lb"] = pd.to_numeric(df["weight_lb"], errors="coerce")
-    df["body_fat_percent"] = pd.to_numeric(df["body_fat_percent"], errors="coerce")
-    df["skeletal_muscle_percent"] = pd.to_numeric(df["skeletal_muscle_percent"], errors="coerce")
+    
+    # Find body composition columns
+    weight_col, body_fat_col, muscle_col = find_body_composition_columns(df)
+    
+    if not weight_col or not body_fat_col or not muscle_col:
+        st.error("Could not find required body composition columns in the data.")
+        st.stop()
+    
+    # Clean and parse the data
+    df_clean = clean_body_composition_data(df, weight_col, body_fat_col, muscle_col)
+    
+    if df_clean is None:
+        st.warning("No valid body composition data found in the selected columns.")
+        st.stop()
+    
+    df = df_clean
 
     # ---------------- Date Filter (same line) ----------------
     min_date = df["date"].min().date()
