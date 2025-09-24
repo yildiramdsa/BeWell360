@@ -179,6 +179,53 @@ if not st.session_state.fitness_df.empty:
         with metric_col3:
             st.metric("Total Distance (km)", f"{total_distance_km:.2f}")
 
+        # ---------------- Weight Progression Chart ----------------
+        weighted_df = filtered_df.dropna(subset=["weight_lb"]) \
+            .query("weight_lb > 0")
+        if not weighted_df.empty:
+            exercises_with_weight = (
+                weighted_df["exercise"].dropna().astype(str).sort_values().unique().tolist()
+            )
+            sel_col1, _ = st.columns([1, 3])
+            with sel_col1:
+                selected_exercise = st.selectbox(
+                    "Exercise (weight):",
+                    options=exercises_with_weight,
+                    index=0 if exercises_with_weight else None,
+                    disabled=(len(exercises_with_weight) == 0)
+                )
+            if exercises_with_weight:
+                ex_df = weighted_df[weighted_df["exercise"].astype(str) == selected_exercise].copy()
+                ex_df = ex_df.sort_values("date")
+                if not ex_df.empty:
+                    import plotly.express as px
+                    fig_w = px.line(
+                        ex_df,
+                        x="date",
+                        y="weight_lb",
+                        markers=True,
+                        color_discrete_sequence=["#028283"],
+                        title=f"Weight over Time • {selected_exercise}"
+                    )
+                    fig_w.update_layout(
+                        xaxis_title="Date",
+                        yaxis_title="Weight (lb)",
+                        xaxis=dict(
+                            tickformat="%d %b",
+                            tickangle=0,
+                            showgrid=False,
+                            showline=False,
+                            zeroline=False
+                        ),
+                        yaxis=dict(
+                            showgrid=False,
+                            showline=False,
+                            zeroline=False
+                        ),
+                        template="plotly_white"
+                    )
+                    st.plotly_chart(fig_w, use_container_width=True)
+
         # Interactive table
         df_display = filtered_df.rename(columns={
             "date": "Date",
