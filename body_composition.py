@@ -46,11 +46,31 @@ prefill_muscle = existing_row["skeletal_muscle_percent"] if existing_row else 0.
 with st.form("body_composition_form", clear_on_submit=False):
     col1, col2, col3 = st.columns(3)
     with col1:
-        weight_lb = st.number_input("Weight (lb)", min_value=0.0, format="%.1f", value=float(prefill_weight))
+        weight_lb = st.number_input(
+            "Weight (lb)",
+            min_value=0.0,
+            step=0.1,
+            format="%.1f",
+            value=float(prefill_weight)
+        )
     with col2:
-        body_fat = st.number_input("Body Fat (%)", min_value=0.0, max_value=100.0, format="%.1f", value=float(prefill_bodyfat))
+        body_fat = st.number_input(
+            "Body Fat (%)",
+            min_value=0.0,
+            max_value=100.0,
+            step=0.1,
+            format="%.1f",
+            value=float(prefill_bodyfat)
+        )
     with col3:
-        muscle = st.number_input("Skeletal Muscle (%)", min_value=0.0, max_value=100.0, format="%.1f", value=float(prefill_muscle))
+        muscle = st.number_input(
+            "Skeletal Muscle (%)",
+            min_value=0.0,
+            max_value=100.0,
+            step=0.1,
+            format="%.1f",
+            value=float(prefill_muscle)
+        )
 
     col_save, col_delete = st.columns([1, 1])
     with col_save:
