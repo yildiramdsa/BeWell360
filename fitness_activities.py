@@ -180,24 +180,27 @@ if not st.session_state.fitness_df.empty:
             st.metric("Total Distance (km)", f"{total_distance_km:.2f}")
 
         # ---------------- Weight Progression Chart ----------------
-        # Show selector for all exercises in range; plot weight (including zeros)
-        exercises_all = (
-            filtered_df["exercise"].dropna().astype(str).sort_values().unique().tolist()
+        # Only include entries where weight is present (> 0)
+        weighted_df = filtered_df.copy()
+        weighted_df["weight_lb"] = pd.to_numeric(weighted_df.get("weight_lb", 0), errors="coerce")
+        weighted_df = weighted_df.dropna(subset=["weight_lb"]) 
+        weighted_df = weighted_df[weighted_df["weight_lb"] > 0]
+
+        exercises_with_weight = (
+            weighted_df["exercise"].dropna().astype(str).sort_values().unique().tolist()
         )
         sel_col1, _ = st.columns([1, 3])
         with sel_col1:
             selected_exercise = st.selectbox(
                 "Exercise (weight):",
-                options=exercises_all,
-                index=0 if exercises_all else None,
-                disabled=(len(exercises_all) == 0)
+                options=exercises_with_weight,
+                index=0 if exercises_with_weight else None,
+                disabled=(len(exercises_with_weight) == 0)
             )
-        if exercises_all:
-            ex_df = filtered_df[filtered_df["exercise"].astype(str) == selected_exercise].copy()
+        if exercises_with_weight:
+            ex_df = weighted_df[weighted_df["exercise"].astype(str) == selected_exercise].copy()
             ex_df = ex_df.sort_values("date")
             if not ex_df.empty:
-                # Ensure numeric weights; fill missing with 0 to always render
-                ex_df["weight_lb"] = pd.to_numeric(ex_df.get("weight_lb", 0), errors="coerce").fillna(0)
                 import plotly.express as px
                 fig_w = px.line(
                     ex_df,
