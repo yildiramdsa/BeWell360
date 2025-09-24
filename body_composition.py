@@ -263,8 +263,6 @@ if not st.session_state.df.empty:
         with metric_col3:
             st.metric("Avg. Muscle (%)", f"{filtered_df['skeletal_muscle_percent'].mean():.1f}")
 
-        st.subheader("📊 Trends")
-
         # Weight trend
         fig_wt = px.line(
             filtered_df.sort_values("date"),
