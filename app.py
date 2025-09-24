@@ -39,12 +39,6 @@ daily_log_pages = create_pages([
     ("professional_and_personal_growth.py", "Professional & Personal Growth", "🌱"),
 ])
 
-insights_pages = create_pages([
-    ("dashboard.py", "Dashboard", "📌"),
-    ("progress.py", "Progress", "🗓"),
-    ("raw_data.py", "Raw Data", "🔍"),
-])
-
 life_mastery_pages = create_pages([
     ("empowering_morning_routine.py", "Empowering Morning Routine", "☀️"),
     ("empowering_evening_routine.py", "Empowering Evening Routine", "🌙"),
@@ -53,7 +47,6 @@ life_mastery_pages = create_pages([
 
 pages = {
     "Daily Log": daily_log_pages,
-    "Insights": insights_pages,
     "Life Mastery Planner": life_mastery_pages,
 }
 
