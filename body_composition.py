@@ -1,63 +1,117 @@
 import streamlit as st
 import pandas as pd
-import os
+import gspread
+from google.oauth2.service_account import Credentials
 from datetime import date
+import plotly.express as px
 
-# ---------------- Constants ----------------
-DATA_DIR = "data"
-EXCEL_FILE = os.path.join(DATA_DIR, "body_composition.xlsx")
+# ---------------- Google Sheets Setup ----------------
+SCOPES = [
+    "https://www.googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/auth/drive"
+]
 
-# ---------------- Page Config ----------------
-st.set_page_config(page_title="Body Composition", layout="wide")
+creds = Credentials.from_service_account_info(
+    st.secrets["gcp_service_account"],
+    scopes=SCOPES
+)
+client = gspread.authorize(creds)
+ws = client.open("body_composition").sheet1
 
-# ---------------- Helpers ----------------
-def load_data():
-    """Load existing data or create a new DataFrame."""
-    if os.path.exists(EXCEL_FILE):
-        return pd.read_excel(EXCEL_FILE)
+# ---------------- Load Data ----------------
+if "df" not in st.session_state:
+    st.session_state.df = pd.DataFrame(ws.get_all_records())
+
+st.title("💪 Body Composition")
+
+today = date.today()
+
+# ---------------- Entry Form ----------------
+entry_date = st.date_input("Date", today)
+
+# Find existing record
+df_records = st.session_state.df.to_dict(orient="records")
+existing_row_idx, existing_row = None, None
+for i, row in enumerate(df_records):
+    if str(row.get("date")) == str(entry_date):
+        existing_row_idx = i + 2  # account for header row
+        existing_row = row
+        break
+
+# Prefill values
+prefill_weight = existing_row["weight_lb"] if existing_row else 0.0
+prefill_bodyfat = existing_row["body_fat_percent"] if existing_row else 0.0
+prefill_muscle = existing_row["skeletal_muscle_percent"] if existing_row else 0.0
+
+col1, col2, col3 = st.columns(3)
+weight_lb = col1.number_input("Weight (lb)", min_value=0.0, format="%.1f", value=float(prefill_weight))
+body_fat = col2.number_input("Body Fat (%)", min_value=0.0, max_value=100.0, format="%.1f", value=float(prefill_bodyfat))
+muscle = col3.number_input("Skeletal Muscle (%)", min_value=0.0, max_value=100.0, format="%.1f", value=float(prefill_muscle))
+
+# ---------------- Action Buttons ----------------
+col_save, col_delete = st.columns([1, 1])
+with col_save:
+    save_clicked = st.button("💾 Save")
+with col_delete:
+    delete_clicked = st.button("🗑️ Delete", disabled=(existing_row_idx is None))
+
+# ---------------- Handle Save/Delete ----------------
+if save_clicked:
+    if existing_row_idx:
+        ws.update(values=[[weight_lb, body_fat, muscle]], range_name=f"B{existing_row_idx}:D{existing_row_idx}")
+        st.success(f"☁️ Updated body composition log for {entry_date}")
     else:
-        return pd.DataFrame(columns=["date", "weight_lb", "body_fat_percent", "skeletal_muscle_percent"])
+        ws.append_row([str(entry_date), weight_lb, body_fat, muscle])
+        st.success(f"☁️ Added new body composition log for {entry_date}")
+    st.session_state.df = pd.DataFrame(ws.get_all_records())
 
-def save_data(df):
-    """Save DataFrame to Excel."""
-    df.to_excel(EXCEL_FILE, index=False)
+if delete_clicked and existing_row_idx:
+    ws.delete_rows(existing_row_idx)
+    st.success(f"🗑️ Deleted body composition log for {entry_date}")
+    st.session_state.df = pd.DataFrame(ws.get_all_records())
 
-# ---------------- UI ----------------
-st.title("💪 Body Composition Tracker")
+# ---------------- Analytics ----------------
+if not st.session_state.df.empty:
+    df = st.session_state.df.copy()
+    df["date"] = pd.to_datetime(df["date"])
+    df["weight_lb"] = pd.to_numeric(df["weight_lb"], errors="coerce")
+    df["body_fat_percent"] = pd.to_numeric(df["body_fat_percent"], errors="coerce")
+    df["skeletal_muscle_percent"] = pd.to_numeric(df["skeletal_muscle_percent"], errors="coerce")
 
-st.markdown("Track your **weight, body fat %, and skeletal muscle %** over time.")
+    st.subheader("📊 Trends")
 
-# Load data
-df = load_data()
+    # Weight trend
+    fig_wt = px.line(
+        df.sort_values("date"),
+        x="date",
+        y="weight_lb",
+        markers=True,
+        title="Weight Over Time",
+        color_discrete_sequence=["#028283"]
+    )
+    fig_wt.update_layout(template="plotly_white")
+    st.plotly_chart(fig_wt, use_container_width=True)
 
-# Input Form
-with st.form("body_composition_form", clear_on_submit=True):
-    col1, col2, col3, col4 = st.columns(4)
-    
-    with col1:
-        entry_date = st.date_input("Date", date.today())
-    with col2:
-        weight = st.number_input("Weight (lb)", min_value=0.0, format="%.1f")
-    with col3:
-        body_fat = st.number_input("Body Fat (%)", min_value=0.0, max_value=100.0, format="%.1f")
-    with col4:
-        muscle = st.number_input("Skeletal Muscle (%)", min_value=0.0, max_value=100.0, format="%.1f")
+    # Body fat & muscle trend
+    fig_bf = px.line(
+        df.sort_values("date"),
+        x="date",
+        y=["body_fat_percent", "skeletal_muscle_percent"],
+        markers=True,
+        title="Body Fat % and Muscle % Over Time",
+        color_discrete_sequence=["#e7541e", "#028283"]
+    )
+    fig_bf.update_layout(template="plotly_white")
+    st.plotly_chart(fig_bf, use_container_width=True)
 
-    submitted = st.form_submit_button("Add Entry")
-    if submitted:
-        new_entry = {"date": entry_date, "weight_lb": weight, "body_fat_percent": body_fat, "skeletal_muscle_percent": muscle}
-        df = pd.concat([df, pd.DataFrame([new_entry])], ignore_index=True)
-        save_data(df)
-        st.success("✅ Entry added!")
-
-# Show Data
-st.subheader("📊 Your Data")
-st.dataframe(df.sort_values("date", ascending=False), use_container_width=True)
-
-# Charts
-if not df.empty:
-    st.subheader("📈 Trends Over Time")
-    df_sorted = df.sort_values("date")
-
-    st.line_chart(df_sorted.set_index("date")[["weight_lb"]], height=250)
-    st.line_chart(df_sorted.set_index("date")[["body_fat_percent", "skeletal_muscle_percent"]], height=250)
+    # ---------------- Interactive Table ----------------
+    df_display = df.rename(columns={
+        "date": "Date",
+        "weight_lb": "Weight (lb)",
+        "body_fat_percent": "Body Fat (%)",
+        "skeletal_muscle_percent": "Muscle (%)"
+    })
+    df_display["Date"] = df_display["Date"].dt.date
+    st.dataframe(df_display.sort_values("Date", ascending=False), width="stretch")
+else:
+    st.info("No body composition logs yet.")
