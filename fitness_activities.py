@@ -386,6 +386,7 @@ if not st.session_state.fitness_df.empty:
             "distance_km": "Distance (km)"
         })
         df_display["Date"] = pd.to_datetime(df_display["Date"]).dt.date
+        st.subheader("📋 Fitness Records")
         st.dataframe(df_display.sort_values(["Date", "Exercise"], ascending=[False, True]), width="stretch")
     else:
         st.info("No records in selected date range.")
