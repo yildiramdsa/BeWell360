@@ -230,7 +230,7 @@ if not st.session_state.sleep_df.empty:
 
     # ---------------- Results Section ----------------
     # Header and date filters on the same line
-    header_col, col1, col2, col3, col4, col5 = st.columns([2, 1, 1, 1, 1, 1])
+    header_col, col1, col2 = st.columns([2, 1, 1])
     
     with header_col:
         st.subheader("Sleep Schedule Analysis")
@@ -250,8 +250,10 @@ if not st.session_state.sleep_df.empty:
         min_date = today
         max_date = today
     
-    start_filter = col1.date_input("Start Date", min_value=min_date, max_value=max_date, value=min_date)
-    end_filter = col2.date_input("End Date", min_value=min_date, max_value=max_date, value=max_date)
+    with col1:
+        start_filter = st.date_input("Start Date", min_value=min_date, max_value=max_date, value=min_date)
+    with col2:
+        end_filter = st.date_input("End Date", min_value=min_date, max_value=max_date, value=max_date)
 
     filtered_df = pd.DataFrame()
     if start_filter > end_filter:
@@ -264,9 +266,14 @@ if not st.session_state.sleep_df.empty:
         avg_end = average_time(filtered_df["sleep_end"])
         avg_duration = filtered_df["Sleep Duration (hrs)"].mean()
 
-        col3.metric("Avg. Sleep Start", avg_start.strftime("%H:%M"))
-        col4.metric("Avg. Sleep End", avg_end.strftime("%H:%M"))
-        col5.metric("Avg. Sleep Duration (hrs)", f"{avg_duration:.2f}")
+        # ---------------- Metrics (separate row) ----------------
+        col3, col4, col5 = st.columns([1, 1, 1])
+        with col3:
+            st.metric("Avg. Sleep Start", avg_start.strftime("%H:%M"))
+        with col4:
+            st.metric("Avg. Sleep End", avg_end.strftime("%H:%M"))
+        with col5:
+            st.metric("Avg. Sleep Duration (hrs)", f"{avg_duration:.2f}")
 
         # ---------------- Line Chart ----------------
         duration_chart = filtered_df[["date", "Sleep Duration (hrs)"]].sort_values("date")

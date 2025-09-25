@@ -242,7 +242,7 @@ if not st.session_state.body_comp_df.empty:
     
     # ---------------- Results Section ----------------
     # Header and date filters on the same line
-    header_col, filter_col1, filter_col2, metric_col1, metric_col2, metric_col3 = st.columns([2, 1, 1, 1, 1, 1])
+    header_col, filter_col1, filter_col2 = st.columns([2, 1, 1])
     
     with header_col:
         st.subheader("Body Composition Analysis")
@@ -258,7 +258,8 @@ if not st.session_state.body_comp_df.empty:
         filtered_df = df[(df["date"].dt.date >= start_filter) & (df["date"].dt.date <= end_filter)].copy()
 
     if not filtered_df.empty:
-        # ---------------- Metrics (same line) ----------------
+        # ---------------- Metrics (separate row) ----------------
+        metric_col1, metric_col2, metric_col3 = st.columns([1, 1, 1])
         with metric_col1:
             st.metric("Avg Weight (lb)", f"{filtered_df['weight_lb'].mean():.1f}")
         with metric_col2:
