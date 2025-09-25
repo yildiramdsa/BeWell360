@@ -229,10 +229,11 @@ if not st.session_state.sleep_df.empty:
         return time(h, m)
 
     # ---------------- Results Section ----------------
-    st.subheader("Sleep Schedule Analysis")
+    # Header and date filters on the same line
+    header_col, col1, col2, col3, col4, col5 = st.columns([2, 1, 1, 1, 1, 1])
     
-    # ---------------- Date Filter + Metrics ----------------
-    col1, col2, col3, col4, col5 = st.columns([1, 1, 1, 1, 1])
+    with header_col:
+        st.subheader("Sleep Schedule Analysis")
     
     # Handle potential NaT values in date columns
     valid_dates = df["date"].dropna()

@@ -130,9 +130,11 @@ if not st.session_state.nutrition_df.empty:
         max_date = today_val
 
     # ---------------- Results Section ----------------
-    st.subheader("Nutrition & Hydration Analysis")
+    # Header and date filters on the same line
+    header_col, filter_col1, filter_col2 = st.columns([2, 1, 1])
     
-    filter_col1, filter_col2 = st.columns(2)
+    with header_col:
+        st.subheader("Nutrition & Hydration Analysis")
     with filter_col1:
         start_filter = st.date_input("Start Date", min_value=min_date, max_value=max_date, value=min_date)
     with filter_col2:

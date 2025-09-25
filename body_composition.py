@@ -241,11 +241,11 @@ if not st.session_state.body_comp_df.empty:
         max_date = today
     
     # ---------------- Results Section ----------------
-    st.subheader("🔍 Body Composition Analysis")
+    # Header and date filters on the same line
+    header_col, filter_col1, filter_col2, metric_col1, metric_col2, metric_col3 = st.columns([2, 1, 1, 1, 1, 1])
     
-    # Create columns for date filters and metrics on the same row
-    filter_col1, filter_col2, metric_col1, metric_col2, metric_col3 = st.columns([1, 1, 1, 1, 1])
-    
+    with header_col:
+        st.subheader("Body Composition Analysis")
     with filter_col1:
         start_filter = st.date_input("Start Date", min_value=min_date, max_value=max_date, value=min_date)
     with filter_col2:
