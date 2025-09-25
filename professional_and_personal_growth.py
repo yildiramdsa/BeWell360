@@ -126,7 +126,7 @@ if not st.session_state.growth_df.empty:
         max_date = today_val
 
     # ---------------- Results Section ----------------
-    st.markdown("---")
+    st.write("")
     # Header and date filters on the same line
     header_col, filter_col1, filter_col2 = st.columns([2, 1, 1])
     
