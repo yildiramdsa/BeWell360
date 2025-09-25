@@ -277,7 +277,7 @@ if not st.session_state.sleep_df.empty:
             y=7,
             line_dash="dash",
             line_color="#e7541e",
-            annotation_text="Target Sleep (7 hrs)",
+            annotation_text="Target: 7.0 hrs",
             annotation_position="top left"
         )
         fig.update_layout(

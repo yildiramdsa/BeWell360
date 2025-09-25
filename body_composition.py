@@ -275,7 +275,7 @@ if not st.session_state.body_comp_df.empty:
             y=filtered_df["weight_lb"].mean(),
             line_dash="dash",
             line_color="#e7541e",
-            annotation_text="Avg. Weight",
+            annotation_text=f"Avg: {filtered_df['weight_lb'].mean():.1f} lb",
             annotation_position="top left"
         )
         fig_wt.update_layout(
