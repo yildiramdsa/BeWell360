@@ -75,8 +75,11 @@ with col2:
     lunch = st.text_area("Lunch", value=prefill_lunch, height=90)
     snacks = st.text_area("Snacks", value=prefill_snacks, height=90)
 
-supplements = st.text_area("Supplements", value=prefill_supplements, height=90)
-water_ml = st.number_input("Water (ml)", min_value=0, step=100, value=int(prefill_water))
+col3, col4 = st.columns(2)
+with col3:
+    supplements = st.text_area("Supplements", value=prefill_supplements, height=90)
+with col4:
+    water_ml = st.number_input("Water (ml)", min_value=0, step=100, value=int(prefill_water))
 
 # ---------------- Action Buttons ----------------
 col_save, col_delete = st.columns([1, 1])
