@@ -322,7 +322,7 @@ if not st.session_state.sleep_df.empty:
         df_display["Sleep Start"] = df_display["Sleep Start"].apply(lambda t: t.strftime("%H:%M"))
         df_display["Sleep End"] = df_display["Sleep End"].apply(lambda t: t.strftime("%H:%M"))
 
-        st.write("**Log Entries**")
-        st.dataframe(df_display.sort_values("Date", ascending=False), width='stretch')
+        with st.expander("**Log Entries**", expanded=False):
+            st.dataframe(df_display.sort_values("Date", ascending=False), width='stretch')
 else:
     st.info("No sleep logs yet.")
