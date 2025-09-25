@@ -229,6 +229,7 @@ if not st.session_state.sleep_df.empty:
         return time(h, m)
 
     # ---------------- Results Section ----------------
+    st.markdown("---")
     # Header and date filters on the same line
     header_col, col1, col2 = st.columns([2, 1, 1])
     

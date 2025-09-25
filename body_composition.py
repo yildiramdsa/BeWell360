@@ -241,6 +241,7 @@ if not st.session_state.body_comp_df.empty:
         max_date = today
     
     # ---------------- Results Section ----------------
+    st.markdown("---")
     # Header and date filters on the same line
     header_col, filter_col1, filter_col2 = st.columns([2, 1, 1])
     
