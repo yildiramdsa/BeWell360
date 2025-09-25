@@ -246,6 +246,9 @@ if not st.session_state.sleep_df.empty:
         min_date = today
         max_date = today
     
+    # ---------------- Results Section ----------------
+    st.subheader("🔍 Sleep Analysis")
+    
     start_filter = col1.date_input("Start Date", min_value=min_date, max_value=max_date, value=min_date)
     end_filter = col2.date_input("End Date", min_value=min_date, max_value=max_date, value=max_date)
 
@@ -256,9 +259,6 @@ if not st.session_state.sleep_df.empty:
         filtered_df = df[(df["date"].dt.date >= start_filter) & (df["date"].dt.date <= end_filter)].copy()
 
     if not filtered_df.empty:
-        # ---------------- Results Section ----------------
-        st.subheader(f"🔍 Sleep Analysis ({start_filter.strftime('%b %d, %Y')} - {end_filter.strftime('%b %d, %Y')})")
-        
         avg_start = average_time(filtered_df["sleep_start"])
         avg_end = average_time(filtered_df["sleep_end"])
         avg_duration = filtered_df["Sleep Duration (hrs)"].mean()

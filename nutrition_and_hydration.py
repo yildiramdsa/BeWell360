@@ -129,6 +129,9 @@ if not st.session_state.nutrition_df.empty:
         min_date = today_val
         max_date = today_val
 
+    # ---------------- Results Section ----------------
+    st.subheader("🔍 Nutrition Analysis")
+    
     filter_col1, filter_col2 = st.columns(2)
     with filter_col1:
         start_filter = st.date_input("Start Date", min_value=min_date, max_value=max_date, value=min_date)
@@ -142,9 +145,6 @@ if not st.session_state.nutrition_df.empty:
         filtered_df = df[(df["date"].dt.date >= start_filter) & (df["date"].dt.date <= end_filter)].copy()
 
     if not filtered_df.empty:
-        # ---------------- Results Section ----------------
-        st.subheader(f"🔍 Nutrition Analysis ({start_filter.strftime('%b %d, %Y')} - {end_filter.strftime('%b %d, %Y')})")
-        
         # Interactive table
         df_display = filtered_df.rename(columns={
             "date": "Date",

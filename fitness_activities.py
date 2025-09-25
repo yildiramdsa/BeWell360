@@ -151,6 +151,9 @@ if not st.session_state.fitness_df.empty:
         min_date = today_val
         max_date = today_val
 
+    # ---------------- Results Section ----------------
+    st.subheader("🔍 Fitness Analysis")
+    
     # Metrics on same row as filters
     filter_col1, filter_col2, metric_col1, metric_col2, metric_col3 = st.columns([1, 1, 1, 1, 1])
     with filter_col1:
@@ -165,9 +168,6 @@ if not st.session_state.fitness_df.empty:
         filtered_df = df[(df["date"].dt.date >= start_filter) & (df["date"].dt.date <= end_filter)].copy()
 
     if not filtered_df.empty:
-        # ---------------- Results Section ----------------
-        st.subheader(f"🔍 Fitness Analysis ({start_filter.strftime('%b %d, %Y')} - {end_filter.strftime('%b %d, %Y')})")
-        
         # ---------------- Weight Progression Chart ----------------
         # Only include entries where weight is present (> 0)
         weighted_df = filtered_df.copy()
