@@ -42,6 +42,8 @@ daily_log_pages = create_pages([
 life_mastery_pages = create_pages([
     ("empowering_morning_routine.py", "Empowering Morning Routine", "☀️"),
     ("empowering_evening_routine.py", "Empowering Evening Routine", "🌙"),
+    ("goals_for_the_year.py", "Goals for the Year", "🎯"),
+    ("long_term_life_goals.py", "Long-Term Life Goals", "📌"),
     ("vision_board.py", "Vision Board", "🎨"),
 ])
 
