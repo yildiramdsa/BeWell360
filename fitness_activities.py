@@ -170,24 +170,19 @@ if not st.session_state.fitness_df.empty:
         avg_duration_min = filtered_df["duration_sec"].mean(skipna=True) / 60.0 if not filtered_df["duration_sec"].isna().all() else 0
         total_distance_km = filtered_df["distance_km"].sum(skipna=True)
         
-        # Max weight per exercise (for weight exercises only)
-        weight_exercises = filtered_df[filtered_df["weight_lb"] > 0]
-        max_weight = weight_exercises["weight_lb"].max() if not weight_exercises.empty else 0
-        
         # Duration increase in Plank (if Plank exists)
         plank_data = filtered_df[filtered_df["exercise"].str.contains("Plank", case=False, na=False)]
         plank_duration_avg = plank_data["duration_sec"].mean(skipna=True) if not plank_data.empty else 0
 
         with metric_col1:
-            st.metric("Max Weight Lifted (lb)", f"{max_weight:.1f}")
-        with metric_col2:
             st.metric("Avg Duration (min)", f"{avg_duration_min:.1f}")
-        with metric_col3:
+        with metric_col2:
             st.metric("Total Distance (km)", f"{total_distance_km:.2f}")
-        
-        # Additional metric for Plank duration
-        if not plank_data.empty:
-            st.metric("Avg Plank Duration (sec)", f"{plank_duration_avg:.1f}")
+        with metric_col3:
+            if not plank_data.empty:
+                st.metric("Avg Plank Duration (sec)", f"{plank_duration_avg:.1f}")
+            else:
+                st.metric("Plank Exercises", "None found")
 
         # ---------------- Weight Progression Chart ----------------
         # Only include entries where weight is present (> 0)
@@ -201,7 +196,7 @@ if not st.session_state.fitness_df.empty:
         )
         
         # Always show the selector, even if empty
-        sel_col1, _ = st.columns([1, 3])
+        sel_col1, sel_col2 = st.columns([1, 1])
         with sel_col1:
             selected_exercise = st.selectbox(
                 "Exercise (weight):",
@@ -209,6 +204,16 @@ if not st.session_state.fitness_df.empty:
                 index=0 if exercises_with_weight else None,
                 disabled=(len(exercises_with_weight) == 0)
             )
+        
+        # Max weight card - responsive to selected exercise
+        with sel_col2:
+            if exercises_with_weight and selected_exercise != "No weight data":
+                # Get max weight for the selected exercise
+                selected_exercise_data = weighted_df[weighted_df["exercise"].astype(str) == selected_exercise]
+                max_weight_selected = selected_exercise_data["weight_lb"].max() if not selected_exercise_data.empty else 0
+                st.metric("Max Weight Lifted (lb)", f"{max_weight_selected:.1f}")
+            else:
+                st.metric("Max Weight Lifted (lb)", "N/A")
         
         if exercises_with_weight and selected_exercise != "No weight data":
             ex_df = weighted_df[weighted_df["exercise"].astype(str) == selected_exercise].copy()
