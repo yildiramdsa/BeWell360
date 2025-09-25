@@ -97,7 +97,7 @@ def get_prefill_times(existing_row):
     if not existing_row:
         return default_start, default_end
     
- in existing row
+    # Find sleep columns in existing row
     start_col, end_col = find_sleep_columns(pd.DataFrame([existing_row]))
     
     if start_col and end_col and existing_row.get(start_col) and existing_row.get(end_col):
