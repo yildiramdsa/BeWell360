@@ -165,7 +165,7 @@ if not st.session_state.nutrition_df.empty:
                 df_display = df_display.rename(columns={alt: std})
 
         df_display["Date"] = pd.to_datetime(df_display["Date"]).dt.date
-        st.subheader("Log Entries")
+        st.write("**Log Entries**")
         st.dataframe(df_display.sort_values("Date", ascending=False), width="stretch")
     else:
         st.info("No records in selected date range.")
