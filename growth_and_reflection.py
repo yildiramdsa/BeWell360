@@ -15,7 +15,7 @@ creds = Credentials.from_service_account_info(
     scopes=SCOPES
 )
 client = gspread.authorize(creds)
-ws = client.open("professional_and_personal_growth").sheet1
+ws = client.open("growth_and_reflection").sheet1
 
 # ---------------- Load Data ----------------
 if "growth_df" not in st.session_state:
