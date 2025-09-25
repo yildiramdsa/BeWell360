@@ -5,19 +5,17 @@ from google.oauth2.service_account import Credentials
 from datetime import date, time, datetime, timedelta
 import plotly.express as px
 
-# ---------------- Helper Functions ----------------
+# Helper Functions
 def find_sleep_columns(df):
     """Find sleep start and end columns in the dataframe."""
     sleep_start_col = None
     sleep_end_col = None
     
-    # Check for expected column names first
     if "sleep_start" in df.columns:
         sleep_start_col = "sleep_start"
     elif "sleep_end" in df.columns:
         sleep_end_col = "sleep_end"
     
-    # If not found, search for alternative names
     if not sleep_start_col:
         possible_start_cols = [col for col in df.columns if 'start' in col.lower() or 'sleep' in col.lower()]
         sleep_start_col = possible_start_cols[0] if possible_start_cols else None
@@ -26,7 +24,6 @@ def find_sleep_columns(df):
         possible_end_cols = [col for col in df.columns if 'end' in col.lower() or 'wake' in col.lower()]
         sleep_end_col = possible_end_cols[0] if possible_end_cols else None
     
-    # Fallback to positional columns
     if not sleep_start_col and len(df.columns) > 1:
         sleep_start_col = df.columns[1]
     if not sleep_end_col and len(df.columns) > 2:
@@ -100,7 +97,7 @@ def get_prefill_times(existing_row):
     if not existing_row:
         return default_start, default_end
     
-    # Find sleep columns in existing row
+ in existing row
     start_col, end_col = find_sleep_columns(pd.DataFrame([existing_row]))
     
     if start_col and end_col and existing_row.get(start_col) and existing_row.get(end_col):
@@ -123,7 +120,7 @@ def get_prefill_times(existing_row):
     return default_start, default_end
 
 
-# ---------------- Google Sheets Setup ----------------
+# Google Sheets Setup
 SCOPES = [
     "https://www.googleapis.com/auth/spreadsheets",
     "https://www.googleapis.com/auth/drive"
@@ -136,7 +133,7 @@ creds = Credentials.from_service_account_info(
 client = gspread.authorize(creds)
 ws = client.open("sleep_schedule").sheet1
 
-# ---------------- Load Data ----------------
+# Load Data
 if "sleep_df" not in st.session_state:
     st.session_state.sleep_df = pd.DataFrame(ws.get_all_records())
 
@@ -146,7 +143,7 @@ today = date.today()
 default_start = time(22, 0)
 default_end = time(6, 0)
 
-# ---------------- Sleep Entry ----------------
+# Sleep Entry
 entry_date = st.date_input("Date", today)
 
 # Find existing record
@@ -166,14 +163,14 @@ col1, col2 = st.columns(2)
 sleep_start = col1.time_input("Sleep Start", prefill_start)
 sleep_end = col2.time_input("Sleep End", prefill_end)
 
-# ---------------- Action Buttons ----------------
+# Action Buttons
 col_save, col_delete = st.columns([1, 1])
 with col_save:
     save_clicked = st.button("☁️ Save")
 with col_delete:
     delete_clicked = st.button("🗑️ Delete", disabled=(existing_row_idx is None))
 
-# ---------------- Handle Save/Delete ----------------
+# Handle Save/Delete
 if save_clicked:
     start_str, end_str = sleep_start.strftime("%H:%M"), sleep_end.strftime("%H:%M")
     if existing_row_idx:
@@ -189,12 +186,11 @@ if delete_clicked and existing_row_idx:
     st.success(f"Deleted sleep log for {entry_date}.")
     st.session_state.sleep_df = pd.DataFrame(ws.get_all_records())
 
-# ---------------- Analytics ----------------
+# Analytics
 if not st.session_state.sleep_df.empty:
     df = st.session_state.sleep_df.copy()
     df["date"] = pd.to_datetime(df["date"])
     
-    # Find sleep columns
     sleep_start_col, sleep_end_col = find_sleep_columns(df)
     
     if not sleep_start_col or not sleep_end_col:
@@ -228,16 +224,14 @@ if not st.session_state.sleep_df.empty:
         m = int((avg_seconds % 3600) // 60)
         return time(h, m)
 
-    # ---------------- Results Section ----------------
+    # Results Section
     st.write("")
     st.write("")
-    # Header and date filters on the same line
     header_col, col1, col2 = st.columns([2, 1, 1])
     
     with header_col:
         st.subheader("Sleep Schedule Analysis")
     
-    # Handle potential NaT values in date columns
     valid_dates = df["date"].dropna()
     if valid_dates.empty:
         st.warning("No valid dates found in the data.")
@@ -246,7 +240,6 @@ if not st.session_state.sleep_df.empty:
     min_date = valid_dates.min().date()
     max_date = valid_dates.max().date()
     
-    # Use today's date as fallback if min/max dates are invalid
     today = date.today()
     if pd.isna(min_date) or pd.isna(max_date):
         min_date = today
@@ -268,7 +261,7 @@ if not st.session_state.sleep_df.empty:
         avg_end = average_time(filtered_df["sleep_end"])
         avg_duration = filtered_df["Sleep Duration (hrs)"].mean()
 
-        # ---------------- Metrics (separate row) ----------------
+        # Metrics
         col3, col4, col5 = st.columns([1, 1, 1])
         with col3:
             st.metric("Avg. Sleep Start", avg_start.strftime("%H:%M"))
@@ -277,7 +270,7 @@ if not st.session_state.sleep_df.empty:
         with col5:
             st.metric("Avg. Sleep Duration (hrs)", f"{avg_duration:.2f}")
 
-        # ---------------- Line Chart ----------------
+        # Line Chart
         duration_chart = filtered_df[["date", "Sleep Duration (hrs)"]].sort_values("date")
         fig = px.line(
             duration_chart,
@@ -312,7 +305,7 @@ if not st.session_state.sleep_df.empty:
         )
         st.plotly_chart(fig, use_container_width=True)
 
-        # ---------------- Interactive Table ----------------
+        # Interactive Table
         df_display = filtered_df.rename(columns={
             "date": "Date",
             "sleep_start": "Sleep Start",

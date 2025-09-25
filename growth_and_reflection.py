@@ -4,7 +4,7 @@ import gspread
 from google.oauth2.service_account import Credentials
 from datetime import date
 
-# ---------------- Google Sheets Setup ----------------
+# Google Sheets Setup
 SCOPES = [
     "https://www.googleapis.com/auth/spreadsheets",
     "https://www.googleapis.com/auth/drive"
@@ -17,7 +17,7 @@ creds = Credentials.from_service_account_info(
 client = gspread.authorize(creds)
 ws = client.open("growth_and_reflection").sheet1
 
-# ---------------- Load Data ----------------
+# Load Data
 if "growth_df" not in st.session_state:
     st.session_state.growth_df = pd.DataFrame(ws.get_all_records())
 
@@ -25,7 +25,7 @@ st.title("🌱 Growth & Reflection")
 
 today = date.today()
 
-# ---------------- Entry Form ----------------
+# Entry Form
 entry_date = st.date_input("Date", today)
 
 # Find existing record
@@ -125,14 +125,14 @@ with col4:
         placeholder="What are you grateful for today?"
     )
 
-# ---------------- Action Buttons ----------------
+# Action Buttons
 col_save, col_delete = st.columns([1, 1])
 with col_save:
     save_clicked = st.button("☁️ Save")
 with col_delete:
     delete_clicked = st.button("🗑️ Delete", disabled=(existing_row_idx is None))
 
-# ---------------- Handle Save/Delete ----------------
+# Handle Save/Delete
 if save_clicked:
     try:
         if existing_row_idx:
@@ -153,12 +153,11 @@ if delete_clicked and existing_row_idx:
     except Exception as e:
         st.error(f"Error deleting data: {str(e)}")
 
-# ---------------- Analytics ----------------
+# Analytics
 if not st.session_state.growth_df.empty:
     df = st.session_state.growth_df.copy()
     df["date"] = pd.to_datetime(df["date"])
 
-    # ---------------- Date Filter (same row) ----------------
     valid_dates = df["date"].dropna()
     if valid_dates.empty:
         st.warning("No valid dates found in the data.")
@@ -167,16 +166,14 @@ if not st.session_state.growth_df.empty:
     min_date = valid_dates.min().date()
     max_date = valid_dates.max().date()
 
-    # Fallback if needed
     today_val = date.today()
     if pd.isna(min_date) or pd.isna(max_date):
         min_date = today_val
         max_date = today_val
 
-    # ---------------- Results Section ----------------
+    # Results Section
     st.write("")
     st.write("")
-    # Header and date filters on the same line
     header_col, filter_col1, filter_col2 = st.columns([2, 1, 1])
     
     with header_col:
@@ -193,17 +190,15 @@ if not st.session_state.growth_df.empty:
         filtered_df = df[(df["date"].dt.date >= start_filter) & (df["date"].dt.date <= end_filter)].copy()
 
     if not filtered_df.empty:
-        # ---------------- Interactive Table ----------------
+        # Interactive Table
         df_display = filtered_df.rename(columns={
             "date": "Date",
         })
 
-        # Standardize optional column names for display
         def resolve_col(cols, candidates):
             for c in candidates:
                 if c in cols:
                     return c
-            # try fuzzy
             for col in cols:
                 cl = col.lower()
                 if any(k in cl for k in candidates):

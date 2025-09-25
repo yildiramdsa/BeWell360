@@ -4,7 +4,7 @@ import gspread
 from google.oauth2.service_account import Credentials
 from datetime import date
 
-# ---------------- Google Sheets Setup ----------------
+# Google Sheets Setup
 SCOPES = [
     "https://www.googleapis.com/auth/spreadsheets",
     "https://www.googleapis.com/auth/drive"
@@ -17,7 +17,7 @@ creds = Credentials.from_service_account_info(
 client = gspread.authorize(creds)
 ws = client.open("nutrition_and_hydration").sheet1
 
-# ---------------- Load Data ----------------
+# Load Data
 if "nutrition_df" not in st.session_state:
     st.session_state.nutrition_df = pd.DataFrame(ws.get_all_records())
 
@@ -25,7 +25,7 @@ st.title("🍎 Nutrition & Hydration")
 
 today = date.today()
 
-# ---------------- Entry Form ----------------
+# Entry Form
 entry_date = st.date_input("Date", today)
 
 # Find existing record
@@ -81,14 +81,14 @@ with col3:
 with col4:
     water_ml = st.number_input("Water (ml)", min_value=0, step=100, value=int(prefill_water))
 
-# ---------------- Action Buttons ----------------
+# Action Buttons
 col_save, col_delete = st.columns([1, 1])
 with col_save:
     save_clicked = st.button("☁️ Save")
 with col_delete:
     delete_clicked = st.button("🗑️ Delete", disabled=(existing_row_idx is None))
 
-# ---------------- Handle Save/Delete ----------------
+# Handle Save/Delete
 if save_clicked:
     try:
         if existing_row_idx:
@@ -109,12 +109,11 @@ if delete_clicked and existing_row_idx:
     except Exception as e:
         st.error(f"Error deleting data: {str(e)}")
 
-# ---------------- Analytics ----------------
+# Analytics
 if not st.session_state.nutrition_df.empty:
     df = st.session_state.nutrition_df.copy()
     df["date"] = pd.to_datetime(df["date"])
 
-    # Date filter (NaT-safe)
     valid_dates = df["date"].dropna()
     if valid_dates.empty:
         st.warning("No valid dates found in the data.")
@@ -129,10 +128,9 @@ if not st.session_state.nutrition_df.empty:
         min_date = today_val
         max_date = today_val
 
-    # ---------------- Results Section ----------------
+    # Results Section
     st.write("")
     st.write("")
-    # Header and date filters on the same line
     header_col, filter_col1, filter_col2 = st.columns([2, 1, 1])
     
     with header_col:

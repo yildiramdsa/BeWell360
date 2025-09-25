@@ -4,7 +4,7 @@ import gspread
 from google.oauth2.service_account import Credentials
 from datetime import date
 
-# ---------------- Google Sheets Setup ----------------
+# Google Sheets Setup
 SCOPES = [
     "https://www.googleapis.com/auth/spreadsheets",
     "https://www.googleapis.com/auth/drive"
@@ -17,7 +17,7 @@ creds = Credentials.from_service_account_info(
 client = gspread.authorize(creds)
 ws = client.open("fitness_activities").sheet1
 
-# ---------------- Load Data ----------------
+# Load Data
 if "fitness_df" not in st.session_state:
     st.session_state.fitness_df = pd.DataFrame(ws.get_all_records())
 
@@ -25,7 +25,7 @@ st.title("⚽ Fitness Activities")
 
 today = date.today()
 
-# ---------------- Entry Form ----------------
+# Entry Form
 entry_date = st.date_input("Date", today)
 
 # Find existing record by (date, exercise)
@@ -84,14 +84,14 @@ with col4:
 with col5:
     distance_km = st.number_input("Distance (km)", min_value=0.0, step=0.1, value=float(prefill_distance))
 
-# ---------------- Action Buttons ----------------
+# Action Buttons
 col_save, col_delete = st.columns([1, 1])
 with col_save:
     save_clicked = st.button("☁️ Save")
 with col_delete:
     delete_clicked = st.button("🗑️ Delete", disabled=(existing_row_idx is None))
 
-# ---------------- Handle Save/Delete ----------------
+# Handle Save/Delete
 if save_clicked:
     try:
         if not exercise.strip():
@@ -126,7 +126,7 @@ if delete_clicked and existing_row_idx:
     except Exception as e:
         st.error(f"Error deleting data: {str(e)}")
 
-# ---------------- Analytics ----------------
+# Analytics
 if not st.session_state.fitness_df.empty:
     df = st.session_state.fitness_df.copy()
     df["date"] = pd.to_datetime(df["date"])
@@ -136,7 +136,6 @@ if not st.session_state.fitness_df.empty:
     df["duration_sec"] = pd.to_numeric(df.get("duration_sec", 0), errors="coerce")
     df["distance_km"] = pd.to_numeric(df.get("distance_km", 0.0), errors="coerce")
 
-    # Date filter (NaT-safe)
     valid_dates = df["date"].dropna()
     if valid_dates.empty:
         st.warning("No valid dates found in the data.")
@@ -151,10 +150,9 @@ if not st.session_state.fitness_df.empty:
         min_date = today_val
         max_date = today_val
 
-    # ---------------- Results Section ----------------
+    # Results Section
     st.write("")
     st.write("")
-    # Header and date filters on the same line
     header_col, filter_col1, filter_col2 = st.columns([2, 1, 1])
     
     with header_col:
@@ -171,8 +169,7 @@ if not st.session_state.fitness_df.empty:
         filtered_df = df[(df["date"].dt.date >= start_filter) & (df["date"].dt.date <= end_filter)].copy()
 
     if not filtered_df.empty:
-        # ---------------- Weight Progression Chart ----------------
-        # Only include entries where weight is present (> 0)
+        # Weight Progression Chart
         weighted_df = filtered_df.copy()
         weighted_df["weight_lb"] = pd.to_numeric(weighted_df.get("weight_lb", 0), errors="coerce")
         weighted_df = weighted_df.dropna(subset=["weight_lb"]) 
@@ -182,7 +179,6 @@ if not st.session_state.fitness_df.empty:
             weighted_df["exercise"].dropna().astype(str).sort_values().unique().tolist()
         )
         
-        # Always show the selector, even if empty
         sel_col1, weight_col1, weight_col2, weight_col3 = st.columns([2, 1, 1, 1])
         with sel_col1:
             selected_exercise = st.selectbox(
@@ -192,7 +188,6 @@ if not st.session_state.fitness_df.empty:
                 disabled=(len(exercises_with_weight) == 0)
             )
         
-        # Weight metrics - responsive to selected exercise (min, avg, max order)
         with weight_col1:
             if exercises_with_weight and selected_exercise != "No weight data":
                 selected_exercise_data = weighted_df[weighted_df["exercise"].astype(str) == selected_exercise]
@@ -239,7 +234,6 @@ if not st.session_state.fitness_df.empty:
                     color_discrete_sequence=["#028283"],
                     title=f"Weight Over Time • {selected_exercise}"
                 )
-                # Add average line
                 avg_weight = ex_df["weight_lb"].mean()
                 fig_w.add_hline(
                     y=avg_weight,
@@ -269,8 +263,7 @@ if not st.session_state.fitness_df.empty:
         else:
             st.info("No exercises with weight data in the selected range.")
 
-        # ---------------- Distance Progression Chart ----------------
-        # Only include entries where distance is present (> 0)
+        # Distance Progression Chart
         distance_df = filtered_df.copy()
         distance_df["distance_km"] = pd.to_numeric(distance_df.get("distance_km", 0), errors="coerce")
         distance_df = distance_df.dropna(subset=["distance_km"]) 
@@ -280,7 +273,6 @@ if not st.session_state.fitness_df.empty:
             distance_df["exercise"].dropna().astype(str).sort_values().unique().tolist()
         )
         
-        # Always show the selector, even if empty
         sel_col2, dist_col1, dist_col2, dist_col3, dist_col4 = st.columns([1, 1, 1, 1, 1])
         with sel_col2:
             selected_exercise_dist = st.selectbox(
@@ -290,7 +282,6 @@ if not st.session_state.fitness_df.empty:
                 disabled=(len(exercises_with_distance) == 0)
             )
         
-        # Distance metrics - responsive to selected exercise (min, avg, max order)
         with dist_col1:
             if exercises_with_distance and selected_exercise_dist != "No distance data":
                 selected_exercise_dist_data = distance_df[distance_df["exercise"].astype(str) == selected_exercise_dist]
@@ -348,7 +339,6 @@ if not st.session_state.fitness_df.empty:
                     color_discrete_sequence=["#e7541e"],
                     title=f"Distance Over Time • {selected_exercise_dist}"
                 )
-                # Add average line
                 avg_distance = ex_df_dist["distance_km"].mean()
                 fig_d.add_hline(
                     y=avg_distance,

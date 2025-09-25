@@ -5,42 +5,37 @@ from google.oauth2.service_account import Credentials
 from datetime import date
 import plotly.express as px
 
-# ---------------- Helper Functions ----------------
+# Helper Functions
 def find_body_composition_columns(df):
     """Find body composition columns in the dataframe."""
     weight_col = None
     body_fat_col = None
     muscle_col = None
     
-    # Check for expected column names first
     expected_columns = {
         'weight': ['weight_lb', 'weight', 'weight_pounds'],
         'body_fat': ['body_fat_percent', 'body_fat', 'bodyfat_percent', 'fat_percent'],
         'muscle': ['skeletal_muscle_percent', 'muscle_percent', 'muscle', 'skeletal_muscle']
     }
     
-    # Find weight column
     for col in df.columns:
         col_lower = col.lower()
         if any(keyword in col_lower for keyword in ['weight', 'lb', 'pound']):
             weight_col = col
             break
     
-    # Find body fat column
     for col in df.columns:
         col_lower = col.lower()
         if any(keyword in col_lower for keyword in ['fat', 'bodyfat']):
             body_fat_col = col
             break
     
-    # Find muscle column
     for col in df.columns:
         col_lower = col.lower()
         if any(keyword in col_lower for keyword in ['muscle', 'skeletal']):
             muscle_col = col
             break
     
-    # Fallback to positional columns if names not found
     if not weight_col and len(df.columns) > 1:
         weight_col = df.columns[1]
     if not body_fat_col and len(df.columns) > 2:
@@ -107,7 +102,7 @@ def get_prefill_values(existing_row):
         return 0.0, 0.0, 0.0
 
 
-# ---------------- Google Sheets Setup ----------------
+# Google Sheets Setup
 SCOPES = [
     "https://www.googleapis.com/auth/spreadsheets",
     "https://www.googleapis.com/auth/drive"
@@ -120,7 +115,7 @@ creds = Credentials.from_service_account_info(
 client = gspread.authorize(creds)
 ws = client.open("body_composition").sheet1
 
-# ---------------- Load Data ----------------
+# Load Data
 if "body_comp_df" not in st.session_state:
     st.session_state.body_comp_df = pd.DataFrame(ws.get_all_records())
 
@@ -128,7 +123,7 @@ st.title("💪 Body Composition")
 
 today = date.today()
 
-# ---------------- Entry Form ----------------
+# Entry Form
 entry_date = st.date_input("Date", today)
 
 # Find existing record
@@ -171,17 +166,16 @@ with col3:
         value=float(prefill_muscle)
     )
 
-# ---------------- Action Buttons ----------------
+# Action Buttons
 col_save, col_delete = st.columns([1, 1])
 with col_save:
     save_clicked = st.button("☁️ Save")
 with col_delete:
     delete_clicked = st.button("🗑️ Delete", disabled=(existing_row_idx is None))
 
-# ---------------- Handle Save/Delete ----------------
+# Handle Save/Delete
 if save_clicked:
     try:
-        # Validate input values
         if weight_lb <= 0 or body_fat < 0 or body_fat > 100 or muscle < 0 or muscle > 100:
             st.error("Please enter valid values: Weight > 0, Body Fat 0-100%, Muscle 0-100%")
         else:
@@ -203,19 +197,17 @@ if delete_clicked and existing_row_idx:
     except Exception as e:
         st.error(f"Error deleting data: {str(e)}")
 
-# ---------------- Analytics ----------------
+# Analytics
 if not st.session_state.body_comp_df.empty:
     df = st.session_state.body_comp_df.copy()
     df["date"] = pd.to_datetime(df["date"])
     
-    # Find body composition columns
     weight_col, body_fat_col, muscle_col = find_body_composition_columns(df)
     
     if not weight_col or not body_fat_col or not muscle_col:
         st.error("Could not find required body composition columns in the data.")
         st.stop()
     
-    # Clean and parse the data
     df_clean = clean_body_composition_data(df, weight_col, body_fat_col, muscle_col)
     
     if df_clean is None:
