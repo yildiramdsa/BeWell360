@@ -228,6 +228,9 @@ if not st.session_state.sleep_df.empty:
         m = int((avg_seconds % 3600) // 60)
         return time(h, m)
 
+    # ---------------- Results Section ----------------
+    st.subheader("🔍 Sleep Analysis")
+    
     # ---------------- Date Filter + Metrics ----------------
     col1, col2, col3, col4, col5 = st.columns([1, 1, 1, 1, 1])
     
@@ -245,9 +248,6 @@ if not st.session_state.sleep_df.empty:
     if pd.isna(min_date) or pd.isna(max_date):
         min_date = today
         max_date = today
-    
-    # ---------------- Results Section ----------------
-    st.subheader("🔍 Sleep Analysis")
     
     start_filter = col1.date_input("Start Date", min_value=min_date, max_value=max_date, value=min_date)
     end_filter = col2.date_input("End Date", min_value=min_date, max_value=max_date, value=max_date)
