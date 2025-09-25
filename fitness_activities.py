@@ -179,7 +179,7 @@ if not st.session_state.fitness_df.empty:
         )
         
         # Always show the selector, even if empty
-        sel_col1, weight_col1, weight_col2, weight_col3 = st.columns([1, 1, 1, 1])
+        sel_col1, weight_col1, weight_col2, weight_col3 = st.columns([2, 1, 1, 1])
         with sel_col1:
             selected_exercise = st.selectbox(
                 "Exercise (weight):",
