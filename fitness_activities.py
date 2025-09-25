@@ -165,24 +165,7 @@ if not st.session_state.fitness_df.empty:
         filtered_df = df[(df["date"].dt.date >= start_filter) & (df["date"].dt.date <= end_filter)].copy()
 
     if not filtered_df.empty:
-        # Metrics
-        # Average duration and distance
-        avg_duration_min = filtered_df["duration_sec"].mean(skipna=True) / 60.0 if not filtered_df["duration_sec"].isna().all() else 0
-        total_distance_km = filtered_df["distance_km"].sum(skipna=True)
-        
-        # Duration increase in Plank (if Plank exists)
-        plank_data = filtered_df[filtered_df["exercise"].str.contains("Plank", case=False, na=False)]
-        plank_duration_avg = plank_data["duration_sec"].mean(skipna=True) if not plank_data.empty else 0
-
-        with metric_col1:
-            st.metric("Avg Duration (min)", f"{avg_duration_min:.1f}")
-        with metric_col2:
-            st.metric("Total Distance (km)", f"{total_distance_km:.2f}")
-        with metric_col3:
-            if not plank_data.empty:
-                st.metric("Avg Plank Duration (sec)", f"{plank_duration_avg:.1f}")
-            else:
-                st.metric("Plank Exercises", "None found")
+        # General metrics removed - now only exercise-specific metrics are shown
 
         # ---------------- Weight Progression Chart ----------------
         # Only include entries where weight is present (> 0)
