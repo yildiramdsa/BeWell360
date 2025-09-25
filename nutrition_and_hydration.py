@@ -60,6 +60,7 @@ prefill_breakfast = str(prefill_value(existing_row, ["breakfast"], ""))
 prefill_lunch = str(prefill_value(existing_row, ["lunch"], ""))
 prefill_dinner = str(prefill_value(existing_row, ["dinner"], ""))
 prefill_snacks = str(prefill_value(existing_row, ["snacks", "snack"], ""))
+prefill_supplements = str(prefill_value(existing_row, ["supplements", "supplement"], ""))
 prefill_water = prefill_value(existing_row, ["water_ml", "water"], 0)
 try:
     prefill_water = int(prefill_water) if str(prefill_water).strip() != "" else 0
@@ -74,6 +75,7 @@ with col2:
     lunch = st.text_area("Lunch", value=prefill_lunch, height=90)
     snacks = st.text_area("Snacks", value=prefill_snacks, height=90)
 
+supplements = st.text_area("Supplements", value=prefill_supplements, height=90)
 water_ml = st.number_input("Water (ml)", min_value=0, step=100, value=int(prefill_water))
 
 # ---------------- Action Buttons ----------------
@@ -87,10 +89,10 @@ with col_delete:
 if save_clicked:
     try:
         if existing_row_idx:
-            ws.update(values=[[breakfast, lunch, dinner, snacks, int(water_ml)]], range_name=f"B{existing_row_idx}:F{existing_row_idx}")
+            ws.update(values=[[breakfast, lunch, dinner, snacks, supplements, int(water_ml)]], range_name=f"B{existing_row_idx}:G{existing_row_idx}")
             st.success(f"Updated nutrition log for {entry_date}.")
         else:
-            ws.append_row([str(entry_date), breakfast, lunch, dinner, snacks, int(water_ml)])
+            ws.append_row([str(entry_date), breakfast, lunch, dinner, snacks, supplements, int(water_ml)])
             st.success(f"Added new nutrition log for {entry_date}.")
         st.session_state.nutrition_df = pd.DataFrame(ws.get_all_records())
     except Exception as e:
@@ -144,14 +146,16 @@ if not st.session_state.nutrition_df.empty:
             "lunch": "Lunch",
             "dinner": "Dinner",
             "snacks": "Snacks",
+            "supplements": "Supplements",
             "water_ml": "Water (ml)"
         })
 
         # Normalize display if original columns are differently named
         for alt, std in [
-            ("water", "Water (ml)")
+            ("water", "Water (ml)"),
+            ("supplement", "Supplements")
         ]:
-            if alt in df_display.columns and "Water (ml)" not in df_display.columns:
+            if alt in df_display.columns and std not in df_display.columns:
                 df_display = df_display.rename(columns={alt: std})
 
         df_display["Date"] = pd.to_datetime(df_display["Date"]).dt.date
