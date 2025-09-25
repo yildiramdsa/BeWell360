@@ -152,7 +152,7 @@ if not st.session_state.fitness_df.empty:
         max_date = today_val
 
     # ---------------- Results Section ----------------
-    st.subheader("🔍 Fitness Analysis")
+    st.subheader("Fitness Activities Analysis")
     
     # Metrics on same row as filters
     filter_col1, filter_col2, metric_col1, metric_col2, metric_col3 = st.columns([1, 1, 1, 1, 1])
@@ -386,7 +386,7 @@ if not st.session_state.fitness_df.empty:
             "distance_km": "Distance (km)"
         })
         df_display["Date"] = pd.to_datetime(df_display["Date"]).dt.date
-        st.subheader("📋 Fitness Records")
+        st.subheader("Records")
         st.dataframe(df_display.sort_values(["Date", "Exercise"], ascending=[False, True]), width="stretch")
     else:
         st.info("No records in selected date range.")

@@ -229,7 +229,7 @@ if not st.session_state.sleep_df.empty:
         return time(h, m)
 
     # ---------------- Results Section ----------------
-    st.subheader("🔍 Sleep Analysis")
+    st.subheader("Sleep Schedule Analysis")
     
     # ---------------- Date Filter + Metrics ----------------
     col1, col2, col3, col4, col5 = st.columns([1, 1, 1, 1, 1])
@@ -312,7 +312,7 @@ if not st.session_state.sleep_df.empty:
         df_display["Sleep Start"] = df_display["Sleep Start"].apply(lambda t: t.strftime("%H:%M"))
         df_display["Sleep End"] = df_display["Sleep End"].apply(lambda t: t.strftime("%H:%M"))
 
-        st.subheader("📋 Sleep Records")
+        st.subheader("Records")
         st.dataframe(df_display.sort_values("Date", ascending=False), width='stretch')
 else:
     st.info("No sleep logs yet.")
