@@ -270,7 +270,7 @@ if not st.session_state.fitness_df.empty:
         )
         
         # Always show the selector, even if empty
-        sel_col2, _ = st.columns([1, 3])
+        sel_col2, dist_col1, dist_col2, dist_col3 = st.columns([1, 1, 1, 1])
         with sel_col2:
             selected_exercise_dist = st.selectbox(
                 "Exercise (distance):",
@@ -278,6 +278,41 @@ if not st.session_state.fitness_df.empty:
                 index=0 if exercises_with_distance else None,
                 disabled=(len(exercises_with_distance) == 0)
             )
+        
+        # Distance metrics - responsive to selected exercise
+        with dist_col1:
+            if exercises_with_distance and selected_exercise_dist != "No distance data":
+                # Get distance stats for the selected exercise
+                selected_exercise_dist_data = distance_df[distance_df["exercise"].astype(str) == selected_exercise_dist]
+                if not selected_exercise_dist_data.empty:
+                    avg_distance_selected = selected_exercise_dist_data["distance_km"].mean()
+                    st.metric("Avg Distance (km)", f"{avg_distance_selected:.2f}")
+                else:
+                    st.metric("Avg Distance (km)", "N/A")
+            else:
+                st.metric("Avg Distance (km)", "N/A")
+        
+        with dist_col2:
+            if exercises_with_distance and selected_exercise_dist != "No distance data":
+                selected_exercise_dist_data = distance_df[distance_df["exercise"].astype(str) == selected_exercise_dist]
+                if not selected_exercise_dist_data.empty:
+                    max_distance_selected = selected_exercise_dist_data["distance_km"].max()
+                    st.metric("Max Distance (km)", f"{max_distance_selected:.2f}")
+                else:
+                    st.metric("Max Distance (km)", "N/A")
+            else:
+                st.metric("Max Distance (km)", "N/A")
+        
+        with dist_col3:
+            if exercises_with_distance and selected_exercise_dist != "No distance data":
+                selected_exercise_dist_data = distance_df[distance_df["exercise"].astype(str) == selected_exercise_dist]
+                if not selected_exercise_dist_data.empty:
+                    min_distance_selected = selected_exercise_dist_data["distance_km"].min()
+                    st.metric("Min Distance (km)", f"{min_distance_selected:.2f}")
+                else:
+                    st.metric("Min Distance (km)", "N/A")
+            else:
+                st.metric("Min Distance (km)", "N/A")
         
         if exercises_with_distance and selected_exercise_dist != "No distance data":
             ex_df_dist = distance_df[distance_df["exercise"].astype(str) == selected_exercise_dist].copy()
