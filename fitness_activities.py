@@ -277,7 +277,7 @@ if not st.session_state.fitness_df.empty:
         )
         
         # Always show the selector, even if empty
-        sel_col2, dist_col1, dist_col2, dist_col3 = st.columns([1, 1, 1, 1])
+        sel_col2, dist_col1, dist_col2, dist_col3, dist_col4 = st.columns([1, 1, 1, 1, 1])
         with sel_col2:
             selected_exercise_dist = st.selectbox(
                 "Exercise (distance):",
@@ -319,6 +319,17 @@ if not st.session_state.fitness_df.empty:
                     st.metric("Max Distance (km)", "N/A")
             else:
                 st.metric("Max Distance (km)", "N/A")
+        
+        with dist_col4:
+            if exercises_with_distance and selected_exercise_dist != "No distance data":
+                selected_exercise_dist_data = distance_df[distance_df["exercise"].astype(str) == selected_exercise_dist]
+                if not selected_exercise_dist_data.empty:
+                    total_distance_selected = selected_exercise_dist_data["distance_km"].sum()
+                    st.metric("Total Distance (km)", f"{total_distance_selected:.2f}")
+                else:
+                    st.metric("Total Distance (km)", "N/A")
+            else:
+                st.metric("Total Distance (km)", "N/A")
         
         if exercises_with_distance and selected_exercise_dist != "No distance data":
             ex_df_dist = distance_df[distance_df["exercise"].astype(str) == selected_exercise_dist].copy()
