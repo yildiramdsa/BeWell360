@@ -69,11 +69,11 @@ except:
 
 col1, col2 = st.columns(2)
 with col1:
-    breakfast = st.text_area("Breakfast", value=prefill_breakfast, height=90)
-    dinner = st.text_area("Dinner", value=prefill_dinner, height=90)
+    breakfast = st.text_input("Breakfast", value=prefill_breakfast)
+    dinner = st.text_input("Dinner", value=prefill_dinner)
 with col2:
-    lunch = st.text_area("Lunch", value=prefill_lunch, height=90)
-    snacks = st.text_area("Snacks", value=prefill_snacks, height=90)
+    lunch = st.text_input("Lunch", value=prefill_lunch)
+    snacks = st.text_input("Snacks", value=prefill_snacks)
 
 col3, col4 = st.columns(2)
 with col3:
