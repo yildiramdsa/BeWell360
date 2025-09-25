@@ -165,8 +165,9 @@ if not st.session_state.fitness_df.empty:
         filtered_df = df[(df["date"].dt.date >= start_filter) & (df["date"].dt.date <= end_filter)].copy()
 
     if not filtered_df.empty:
-        # General metrics removed - now only exercise-specific metrics are shown
-
+        # ---------------- Results Section ----------------
+        st.subheader(f"🔍 Fitness Analysis ({start_filter.strftime('%b %d, %Y')} - {end_filter.strftime('%b %d, %Y')})")
+        
         # ---------------- Weight Progression Chart ----------------
         # Only include entries where weight is present (> 0)
         weighted_df = filtered_df.copy()

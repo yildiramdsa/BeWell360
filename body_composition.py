@@ -255,6 +255,9 @@ if not st.session_state.body_comp_df.empty:
         filtered_df = df[(df["date"].dt.date >= start_filter) & (df["date"].dt.date <= end_filter)].copy()
 
     if not filtered_df.empty:
+        # ---------------- Results Section ----------------
+        st.subheader(f"🔍 Body Composition Analysis ({start_filter.strftime('%b %d, %Y')} - {end_filter.strftime('%b %d, %Y')})")
+        
         # ---------------- Metrics (same line) ----------------
         with metric_col1:
             st.metric("Avg Weight (lb)", f"{filtered_df['weight_lb'].mean():.1f}")
