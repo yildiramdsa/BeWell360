@@ -93,7 +93,22 @@ with col2:
 
 col3, col4 = st.columns(2)
 with col3:
-    mood_options = ["😊 Happy", "😌 Content", "😐 Neutral", "😔 Sad", "😤 Frustrated", "😰 Anxious", "😴 Tired", "🤔 Thoughtful", "😌 Peaceful", "🎉 Excited"]
+    mood_options = [
+        "😀 cheerful and upbeat",
+        "😄 good and content", 
+        "😊 calm and satisfied",
+        "😍 joyful or enthusiastic",
+        "🥰 grateful or affectionate",
+        "🙂 okay, balanced",
+        "😐 neither good nor bad",
+        "😶 indifferent or unsure",
+        "😌 relaxed or at peace",
+        "😞 sad or let down",
+        "😔 down or reflective",
+        "😟 anxious or concerned",
+        "😢 upset or emotional",
+        "😫 drained or overwhelmed"
+    ]
     mood_index = 0
     if prefill_mood and prefill_mood in mood_options:
         mood_index = mood_options.index(prefill_mood)
