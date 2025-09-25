@@ -305,7 +305,7 @@ if not st.session_state.body_comp_df.empty:
             y=["body_fat_percent", "skeletal_muscle_percent"],
             markers=True,
             color_discrete_sequence=["#e7541e", "#028283"],
-            title="Body Composition Over Time"
+            title="Body Fat & Muscle Percentage Over Time"
         )
         fig_bf.update_layout(
             xaxis_title="Date",
@@ -325,6 +325,8 @@ if not st.session_state.body_comp_df.empty:
             template="plotly_white",
             legend_title_text=""
         )
+        # Update legend labels to remove underscores
+        fig_bf.for_each_trace(lambda t: t.update(name=t.name.replace("_", " ").title()))
         st.plotly_chart(fig_bf, use_container_width=True)
 
         # ---------------- Interactive Table ----------------
