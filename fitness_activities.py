@@ -196,7 +196,7 @@ if not st.session_state.fitness_df.empty:
         )
         
         # Always show the selector, even if empty
-        sel_col1, sel_col2 = st.columns([1, 1])
+        sel_col1, weight_col1, weight_col2, weight_col3 = st.columns([1, 1, 1, 1])
         with sel_col1:
             selected_exercise = st.selectbox(
                 "Exercise (weight):",
@@ -205,15 +205,39 @@ if not st.session_state.fitness_df.empty:
                 disabled=(len(exercises_with_weight) == 0)
             )
         
-        # Max weight card - responsive to selected exercise
-        with sel_col2:
+        # Weight metrics - responsive to selected exercise (min, avg, max order)
+        with weight_col1:
             if exercises_with_weight and selected_exercise != "No weight data":
-                # Get max weight for the selected exercise
                 selected_exercise_data = weighted_df[weighted_df["exercise"].astype(str) == selected_exercise]
-                max_weight_selected = selected_exercise_data["weight_lb"].max() if not selected_exercise_data.empty else 0
-                st.metric("Max Weight Lifted (lb)", f"{max_weight_selected:.1f}")
+                if not selected_exercise_data.empty:
+                    min_weight_selected = selected_exercise_data["weight_lb"].min()
+                    st.metric("Min Weight (lb)", f"{min_weight_selected:.1f}")
+                else:
+                    st.metric("Min Weight (lb)", "N/A")
             else:
-                st.metric("Max Weight Lifted (lb)", "N/A")
+                st.metric("Min Weight (lb)", "N/A")
+        
+        with weight_col2:
+            if exercises_with_weight and selected_exercise != "No weight data":
+                selected_exercise_data = weighted_df[weighted_df["exercise"].astype(str) == selected_exercise]
+                if not selected_exercise_data.empty:
+                    avg_weight_selected = selected_exercise_data["weight_lb"].mean()
+                    st.metric("Avg Weight (lb)", f"{avg_weight_selected:.1f}")
+                else:
+                    st.metric("Avg Weight (lb)", "N/A")
+            else:
+                st.metric("Avg Weight (lb)", "N/A")
+        
+        with weight_col3:
+            if exercises_with_weight and selected_exercise != "No weight data":
+                selected_exercise_data = weighted_df[weighted_df["exercise"].astype(str) == selected_exercise]
+                if not selected_exercise_data.empty:
+                    max_weight_selected = selected_exercise_data["weight_lb"].max()
+                    st.metric("Max Weight (lb)", f"{max_weight_selected:.1f}")
+                else:
+                    st.metric("Max Weight (lb)", "N/A")
+            else:
+                st.metric("Max Weight (lb)", "N/A")
         
         if exercises_with_weight and selected_exercise != "No weight data":
             ex_df = weighted_df[weighted_df["exercise"].astype(str) == selected_exercise].copy()
@@ -279,31 +303,8 @@ if not st.session_state.fitness_df.empty:
                 disabled=(len(exercises_with_distance) == 0)
             )
         
-        # Distance metrics - responsive to selected exercise
+        # Distance metrics - responsive to selected exercise (min, avg, max order)
         with dist_col1:
-            if exercises_with_distance and selected_exercise_dist != "No distance data":
-                # Get distance stats for the selected exercise
-                selected_exercise_dist_data = distance_df[distance_df["exercise"].astype(str) == selected_exercise_dist]
-                if not selected_exercise_dist_data.empty:
-                    avg_distance_selected = selected_exercise_dist_data["distance_km"].mean()
-                    st.metric("Avg Distance (km)", f"{avg_distance_selected:.2f}")
-                else:
-                    st.metric("Avg Distance (km)", "N/A")
-            else:
-                st.metric("Avg Distance (km)", "N/A")
-        
-        with dist_col2:
-            if exercises_with_distance and selected_exercise_dist != "No distance data":
-                selected_exercise_dist_data = distance_df[distance_df["exercise"].astype(str) == selected_exercise_dist]
-                if not selected_exercise_dist_data.empty:
-                    max_distance_selected = selected_exercise_dist_data["distance_km"].max()
-                    st.metric("Max Distance (km)", f"{max_distance_selected:.2f}")
-                else:
-                    st.metric("Max Distance (km)", "N/A")
-            else:
-                st.metric("Max Distance (km)", "N/A")
-        
-        with dist_col3:
             if exercises_with_distance and selected_exercise_dist != "No distance data":
                 selected_exercise_dist_data = distance_df[distance_df["exercise"].astype(str) == selected_exercise_dist]
                 if not selected_exercise_dist_data.empty:
@@ -313,6 +314,28 @@ if not st.session_state.fitness_df.empty:
                     st.metric("Min Distance (km)", "N/A")
             else:
                 st.metric("Min Distance (km)", "N/A")
+        
+        with dist_col2:
+            if exercises_with_distance and selected_exercise_dist != "No distance data":
+                selected_exercise_dist_data = distance_df[distance_df["exercise"].astype(str) == selected_exercise_dist]
+                if not selected_exercise_dist_data.empty:
+                    avg_distance_selected = selected_exercise_dist_data["distance_km"].mean()
+                    st.metric("Avg Distance (km)", f"{avg_distance_selected:.2f}")
+                else:
+                    st.metric("Avg Distance (km)", "N/A")
+            else:
+                st.metric("Avg Distance (km)", "N/A")
+        
+        with dist_col3:
+            if exercises_with_distance and selected_exercise_dist != "No distance data":
+                selected_exercise_dist_data = distance_df[distance_df["exercise"].astype(str) == selected_exercise_dist]
+                if not selected_exercise_dist_data.empty:
+                    max_distance_selected = selected_exercise_dist_data["distance_km"].max()
+                    st.metric("Max Distance (km)", f"{max_distance_selected:.2f}")
+                else:
+                    st.metric("Max Distance (km)", "N/A")
+            else:
+                st.metric("Max Distance (km)", "N/A")
         
         if exercises_with_distance and selected_exercise_dist != "No distance data":
             ex_df_dist = distance_df[distance_df["exercise"].astype(str) == selected_exercise_dist].copy()
