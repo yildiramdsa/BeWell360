@@ -166,18 +166,28 @@ if not st.session_state.fitness_df.empty:
 
     if not filtered_df.empty:
         # Metrics
-        # Training volume (approx): sum(sets * reps * weight) where present
-        volume = (filtered_df[["sets", "reps", "weight_lb"]]
-                  .prod(axis=1, min_count=1)).sum(skipna=True)
-        total_duration_min = filtered_df["duration_sec"].sum(skipna=True) / 60.0
+        # Average duration and distance
+        avg_duration_min = filtered_df["duration_sec"].mean(skipna=True) / 60.0 if not filtered_df["duration_sec"].isna().all() else 0
         total_distance_km = filtered_df["distance_km"].sum(skipna=True)
+        
+        # Max weight per exercise (for weight exercises only)
+        weight_exercises = filtered_df[filtered_df["weight_lb"] > 0]
+        max_weight = weight_exercises["weight_lb"].max() if not weight_exercises.empty else 0
+        
+        # Duration increase in Plank (if Plank exists)
+        plank_data = filtered_df[filtered_df["exercise"].str.contains("Plank", case=False, na=False)]
+        plank_duration_avg = plank_data["duration_sec"].mean(skipna=True) if not plank_data.empty else 0
 
         with metric_col1:
-            st.metric("Total Volume", f"{volume:,.0f}")
+            st.metric("Max Weight Lifted (lb)", f"{max_weight:.1f}")
         with metric_col2:
-            st.metric("Total Duration (min)", f"{total_duration_min:.1f}")
+            st.metric("Avg Duration (min)", f"{avg_duration_min:.1f}")
         with metric_col3:
             st.metric("Total Distance (km)", f"{total_distance_km:.2f}")
+        
+        # Additional metric for Plank duration
+        if not plank_data.empty:
+            st.metric("Avg Plank Duration (sec)", f"{plank_duration_avg:.1f}")
 
         # ---------------- Weight Progression Chart ----------------
         # Only include entries where weight is present (> 0)
@@ -212,6 +222,15 @@ if not st.session_state.fitness_df.empty:
                     markers=True,
                     color_discrete_sequence=["#028283"],
                     title=f"Weight over Time • {selected_exercise}"
+                )
+                # Add average line
+                avg_weight = ex_df["weight_lb"].mean()
+                fig_w.add_hline(
+                    y=avg_weight,
+                    line_dash="dash",
+                    line_color="#e7541e",
+                    annotation_text=f"Avg: {avg_weight:.1f} lb",
+                    annotation_position="top left"
                 )
                 fig_w.update_layout(
                     xaxis_title="Date",
@@ -267,6 +286,15 @@ if not st.session_state.fitness_df.empty:
                     markers=True,
                     color_discrete_sequence=["#e7541e"],
                     title=f"Distance over Time • {selected_exercise_dist}"
+                )
+                # Add average line
+                avg_distance = ex_df_dist["distance_km"].mean()
+                fig_d.add_hline(
+                    y=avg_distance,
+                    line_dash="dash",
+                    line_color="#028283",
+                    annotation_text=f"Avg: {avg_distance:.2f} km",
+                    annotation_position="top left"
                 )
                 fig_d.update_layout(
                     xaxis_title="Date",
