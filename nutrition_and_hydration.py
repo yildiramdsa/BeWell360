@@ -77,7 +77,7 @@ with col2:
 
 col3, col4 = st.columns(2)
 with col3:
-    supplements = st.text_area("Supplements", value=prefill_supplements, height=90)
+    supplements = st.text_input("Supplements", value=prefill_supplements)
 with col4:
     water_ml = st.number_input("Water (ml)", min_value=0, step=100, value=int(prefill_water))
 
