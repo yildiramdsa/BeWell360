@@ -233,7 +233,7 @@ if not st.session_state.fitness_df.empty:
                     y="weight_lb",
                     markers=True,
                     color_discrete_sequence=["#028283"],
-                    title=f"Weight over Time • {selected_exercise}"
+                    title=f"Weight Over Time • {selected_exercise}"
                 )
                 # Add average line
                 avg_weight = ex_df["weight_lb"].mean()
@@ -342,7 +342,7 @@ if not st.session_state.fitness_df.empty:
                     y="distance_km",
                     markers=True,
                     color_discrete_sequence=["#e7541e"],
-                    title=f"Distance over Time • {selected_exercise_dist}"
+                    title=f"Distance Over Time • {selected_exercise_dist}"
                 )
                 # Add average line
                 avg_distance = ex_df_dist["distance_km"].mean()

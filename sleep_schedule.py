@@ -271,7 +271,8 @@ if not st.session_state.sleep_df.empty:
             x="date",
             y="Sleep Duration (hrs)",
             markers=True,
-            color_discrete_sequence=["#028283"]
+            color_discrete_sequence=["#028283"],
+            title="Sleep Duration Over Time"
         )
         fig.add_hline(
             y=7,

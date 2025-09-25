@@ -257,11 +257,11 @@ if not st.session_state.body_comp_df.empty:
     if not filtered_df.empty:
         # ---------------- Metrics (same line) ----------------
         with metric_col1:
-            st.metric("Avg. Weight (lb)", f"{filtered_df['weight_lb'].mean():.1f}")
+            st.metric("Avg Weight (lb)", f"{filtered_df['weight_lb'].mean():.1f}")
         with metric_col2:
-            st.metric("Avg. Body Fat (%)", f"{filtered_df['body_fat_percent'].mean():.1f}")
+            st.metric("Avg Body Fat (%)", f"{filtered_df['body_fat_percent'].mean():.1f}")
         with metric_col3:
-            st.metric("Avg. Muscle (%)", f"{filtered_df['skeletal_muscle_percent'].mean():.1f}")
+            st.metric("Avg Muscle (%)", f"{filtered_df['skeletal_muscle_percent'].mean():.1f}")
 
         # Weight trend
         fig_wt = px.line(
@@ -269,7 +269,8 @@ if not st.session_state.body_comp_df.empty:
             x="date",
             y="weight_lb",
             markers=True,
-            color_discrete_sequence=["#028283"]
+            color_discrete_sequence=["#028283"],
+            title="Weight Over Time"
         )
         fig_wt.add_hline(
             y=filtered_df["weight_lb"].mean(),
@@ -303,7 +304,8 @@ if not st.session_state.body_comp_df.empty:
             x="date",
             y=["body_fat_percent", "skeletal_muscle_percent"],
             markers=True,
-            color_discrete_sequence=["#e7541e", "#028283"]
+            color_discrete_sequence=["#e7541e", "#028283"],
+            title="Body Composition Over Time"
         )
         fig_bf.update_layout(
             xaxis_title="Date",
