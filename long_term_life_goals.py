@@ -23,14 +23,12 @@ if "life_goals_completed" not in st.session_state:
 
 st.title("📌 Long-Term Life Goals")
 
-st.subheader("Your Life Goals Checklist")
-
 if not st.session_state.life_goals_df.empty:
     df = st.session_state.life_goals_df.copy()
     
     for idx, row in df.iterrows():
         goal_key = f"goal_{idx}"
-        goal_name = row.get('goal', 'N/A')
+        goal_name = row.get('goal', row.get('Goal', 'N/A'))
         
         checked = st.checkbox(
             goal_name,
@@ -55,7 +53,7 @@ if not st.session_state.life_goals_df.empty:
             col1, col2, col3 = st.columns([4, 1, 1])
             
             with col1:
-                st.write(f"{row.get('goal', 'N/A')}")
+                st.write(f"{row.get('goal', row.get('Goal', 'N/A'))}")
             
             with col2:
                 if st.button("✏️", key=f"edit_{idx}", help="Edit", use_container_width=True):
@@ -65,15 +63,15 @@ if not st.session_state.life_goals_df.empty:
                 if st.button("🗑️", key=f"delete_{idx}", help="Delete", use_container_width=True):
                     try:
                         ws.delete_rows(idx + 2)
-                        st.success(f"Deleted '{row.get('goal', 'goal')}' from goals!")
+                        st.success(f"Deleted '{row.get('goal', row.get('Goal', 'goal'))}' from goals!")
                         st.session_state.life_goals_df = pd.DataFrame(ws.get_all_records())
                         st.rerun()
                     except Exception as e:
                         st.error(f"Error deleting goal: {str(e)}")
             
             if st.session_state.get(f"editing_{idx}", False):
-                with st.expander(f"Edit: {row.get('goal', 'N/A')}", expanded=True):
-                    edit_goal = st.text_input("Goal", value=row.get('goal', ''), key=f"edit_goal_{idx}")
+                with st.expander(f"Edit: {row.get('goal', row.get('Goal', 'N/A'))}", expanded=True):
+                    edit_goal = st.text_input("Goal", value=row.get('goal', row.get('Goal', '')), key=f"edit_goal_{idx}")
                     
                     edit_save_col, edit_cancel_col = st.columns([1, 1])
                     with edit_save_col:
