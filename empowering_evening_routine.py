@@ -160,11 +160,3 @@ if not st.session_state.evening_routine_df.empty:
 
 else:
     st.info("No evening routines yet. Add your first routine above to get started!")
-    st.markdown("""
-    ### 💡 Evening Routine Ideas:
-    - **Mindfulness**: Meditation, deep breathing, gratitude journaling
-    - **Self-Care**: Skincare routine, reading, relaxing music
-    - **Planning**: Review tomorrow's schedule, set intentions
-    - **Learning**: Read educational content, listen to podcasts
-    - **Health**: Stretching, light exercise, prepare healthy snacks
-    """)
