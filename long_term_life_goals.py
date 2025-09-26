@@ -132,14 +132,18 @@ if not st.session_state.life_goals_df.empty:
         st.progress(progress)
         st.caption(f"Completed: {checked_items}/{total_items} goals ({progress:.0%})")
         
-        if st.button("⚙️ Manage Goals", help="Edit or delete goal items"):
-            st.session_state["show_management"] = True
-            st.rerun()
+        col1, col2 = st.columns([1, 1])
         
-        if st.session_state.get("show_management", False):
-            if st.button("☁️ Save", help="Close management section"):
-                st.session_state["show_management"] = False
+        with col1:
+            if st.button("⚙️ Manage Goals", help="Edit or delete goal items", disabled=st.session_state.get("show_management", False)):
+                st.session_state["show_management"] = True
                 st.rerun()
+        
+        with col2:
+            if st.session_state.get("show_management", False):
+                if st.button("☁️ Save", help="Close management section"):
+                    st.session_state["show_management"] = False
+                    st.rerun()
 
 else:
     st.info("No life goals yet. Click 'Manage Goals' below to add your first goal!")
