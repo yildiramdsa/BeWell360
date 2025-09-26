@@ -99,17 +99,6 @@ if not st.session_state.life_goals_df.empty:
                 )
                 st.session_state.life_goals_completed[goal_key] = checked
         
-        total_items = len([row for _, row in df.iterrows() if str(row.get(goal_col, '')).strip()])
-        checked_items = sum(st.session_state.life_goals_completed.values())
-        progress = checked_items / total_items if total_items > 0 else 0
-        
-        st.progress(progress)
-        st.caption(f"Completed: {checked_items}/{total_items} goals ({progress:.0%})")
-        
-        if st.button("⚙️ Manage Goals", help="Edit or delete goal items"):
-            st.session_state["show_management"] = True
-            st.rerun()
-        
         if st.session_state.get("show_management", False):
             col1, col2, col3 = st.columns([4, 1, 1])
             
@@ -135,7 +124,19 @@ if not st.session_state.life_goals_df.empty:
                         st.error(f"Error adding goal: {str(e)}")
                 else:
                     st.error("Please enter a goal.")
-            
+        
+        total_items = len([row for _, row in df.iterrows() if str(row.get(goal_col, '')).strip()])
+        checked_items = sum(st.session_state.life_goals_completed.values())
+        progress = checked_items / total_items if total_items > 0 else 0
+        
+        st.progress(progress)
+        st.caption(f"Completed: {checked_items}/{total_items} goals ({progress:.0%})")
+        
+        if st.button("⚙️ Manage Goals", help="Edit or delete goal items"):
+            st.session_state["show_management"] = True
+            st.rerun()
+        
+        if st.session_state.get("show_management", False):
             if st.button("☁️ Save", help="Close management section"):
                 st.session_state["show_management"] = False
                 st.rerun()
