@@ -81,6 +81,11 @@ st.title("🎨 Vision Board")
 if not st.session_state.vision_board_df.empty:
     df = st.session_state.vision_board_df.copy()
     
+    # Debug: Show what's in the dataframe
+    st.write("Debug - DataFrame columns:", df.columns.tolist())
+    st.write("Debug - DataFrame shape:", df.shape)
+    st.write("Debug - First few rows:", df.head())
+    
     file_id_col = None
     for col in df.columns:
         if col.lower() in ['file_id', 'image_id', 'drive_id']:
@@ -89,6 +94,8 @@ if not st.session_state.vision_board_df.empty:
     
     if file_id_col is None and len(df.columns) > 0:
         file_id_col = df.columns[0]
+    
+    st.write(f"Debug - Using column: {file_id_col}")
     
     if file_id_col is None:
         st.error("No data found in the Google Sheet. Please add some images.")
@@ -105,10 +112,8 @@ if not st.session_state.vision_board_df.empty:
                     
                     if file_id:
                         with col:
+                            st.write(f"Debug - File ID: {file_id}")
                             try:
-                                # Debug: Check file ID
-                                st.write(f"Debug: File ID: {file_id}")
-                                
                                 image = get_image_from_drive(file_id)
                                 if image:
                                     st.image(image, use_column_width=True)
@@ -160,7 +165,6 @@ if not st.session_state.vision_board_df.empty:
                                                 st.rerun()
                             except Exception as e:
                                 st.write(f"Image could not be displayed: {str(e)}")
-                                st.write(f"File ID: {file_id}")
         
         if st.session_state.get("show_management", False):
             st.subheader("Add New Image")
