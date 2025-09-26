@@ -27,7 +27,7 @@ if f"daily_checklist_{today_str}" not in st.session_state:
 
 st.title("🌙 Empowering Evening Routine")
 
-st.subheader(f"Today's Evening Routine - {today.strftime('%B %d, %Y')}")
+st.subheader(f"Today's Checklist - {today.strftime('%B %d, %Y')}")
 
 if not st.session_state.evening_routine_df.empty:
     df = st.session_state.evening_routine_df.copy()
@@ -124,7 +124,6 @@ if not st.session_state.evening_routine_df.empty:
         if st.button("☁️ Save", help="Close management section"):
             st.session_state["show_management"] = False
             st.rerun()
-
 
 else:
     st.info("No evening routines yet. Click 'Manage Routines' below to add your first routine!")
