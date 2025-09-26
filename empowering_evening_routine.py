@@ -113,19 +113,6 @@ if not st.session_state.evening_routine_df.empty:
             
             st.divider()
 
-    # Analytics
-    st.subheader("Routine Analytics")
-    
-    if len(df) > 0:
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            total_routines = len(df)
-            st.metric("Total Routines", total_routines)
-        
-        with col2:
-            checked_routines = sum(st.session_state[f"daily_checklist_{today_str}"].values())
-            st.metric("Completed Today", f"{checked_routines}/{total_routines}")
 
 else:
     st.info("No evening routines yet. Add your first routine below to get started!")
