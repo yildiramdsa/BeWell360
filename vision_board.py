@@ -5,6 +5,8 @@ from google.oauth2.service_account import Credentials
 import base64
 from io import BytesIO
 from PIL import Image
+from googleapiclient.discovery import build
+from googleapiclient.http import MediaIoBaseUpload, MediaIoBaseDownload
 
 SCOPES = [
     "https://www.googleapis.com/auth/spreadsheets",
@@ -18,6 +20,59 @@ creds = Credentials.from_service_account_info(
 client = gspread.authorize(creds)
 ws = client.open("vision_board").sheet1
 
+# Google Drive service for file uploads
+drive_service = build('drive', 'v3', credentials=creds)
+
+def upload_image_to_drive(image_file, filename):
+    """Upload image to Google Drive and return file ID."""
+    try:
+        # Create file metadata
+        file_metadata = {
+            'name': filename,
+            'parents': []  # Upload to root folder
+        }
+        
+        # Create media upload
+        media = MediaIoBaseUpload(
+            BytesIO(image_file.read()),
+            mimetype=image_file.type,
+            resumable=True
+        )
+        
+        # Upload file
+        file = drive_service.files().create(
+            body=file_metadata,
+            media_body=media,
+            fields='id'
+        ).execute()
+        
+        return file.get('id')
+    except Exception as e:
+        st.error(f"Error uploading to Drive: {str(e)}")
+        return None
+
+def get_image_from_drive(file_id):
+    """Get image from Google Drive by file ID."""
+    try:
+        # Get file metadata
+        file = drive_service.files().get(fileId=file_id).execute()
+        
+        # Download file content
+        request = drive_service.files().get_media(fileId=file_id)
+        file_content = BytesIO()
+        
+        # Download in chunks
+        downloader = MediaIoBaseDownload(file_content, request)
+        done = False
+        while done is False:
+            status, done = downloader.next_chunk()
+        
+        file_content.seek(0)
+        return Image.open(file_content)
+    except Exception as e:
+        st.error(f"Error loading image from Drive: {str(e)}")
+        return None
+
 if "vision_board_df" not in st.session_state:
     st.session_state.vision_board_df = pd.DataFrame(ws.get_all_records())
 
@@ -26,16 +81,16 @@ st.title("🎨 Vision Board")
 if not st.session_state.vision_board_df.empty:
     df = st.session_state.vision_board_df.copy()
     
-    image_col = None
+    file_id_col = None
     for col in df.columns:
-        if col.lower() in ['image', 'picture', 'photo']:
-            image_col = col
+        if col.lower() in ['file_id', 'image_id', 'drive_id']:
+            file_id_col = col
             break
     
-    if image_col is None and len(df.columns) > 0:
-        image_col = df.columns[0]
+    if file_id_col is None and len(df.columns) > 0:
+        file_id_col = df.columns[0]
     
-    if image_col is None:
+    if file_id_col is None:
         st.error("No data found in the Google Sheet. Please add some images.")
     else:
         # Display images in a grid
@@ -46,18 +101,19 @@ if not st.session_state.vision_board_df.empty:
                 if i + j < len(df):
                     idx = i + j
                     row = df.iloc[idx]
-                    image_data = row.get(image_col, '')
+                    file_id = row.get(file_id_col, '')
                     
-                    if image_data:
+                    if file_id:
                         with col:
                             try:
-                                # Debug: Check image data
-                                st.write(f"Debug: Image data length: {len(str(image_data))}")
-                                st.write(f"Debug: First 50 chars: {str(image_data)[:50]}")
+                                # Debug: Check file ID
+                                st.write(f"Debug: File ID: {file_id}")
                                 
-                                image_bytes = base64.b64decode(image_data)
-                                image = Image.open(BytesIO(image_bytes))
-                                st.image(image, use_column_width=True)
+                                image = get_image_from_drive(file_id)
+                                if image:
+                                    st.image(image, use_column_width=True)
+                                else:
+                                    st.write("Could not load image from Drive")
                                 
                                 if st.session_state.get("show_management", False):
                                     col_edit, col_delete = st.columns([1, 1])
@@ -83,14 +139,16 @@ if not st.session_state.vision_board_df.empty:
                                             if st.button("☁️ Save Changes", key=f"save_edit_{idx}"):
                                                 try:
                                                     if edit_image:
-                                                        image_bytes = edit_image.read()
-                                                        image_data_to_save = base64.b64encode(image_bytes).decode()
-                                                        ws.update(values=[[image_data_to_save]], 
-                                                                 range_name=f"A{idx+2}")
-                                                        st.success("Image updated successfully!")
-                                                        st.session_state[f"editing_{idx}"] = False
-                                                        st.session_state.vision_board_df = pd.DataFrame(ws.get_all_records())
-                                                        st.rerun()
+                                                        new_file_id = upload_image_to_drive(edit_image, f"vision_board_{idx}_{edit_image.name}")
+                                                        if new_file_id:
+                                                            ws.update(values=[[new_file_id]], 
+                                                                     range_name=f"A{idx+2}")
+                                                            st.success("Image updated successfully!")
+                                                            st.session_state[f"editing_{idx}"] = False
+                                                            st.session_state.vision_board_df = pd.DataFrame(ws.get_all_records())
+                                                            st.rerun()
+                                                        else:
+                                                            st.error("Failed to upload new image.")
                                                     else:
                                                         st.warning("Please select a new image.")
                                                 except Exception as e:
@@ -102,7 +160,7 @@ if not st.session_state.vision_board_df.empty:
                                                 st.rerun()
                             except Exception as e:
                                 st.write(f"Image could not be displayed: {str(e)}")
-                                st.write(f"Image data: {str(image_data)[:100]}...")
+                                st.write(f"File ID: {file_id}")
         
         if st.session_state.get("show_management", False):
             st.subheader("Add New Image")
@@ -118,19 +176,20 @@ if not st.session_state.vision_board_df.empty:
             if add_clicked:
                 if new_image:
                     try:
-                        image_bytes = new_image.read()
-                        image_data_to_save = base64.b64encode(image_bytes).decode()
-                        
-                        ws.append_row([image_data_to_save])
-                        st.success("Image added to your vision board!")
-                        st.session_state.vision_board_df = pd.DataFrame(ws.get_all_records())
-                        st.rerun()
+                        file_id = upload_image_to_drive(new_image, f"vision_board_{new_image.name}")
+                        if file_id:
+                            ws.append_row([file_id])
+                            st.success("Image added to your vision board!")
+                            st.session_state.vision_board_df = pd.DataFrame(ws.get_all_records())
+                            st.rerun()
+                        else:
+                            st.error("Failed to upload image to Drive.")
                     except Exception as e:
                         st.error(f"Error adding image: {str(e)}")
                 else:
                     st.error("Please select an image to upload.")
         
-        total_items = len([row for _, row in df.iterrows() if str(row.get(image_col, '')).strip()])
+        total_items = len([row for _, row in df.iterrows() if str(row.get(file_id_col, '')).strip()])
         
         st.caption(f"Total images: {total_items}")
         
@@ -168,13 +227,14 @@ else:
         if add_clicked:
             if new_image:
                 try:
-                    image_bytes = new_image.read()
-                    image_data_to_save = base64.b64encode(image_bytes).decode()
-                    
-                    ws.append_row([image_data_to_save])
-                    st.success("Image added to your vision board!")
-                    st.session_state.vision_board_df = pd.DataFrame(ws.get_all_records())
-                    st.rerun()
+                    file_id = upload_image_to_drive(new_image, f"vision_board_{new_image.name}")
+                    if file_id:
+                        ws.append_row([file_id])
+                        st.success("Image added to your vision board!")
+                        st.session_state.vision_board_df = pd.DataFrame(ws.get_all_records())
+                        st.rerun()
+                    else:
+                        st.error("Failed to upload image to Drive.")
                 except Exception as e:
                     st.error(f"Error adding image: {str(e)}")
             else:
