@@ -83,7 +83,7 @@ if not st.session_state.evening_routine_df.empty:
                     
                     edit_save_col, edit_cancel_col = st.columns([1, 1])
                     with edit_save_col:
-                        if st.button("💾 Save Changes", key=f"save_edit_{idx}"):
+                        if st.button("☁️ Save Changes", key=f"save_edit_{idx}"):
                             try:
                                 ws.update(values=[[edit_routine]], 
                                          range_name=f"A{idx+2}")
