@@ -90,26 +90,6 @@ if not st.session_state.evening_routine_df.empty:
             )
             st.session_state[f"daily_checklist_{today_str}"][routine_key] = checked
     
-    total_items = len(df)
-    checked_items = sum(st.session_state[f"daily_checklist_{today_str}"].values())
-    progress = checked_items / total_items if total_items > 0 else 0
-    
-    st.progress(progress)
-    st.caption(f"Completed: {checked_items}/{total_items} items ({progress:.0%})")
-    
-    col1, col2 = st.columns([1, 1])
-    
-    with col1:
-        if st.button("⚙️ Manage Routines", help="Edit or delete routine items", disabled=st.session_state.get("show_management", False)):
-            st.session_state["show_management"] = True
-            st.rerun()
-    
-    with col2:
-        if st.session_state.get("show_management", False):
-            if st.button("☁️ Save", help="Close management section"):
-                st.session_state["show_management"] = False
-                st.rerun()
-    
     if st.session_state.get("show_management", False):
         col1, col2, col3 = st.columns([4, 1, 1])
         
@@ -135,6 +115,26 @@ if not st.session_state.evening_routine_df.empty:
                     st.error(f"Error adding routine: {str(e)}")
             else:
                 st.error("Please enter a routine.")
+    
+    total_items = len(df)
+    checked_items = sum(st.session_state[f"daily_checklist_{today_str}"].values())
+    progress = checked_items / total_items if total_items > 0 else 0
+    
+    st.progress(progress)
+    st.caption(f"Completed: {checked_items}/{total_items} items ({progress:.0%})")
+    
+    col1, col2 = st.columns([1, 1])
+    
+    with col1:
+        if st.button("⚙️ Manage Routines", help="Edit or delete routine items", disabled=st.session_state.get("show_management", False)):
+            st.session_state["show_management"] = True
+            st.rerun()
+    
+    with col2:
+        if st.session_state.get("show_management", False):
+            if st.button("☁️ Save", help="Close management section"):
+                st.session_state["show_management"] = False
+                st.rerun()
 
 else:
     st.info("No evening routines yet. Click 'Manage Routines' below to add your first routine!")
