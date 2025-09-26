@@ -45,34 +45,16 @@ if not st.session_state.life_goals_df.empty:
             if goal_name == '':
                 continue
             
-            checked = st.checkbox(
-                goal_name,
-                value=st.session_state.life_goals_completed.get(goal_key, False),
-                key=f"check_{goal_key}"
-            )
-            
-            st.session_state.life_goals_completed[goal_key] = checked
-        
-        total_items = len([row for _, row in df.iterrows() if str(row.get(goal_col, '')).strip()])
-        checked_items = sum(st.session_state.life_goals_completed.values())
-        progress = checked_items / total_items if total_items > 0 else 0
-        
-        st.progress(progress)
-        st.caption(f"Completed: {checked_items}/{total_items} goals ({progress:.0%})")
-        
-        if st.button("⚙️ Manage Goals", help="Edit or delete goal items"):
-            st.session_state["show_management"] = True
-        
-        if st.session_state.get("show_management", False):
-            for idx, row in df.iterrows():
-                goal_name = str(row.get(goal_col, '')).strip()
-                if goal_name == '':
-                    continue
-                    
+            if st.session_state.get("show_management", False):
                 col1, col2, col3 = st.columns([4, 1, 1])
                 
                 with col1:
-                    st.write(goal_name)
+                    checked = st.checkbox(
+                        goal_name,
+                        value=st.session_state.life_goals_completed.get(goal_key, False),
+                        key=f"check_{goal_key}"
+                    )
+                    st.session_state.life_goals_completed[goal_key] = checked
                 
                 with col2:
                     if st.button("✏️", key=f"edit_{idx}", help="Edit", use_container_width=True):
@@ -91,25 +73,43 @@ if not st.session_state.life_goals_df.empty:
                 if st.session_state.get(f"editing_{idx}", False):
                     with st.expander(f"Edit: {goal_name}", expanded=True):
                         edit_goal = st.text_input("Goal", value=goal_name, key=f"edit_goal_{idx}")
-                    
-                    edit_save_col, edit_cancel_col = st.columns([1, 1])
-                    with edit_save_col:
-                        if st.button("☁️ Save Changes", key=f"save_edit_{idx}"):
-                            try:
-                                ws.update(values=[[edit_goal]], 
-                                         range_name=f"A{idx+2}")
-                                st.success("Goal updated successfully!")
+                        
+                        edit_save_col, edit_cancel_col = st.columns([1, 1])
+                        with edit_save_col:
+                            if st.button("☁️ Save Changes", key=f"save_edit_{idx}"):
+                                try:
+                                    ws.update(values=[[edit_goal]], 
+                                             range_name=f"A{idx+2}")
+                                    st.success("Goal updated successfully!")
+                                    st.session_state[f"editing_{idx}"] = False
+                                    st.session_state.life_goals_df = pd.DataFrame(ws.get_all_records())
+                                    st.rerun()
+                                except Exception as e:
+                                    st.error(f"Error updating goal: {str(e)}")
+                        
+                        with edit_cancel_col:
+                            if st.button("❌ Cancel", key=f"cancel_edit_{idx}"):
                                 st.session_state[f"editing_{idx}"] = False
-                                st.session_state.life_goals_df = pd.DataFrame(ws.get_all_records())
                                 st.rerun()
-                            except Exception as e:
-                                st.error(f"Error updating goal: {str(e)}")
-                    
-                    with edit_cancel_col:
-                        if st.button("❌ Cancel", key=f"cancel_edit_{idx}"):
-                            st.session_state[f"editing_{idx}"] = False
-                            st.rerun()
-            
+            else:
+                checked = st.checkbox(
+                    goal_name,
+                    value=st.session_state.life_goals_completed.get(goal_key, False),
+                    key=f"check_{goal_key}"
+                )
+                st.session_state.life_goals_completed[goal_key] = checked
+        
+        total_items = len([row for _, row in df.iterrows() if str(row.get(goal_col, '')).strip()])
+        checked_items = sum(st.session_state.life_goals_completed.values())
+        progress = checked_items / total_items if total_items > 0 else 0
+        
+        st.progress(progress)
+        st.caption(f"Completed: {checked_items}/{total_items} goals ({progress:.0%})")
+        
+        if st.button("⚙️ Manage Goals", help="Edit or delete goal items"):
+            st.session_state["show_management"] = True
+        
+        if st.session_state.get("show_management", False):
             col1, col2, col3 = st.columns([4, 1, 1])
             
             with col1:
