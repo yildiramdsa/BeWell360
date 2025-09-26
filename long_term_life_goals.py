@@ -26,56 +26,71 @@ st.title("📌 Long-Term Life Goals")
 if not st.session_state.life_goals_df.empty:
     df = st.session_state.life_goals_df.copy()
     
-    # Debug: Show column names and first few rows
-    st.write("Debug - Column names:", df.columns.tolist())
-    st.write("Debug - First few rows:", df.head())
+    goal_col = None
+    for col in df.columns:
+        if col.lower() in ['goal', 'goals']:
+            goal_col = col
+            break
     
-    for idx, row in df.iterrows():
-        goal_key = f"goal_{idx}"
-        goal_name = row.get('goal', row.get('Goal', 'N/A'))
-        
-        checked = st.checkbox(
-            goal_name,
-            value=st.session_state.life_goals_completed.get(goal_key, False),
-            key=f"check_{goal_key}"
-        )
-        
-        st.session_state.life_goals_completed[goal_key] = checked
+    if goal_col is None and len(df.columns) > 0:
+        goal_col = df.columns[0]
     
-    total_items = len(df)
-    checked_items = sum(st.session_state.life_goals_completed.values())
-    progress = checked_items / total_items if total_items > 0 else 0
-    
-    st.progress(progress)
-    st.caption(f"Completed: {checked_items}/{total_items} goals ({progress:.0%})")
-    
-    if st.button("⚙️ Manage Goals", help="Edit or delete goal items"):
-        st.session_state["show_management"] = True
-    
-    if st.session_state.get("show_management", False):
+    if goal_col is None:
+        st.error("No data found in the Google Sheet. Please add some goals.")
+    else:
         for idx, row in df.iterrows():
-            col1, col2, col3 = st.columns([4, 1, 1])
+            goal_key = f"goal_{idx}"
+            goal_name = str(row.get(goal_col, '')).strip()
             
-            with col1:
-                st.write(f"{row.get('goal', row.get('Goal', 'N/A'))}")
+            if goal_name == '':
+                continue
             
-            with col2:
-                if st.button("✏️", key=f"edit_{idx}", help="Edit", use_container_width=True):
-                    st.session_state[f"editing_{idx}"] = True
+            checked = st.checkbox(
+                goal_name,
+                value=st.session_state.life_goals_completed.get(goal_key, False),
+                key=f"check_{goal_key}"
+            )
             
-            with col3:
-                if st.button("🗑️", key=f"delete_{idx}", help="Delete", use_container_width=True):
-                    try:
-                        ws.delete_rows(idx + 2)
-                        st.success(f"Deleted '{row.get('goal', row.get('Goal', 'goal'))}' from goals!")
-                        st.session_state.life_goals_df = pd.DataFrame(ws.get_all_records())
-                        st.rerun()
-                    except Exception as e:
-                        st.error(f"Error deleting goal: {str(e)}")
-            
-            if st.session_state.get(f"editing_{idx}", False):
-                with st.expander(f"Edit: {row.get('goal', row.get('Goal', 'N/A'))}", expanded=True):
-                    edit_goal = st.text_input("Goal", value=row.get('goal', row.get('Goal', '')), key=f"edit_goal_{idx}")
+            st.session_state.life_goals_completed[goal_key] = checked
+        
+        total_items = len([row for _, row in df.iterrows() if str(row.get(goal_col, '')).strip()])
+        checked_items = sum(st.session_state.life_goals_completed.values())
+        progress = checked_items / total_items if total_items > 0 else 0
+        
+        st.progress(progress)
+        st.caption(f"Completed: {checked_items}/{total_items} goals ({progress:.0%})")
+        
+        if st.button("⚙️ Manage Goals", help="Edit or delete goal items"):
+            st.session_state["show_management"] = True
+        
+        if st.session_state.get("show_management", False):
+            for idx, row in df.iterrows():
+                goal_name = str(row.get(goal_col, '')).strip()
+                if goal_name == '':
+                    continue
+                    
+                col1, col2, col3 = st.columns([4, 1, 1])
+                
+                with col1:
+                    st.write(goal_name)
+                
+                with col2:
+                    if st.button("✏️", key=f"edit_{idx}", help="Edit", use_container_width=True):
+                        st.session_state[f"editing_{idx}"] = True
+                
+                with col3:
+                    if st.button("🗑️", key=f"delete_{idx}", help="Delete", use_container_width=True):
+                        try:
+                            ws.delete_rows(idx + 2)
+                            st.success(f"Deleted '{goal_name}' from goals!")
+                            st.session_state.life_goals_df = pd.DataFrame(ws.get_all_records())
+                            st.rerun()
+                        except Exception as e:
+                            st.error(f"Error deleting goal: {str(e)}")
+                
+                if st.session_state.get(f"editing_{idx}", False):
+                    with st.expander(f"Edit: {goal_name}", expanded=True):
+                        edit_goal = st.text_input("Goal", value=goal_name, key=f"edit_goal_{idx}")
                     
                     edit_save_col, edit_cancel_col = st.columns([1, 1])
                     with edit_save_col:
