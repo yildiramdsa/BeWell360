@@ -51,8 +51,6 @@ if not st.session_state.evening_routine_df.empty:
     st.progress(progress)
     st.caption(f"Completed: {checked_items}/{total_items} items ({progress:.0%})")
     
-    st.divider()
-    
     if st.button("⚙️ Manage Routines", help="Edit or delete routine items"):
         st.session_state["show_management"] = True
     
