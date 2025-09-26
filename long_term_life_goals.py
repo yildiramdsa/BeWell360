@@ -109,35 +109,35 @@ if not st.session_state.life_goals_df.empty:
                         if st.button("❌ Cancel", key=f"cancel_edit_{idx}"):
                             st.session_state[f"editing_{idx}"] = False
                             st.rerun()
-        
-        col1, col2, col3 = st.columns([4, 1, 1])
-        
-        with col1:
-            new_goal = st.text_input("", placeholder="Add new goal...", key="new_goal_input", label_visibility="collapsed")
-        
-        with col2:
-            add_clicked = st.button("➕", key="add_new_goal", help="Add goal", use_container_width=True)
-        
-        with col3:
-            if st.button("🗑️", key="clear_new_goal", help="Clear", use_container_width=True):
-                st.session_state["new_goal_input"] = ""
-                st.rerun()
-        
-        if add_clicked:
-            if new_goal.strip():
-                try:
-                    ws.append_row([new_goal.strip()])
-                    st.success(f"Added '{new_goal}' to your life goals!")
-                    st.session_state.life_goals_df = pd.DataFrame(ws.get_all_records())
+            
+            col1, col2, col3 = st.columns([4, 1, 1])
+            
+            with col1:
+                new_goal = st.text_input("", placeholder="Add new goal...", key="new_goal_input", label_visibility="collapsed")
+            
+            with col2:
+                add_clicked = st.button("➕", key="add_new_goal", help="Add goal", use_container_width=True)
+            
+            with col3:
+                if st.button("🗑️", key="clear_new_goal", help="Clear", use_container_width=True):
+                    st.session_state["new_goal_input"] = ""
                     st.rerun()
-                except Exception as e:
-                    st.error(f"Error adding goal: {str(e)}")
-            else:
-                st.error("Please enter a goal.")
-        
-        if st.button("☁️ Save", help="Close management section"):
-            st.session_state["show_management"] = False
-            st.rerun()
+            
+            if add_clicked:
+                if new_goal.strip():
+                    try:
+                        ws.append_row([new_goal.strip()])
+                        st.success(f"Added '{new_goal}' to your life goals!")
+                        st.session_state.life_goals_df = pd.DataFrame(ws.get_all_records())
+                        st.rerun()
+                    except Exception as e:
+                        st.error(f"Error adding goal: {str(e)}")
+                else:
+                    st.error("Please enter a goal.")
+            
+            if st.button("☁️ Save", help="Close management section"):
+                st.session_state["show_management"] = False
+                st.rerun()
 
 else:
     st.info("No life goals yet. Click 'Manage Goals' below to add your first goal!")
