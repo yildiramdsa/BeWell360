@@ -63,55 +63,96 @@ if not st.session_state.evening_routine_df.empty:
     
     st.divider()
     
-    # Management section
-    st.subheader("Manage Routine Items")
+    # Edit button to show management section
+    if st.button("⚙️ Manage Routines", help="Edit or delete routine items"):
+        st.session_state["show_management"] = True
     
-    # Display routine items with controls
-    for idx, row in df.iterrows():
-        with st.container():
-            col1, col2, col3 = st.columns([3, 1, 1])
-            
-            with col1:
-                st.write(f"**{row.get('routine', 'N/A')}**")
-            
-            with col2:
-                if st.button("✏️", key=f"edit_{idx}", help="Edit item"):
-                    st.session_state[f"editing_{idx}"] = True
-            
-            with col3:
-                if st.button("🗑️", key=f"delete_{idx}", help="Delete routine"):
-                    try:
-                        ws.delete_rows(idx + 2)  # +2 because of header row and 0-based index
-                        st.success(f"Deleted '{row.get('routine', 'routine')}' from routine!")
-                        st.session_state.evening_routine_df = pd.DataFrame(ws.get_all_records())
-                        st.rerun()
-                    except Exception as e:
-                        st.error(f"Error deleting routine: {str(e)}")
-            
-            # Edit form (appears when edit button is clicked)
-            if st.session_state.get(f"editing_{idx}", False):
-                with st.expander(f"Edit: {row.get('routine', 'N/A')}", expanded=True):
-                    edit_routine = st.text_input("Routine", value=row.get('routine', ''), key=f"edit_routine_{idx}")
-                    
-                    edit_save_col, edit_cancel_col = st.columns([1, 1])
-                    with edit_save_col:
-                        if st.button("💾 Save Changes", key=f"save_edit_{idx}"):
-                            try:
-                                ws.update(values=[[edit_routine]], 
-                                         range_name=f"A{idx+2}")
-                                st.success("Routine updated successfully!")
-                                st.session_state[f"editing_{idx}"] = False
-                                st.session_state.evening_routine_df = pd.DataFrame(ws.get_all_records())
-                                st.rerun()
-                            except Exception as e:
-                                st.error(f"Error updating routine: {str(e)}")
-                    
-                    with edit_cancel_col:
-                        if st.button("❌ Cancel", key=f"cancel_edit_{idx}"):
-                            st.session_state[f"editing_{idx}"] = False
+    # Management section (only shown when edit button is pressed)
+    if st.session_state.get("show_management", False):
+        st.subheader("Manage Routine Items")
+        
+        # Display routine items with controls
+        for idx, row in df.iterrows():
+            with st.container():
+                col1, col2, col3 = st.columns([3, 1, 1])
+                
+                with col1:
+                    st.write(f"**{row.get('routine', 'N/A')}**")
+                
+                with col2:
+                    if st.button("✏️", key=f"edit_{idx}", help="Edit item"):
+                        st.session_state[f"editing_{idx}"] = True
+                
+                with col3:
+                    if st.button("🗑️", key=f"delete_{idx}", help="Delete routine"):
+                        try:
+                            ws.delete_rows(idx + 2)  # +2 because of header row and 0-based index
+                            st.success(f"Deleted '{row.get('routine', 'routine')}' from routine!")
+                            st.session_state.evening_routine_df = pd.DataFrame(ws.get_all_records())
                             st.rerun()
-            
-            st.divider()
+                        except Exception as e:
+                            st.error(f"Error deleting routine: {str(e)}")
+                
+                # Edit form (appears when edit button is clicked)
+                if st.session_state.get(f"editing_{idx}", False):
+                    with st.expander(f"Edit: {row.get('routine', 'N/A')}", expanded=True):
+                        edit_routine = st.text_input("Routine", value=row.get('routine', ''), key=f"edit_routine_{idx}")
+                        
+                        edit_save_col, edit_cancel_col = st.columns([1, 1])
+                        with edit_save_col:
+                            if st.button("💾 Save Changes", key=f"save_edit_{idx}"):
+                                try:
+                                    ws.update(values=[[edit_routine]], 
+                                             range_name=f"A{idx+2}")
+                                    st.success("Routine updated successfully!")
+                                    st.session_state[f"editing_{idx}"] = False
+                                    st.session_state.evening_routine_df = pd.DataFrame(ws.get_all_records())
+                                    st.rerun()
+                                except Exception as e:
+                                    st.error(f"Error updating routine: {str(e)}")
+                        
+                        with edit_cancel_col:
+                            if st.button("❌ Cancel", key=f"cancel_edit_{idx}"):
+                                st.session_state[f"editing_{idx}"] = False
+                                st.rerun()
+                
+                st.divider()
+        
+        # Add New Routine Section (only shown in management mode)
+        st.subheader("Add New Routine Item")
+        new_routine = st.text_input("Routine", placeholder="e.g., Read, Journal, Meditate, Prepare tomorrow's clothes", key="new_routine_input")
+        
+        # Action Buttons
+        col_save, col_clear = st.columns([1, 1])
+        with col_save:
+            add_clicked = st.button("➕ Add Item", type="primary")
+        with col_clear:
+            clear_clicked = st.button("🗑️ Clear Form")
+        
+        # Handle Add Item
+        if add_clicked:
+            if new_routine.strip():
+                try:
+                    # Add new routine
+                    ws.append_row([
+                        new_routine.strip()
+                    ])
+                    st.success(f"Added '{new_routine}' to your evening routine!")
+                    st.session_state.evening_routine_df = pd.DataFrame(ws.get_all_records())
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"Error adding routine: {str(e)}")
+            else:
+                st.error("Please enter a routine.")
+        
+        # Handle Clear Form
+        if clear_clicked:
+            st.rerun()
+        
+        # Close management section button
+        if st.button("✅ Done Managing", help="Close management section"):
+            st.session_state["show_management"] = False
+            st.rerun()
 
 
 else:
