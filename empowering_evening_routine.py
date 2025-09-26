@@ -55,8 +55,6 @@ if not st.session_state.evening_routine_df.empty:
         st.session_state["show_management"] = True
     
     if st.session_state.get("show_management", False):
-        st.subheader("Manage Routine Items")
-        
         for idx, row in df.iterrows():
             col1, col2, col3 = st.columns([4, 1, 1])
             
