@@ -26,6 +26,10 @@ st.title("📌 Long-Term Life Goals")
 if not st.session_state.life_goals_df.empty:
     df = st.session_state.life_goals_df.copy()
     
+    # Debug: Show column names and first few rows
+    st.write("Debug - Column names:", df.columns.tolist())
+    st.write("Debug - First few rows:", df.head())
+    
     for idx, row in df.iterrows():
         goal_key = f"goal_{idx}"
         goal_name = row.get('goal', row.get('Goal', 'N/A'))
