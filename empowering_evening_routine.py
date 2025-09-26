@@ -115,16 +115,18 @@ if not st.session_state.evening_routine_df.empty:
                             st.session_state[f"editing_{idx}"] = False
                             st.rerun()
         
-        # Add New Routine Section (only shown in management mode)
-        st.subheader("Add New Routine Item")
-        new_routine = st.text_input("Routine", placeholder="e.g., Read, Journal, Meditate, Prepare tomorrow's clothes", key="new_routine_input")
+        # Add New Routine Item (inline with other items)
+        col1, col2, col3 = st.columns([4, 1, 1])
         
-        # Action Buttons
-        col_save, col_clear = st.columns([1, 1])
-        with col_save:
-            add_clicked = st.button("➕ Add Item", type="primary")
-        with col_clear:
-            clear_clicked = st.button("🗑️ Clear Form")
+        with col1:
+            new_routine = st.text_input("", placeholder="Add new routine...", key="new_routine_input", label_visibility="collapsed")
+        
+        with col2:
+            add_clicked = st.button("➕", key="add_new_routine", help="Add routine", use_container_width=True)
+        
+        with col3:
+            if st.button("🗑️", key="clear_new_routine", help="Clear", use_container_width=True):
+                st.rerun()
         
         # Handle Add Item
         if add_clicked:
@@ -141,10 +143,6 @@ if not st.session_state.evening_routine_df.empty:
                     st.error(f"Error adding routine: {str(e)}")
             else:
                 st.error("Please enter a routine.")
-        
-        # Handle Clear Form
-        if clear_clicked:
-            st.rerun()
         
         # Close management section button
         if st.button("✅ Done Managing", help="Close management section"):
