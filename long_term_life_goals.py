@@ -108,6 +108,7 @@ if not st.session_state.life_goals_df.empty:
         
         if st.button("⚙️ Manage Goals", help="Edit or delete goal items"):
             st.session_state["show_management"] = True
+            st.rerun()
         
         if st.session_state.get("show_management", False):
             col1, col2, col3 = st.columns([4, 1, 1])
