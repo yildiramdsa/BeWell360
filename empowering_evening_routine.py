@@ -32,37 +32,6 @@ if f"daily_checklist_{today_str}" not in st.session_state:
 
 st.title("🌙 Empowering Evening Routine")
 
-# Entry Form
-st.subheader("Add New Routine Item")
-new_routine = st.text_input("Routine", placeholder="e.g., Read, Journal, Meditate, Prepare tomorrow's clothes")
-
-# Action Buttons
-col_save, col_clear = st.columns([1, 1])
-with col_save:
-    add_clicked = st.button("➕ Add Item", type="primary")
-with col_clear:
-    clear_clicked = st.button("🗑️ Clear Form")
-
-# Handle Add Item
-if add_clicked:
-    if new_routine.strip():
-        try:
-            # Add new routine
-            ws.append_row([
-                new_routine.strip()
-            ])
-            st.success(f"Added '{new_routine}' to your evening routine!")
-            st.session_state.evening_routine_df = pd.DataFrame(ws.get_all_records())
-            st.rerun()
-        except Exception as e:
-            st.error(f"Error adding routine: {str(e)}")
-    else:
-        st.error("Please enter a routine.")
-
-# Handle Clear Form
-if clear_clicked:
-    st.rerun()
-
 # Daily Checklist
 st.subheader(f"Today's Evening Routine - {today.strftime('%B %d, %Y')}")
 
@@ -159,4 +128,35 @@ if not st.session_state.evening_routine_df.empty:
             st.metric("Completed Today", f"{checked_routines}/{total_routines}")
 
 else:
-    st.info("No evening routines yet. Add your first routine above to get started!")
+    st.info("No evening routines yet. Add your first routine below to get started!")
+
+# Add New Routine Section (at the end)
+st.subheader("Add New Routine Item")
+new_routine = st.text_input("Routine", placeholder="e.g., Read, Journal, Meditate, Prepare tomorrow's clothes")
+
+# Action Buttons
+col_save, col_clear = st.columns([1, 1])
+with col_save:
+    add_clicked = st.button("➕ Add Item", type="primary")
+with col_clear:
+    clear_clicked = st.button("🗑️ Clear Form")
+
+# Handle Add Item
+if add_clicked:
+    if new_routine.strip():
+        try:
+            # Add new routine
+            ws.append_row([
+                new_routine.strip()
+            ])
+            st.success(f"Added '{new_routine}' to your evening routine!")
+            st.session_state.evening_routine_df = pd.DataFrame(ws.get_all_records())
+            st.rerun()
+        except Exception as e:
+            st.error(f"Error adding routine: {str(e)}")
+    else:
+        st.error("Please enter a routine.")
+
+# Handle Clear Form
+if clear_clicked:
+    st.rerun()
