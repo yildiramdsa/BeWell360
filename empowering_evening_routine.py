@@ -118,7 +118,7 @@ if not st.session_state.evening_routine_df.empty:
     
     total_items = len(df)
     checked_items = sum(st.session_state[f"daily_checklist_{today_str}"].values())
-    progress = checked_items / total_items if total_items > 0 else 0
+    progress = min(checked_items / total_items, 1.0) if total_items > 0 else 0
     
     st.progress(progress)
     st.caption(f"Completed: {checked_items}/{total_items} items ({progress:.0%})")
