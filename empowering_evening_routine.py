@@ -71,52 +71,49 @@ if not st.session_state.evening_routine_df.empty:
     if st.session_state.get("show_management", False):
         st.subheader("Manage Routine Items")
         
-        # Display routine items with controls
+        # Display routine items with controls (compact)
         for idx, row in df.iterrows():
-            with st.container():
-                col1, col2, col3 = st.columns([3, 1, 1])
-                
-                with col1:
-                    st.write(f"**{row.get('routine', 'N/A')}**")
-                
-                with col2:
-                    if st.button("✏️", key=f"edit_{idx}", help="Edit item"):
-                        st.session_state[f"editing_{idx}"] = True
-                
-                with col3:
-                    if st.button("🗑️", key=f"delete_{idx}", help="Delete routine"):
-                        try:
-                            ws.delete_rows(idx + 2)  # +2 because of header row and 0-based index
-                            st.success(f"Deleted '{row.get('routine', 'routine')}' from routine!")
-                            st.session_state.evening_routine_df = pd.DataFrame(ws.get_all_records())
-                            st.rerun()
-                        except Exception as e:
-                            st.error(f"Error deleting routine: {str(e)}")
-                
-                # Edit form (appears when edit button is clicked)
-                if st.session_state.get(f"editing_{idx}", False):
-                    with st.expander(f"Edit: {row.get('routine', 'N/A')}", expanded=True):
-                        edit_routine = st.text_input("Routine", value=row.get('routine', ''), key=f"edit_routine_{idx}")
-                        
-                        edit_save_col, edit_cancel_col = st.columns([1, 1])
-                        with edit_save_col:
-                            if st.button("💾 Save Changes", key=f"save_edit_{idx}"):
-                                try:
-                                    ws.update(values=[[edit_routine]], 
-                                             range_name=f"A{idx+2}")
-                                    st.success("Routine updated successfully!")
-                                    st.session_state[f"editing_{idx}"] = False
-                                    st.session_state.evening_routine_df = pd.DataFrame(ws.get_all_records())
-                                    st.rerun()
-                                except Exception as e:
-                                    st.error(f"Error updating routine: {str(e)}")
-                        
-                        with edit_cancel_col:
-                            if st.button("❌ Cancel", key=f"cancel_edit_{idx}"):
+            col1, col2, col3 = st.columns([4, 1, 1])
+            
+            with col1:
+                st.write(f"{row.get('routine', 'N/A')}")
+            
+            with col2:
+                if st.button("✏️", key=f"edit_{idx}", help="Edit", use_container_width=True):
+                    st.session_state[f"editing_{idx}"] = True
+            
+            with col3:
+                if st.button("🗑️", key=f"delete_{idx}", help="Delete", use_container_width=True):
+                    try:
+                        ws.delete_rows(idx + 2)  # +2 because of header row and 0-based index
+                        st.success(f"Deleted '{row.get('routine', 'routine')}' from routine!")
+                        st.session_state.evening_routine_df = pd.DataFrame(ws.get_all_records())
+                        st.rerun()
+                    except Exception as e:
+                        st.error(f"Error deleting routine: {str(e)}")
+            
+            # Edit form (appears when edit button is clicked)
+            if st.session_state.get(f"editing_{idx}", False):
+                with st.expander(f"Edit: {row.get('routine', 'N/A')}", expanded=True):
+                    edit_routine = st.text_input("Routine", value=row.get('routine', ''), key=f"edit_routine_{idx}")
+                    
+                    edit_save_col, edit_cancel_col = st.columns([1, 1])
+                    with edit_save_col:
+                        if st.button("💾 Save Changes", key=f"save_edit_{idx}"):
+                            try:
+                                ws.update(values=[[edit_routine]], 
+                                         range_name=f"A{idx+2}")
+                                st.success("Routine updated successfully!")
                                 st.session_state[f"editing_{idx}"] = False
+                                st.session_state.evening_routine_df = pd.DataFrame(ws.get_all_records())
                                 st.rerun()
-                
-                st.divider()
+                            except Exception as e:
+                                st.error(f"Error updating routine: {str(e)}")
+                    
+                    with edit_cancel_col:
+                        if st.button("❌ Cancel", key=f"cancel_edit_{idx}"):
+                            st.session_state[f"editing_{idx}"] = False
+                            st.rerun()
         
         # Add New Routine Section (only shown in management mode)
         st.subheader("Add New Routine Item")
