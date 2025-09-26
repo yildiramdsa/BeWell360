@@ -2,10 +2,8 @@ import streamlit as st
 import pandas as pd
 import gspread
 from google.oauth2.service_account import Credentials
-from datetime import date, datetime
-import plotly.express as px
+from datetime import date
 
-# Google Sheets Setup
 SCOPES = [
     "https://www.googleapis.com/auth/spreadsheets",
     "https://www.googleapis.com/auth/drive"
@@ -18,42 +16,34 @@ creds = Credentials.from_service_account_info(
 client = gspread.authorize(creds)
 ws = client.open("empowering_evening_routine").sheet1
 
-# Load Data
 if "evening_routine_df" not in st.session_state:
     st.session_state.evening_routine_df = pd.DataFrame(ws.get_all_records())
 
-# Get today's date for daily reset
 today = date.today()
 today_str = today.strftime("%Y-%m-%d")
 
-# Initialize daily checklist state
 if f"daily_checklist_{today_str}" not in st.session_state:
     st.session_state[f"daily_checklist_{today_str}"] = {}
 
 st.title("🌙 Empowering Evening Routine")
 
-# Daily Checklist
 st.subheader(f"Today's Evening Routine - {today.strftime('%B %d, %Y')}")
 
 if not st.session_state.evening_routine_df.empty:
     df = st.session_state.evening_routine_df.copy()
     
-    # Display checklist items
     for idx, row in df.iterrows():
         routine_key = f"routine_{idx}"
         routine_name = row.get('routine', 'N/A')
         
-        # Create checkbox for each routine
         checked = st.checkbox(
             routine_name,
             value=st.session_state[f"daily_checklist_{today_str}"].get(routine_key, False),
             key=f"check_{routine_key}_{today_str}"
         )
         
-        # Update the daily checklist state
         st.session_state[f"daily_checklist_{today_str}"][routine_key] = checked
     
-    # Show progress
     total_items = len(df)
     checked_items = sum(st.session_state[f"daily_checklist_{today_str}"].values())
     progress = checked_items / total_items if total_items > 0 else 0
@@ -63,15 +53,12 @@ if not st.session_state.evening_routine_df.empty:
     
     st.divider()
     
-    # Edit button to show management section
     if st.button("⚙️ Manage Routines", help="Edit or delete routine items"):
         st.session_state["show_management"] = True
     
-    # Management section (only shown when edit button is pressed)
     if st.session_state.get("show_management", False):
         st.subheader("Manage Routine Items")
         
-        # Display routine items with controls (compact)
         for idx, row in df.iterrows():
             col1, col2, col3 = st.columns([4, 1, 1])
             
@@ -85,14 +72,13 @@ if not st.session_state.evening_routine_df.empty:
             with col3:
                 if st.button("🗑️", key=f"delete_{idx}", help="Delete", use_container_width=True):
                     try:
-                        ws.delete_rows(idx + 2)  # +2 because of header row and 0-based index
+                        ws.delete_rows(idx + 2)
                         st.success(f"Deleted '{row.get('routine', 'routine')}' from routine!")
                         st.session_state.evening_routine_df = pd.DataFrame(ws.get_all_records())
                         st.rerun()
                     except Exception as e:
                         st.error(f"Error deleting routine: {str(e)}")
             
-            # Edit form (appears when edit button is clicked)
             if st.session_state.get(f"editing_{idx}", False):
                 with st.expander(f"Edit: {row.get('routine', 'N/A')}", expanded=True):
                     edit_routine = st.text_input("Routine", value=row.get('routine', ''), key=f"edit_routine_{idx}")
@@ -115,7 +101,6 @@ if not st.session_state.evening_routine_df.empty:
                             st.session_state[f"editing_{idx}"] = False
                             st.rerun()
         
-        # Add New Routine Item (inline with other items)
         col1, col2, col3 = st.columns([4, 1, 1])
         
         with col1:
@@ -128,14 +113,10 @@ if not st.session_state.evening_routine_df.empty:
             if st.button("🗑️", key="clear_new_routine", help="Clear", use_container_width=True):
                 st.rerun()
         
-        # Handle Add Item
         if add_clicked:
             if new_routine.strip():
                 try:
-                    # Add new routine
-                    ws.append_row([
-                        new_routine.strip()
-                    ])
+                    ws.append_row([new_routine.strip()])
                     st.success(f"Added '{new_routine}' to your evening routine!")
                     st.session_state.evening_routine_df = pd.DataFrame(ws.get_all_records())
                     st.rerun()
@@ -144,8 +125,7 @@ if not st.session_state.evening_routine_df.empty:
             else:
                 st.error("Please enter a routine.")
         
-        # Close management section button
-        if st.button("✅ Done Managing", help="Close management section"):
+        if st.button("☁️ Save", help="Close management section"):
             st.session_state["show_management"] = False
             st.rerun()
 
@@ -153,31 +133,24 @@ if not st.session_state.evening_routine_df.empty:
 else:
     st.info("No evening routines yet. Click 'Manage Routines' below to add your first routine!")
     
-    # Show management button for empty state
     if st.button("⚙️ Manage Routines", help="Add your first routine"):
         st.session_state["show_management"] = True
         st.rerun()
     
-    # Management section for empty state
     if st.session_state.get("show_management", False):
         st.subheader("Add New Routine Item")
         new_routine = st.text_input("Routine", placeholder="e.g., Read, Journal, Meditate, Prepare tomorrow's clothes", key="new_routine_input_empty")
         
-        # Action Buttons
         col_save, col_clear = st.columns([1, 1])
         with col_save:
             add_clicked = st.button("➕ Add Item", type="primary")
         with col_clear:
             clear_clicked = st.button("🗑️ Clear Form")
         
-        # Handle Add Item
         if add_clicked:
             if new_routine.strip():
                 try:
-                    # Add new routine
-                    ws.append_row([
-                        new_routine.strip()
-                    ])
+                    ws.append_row([new_routine.strip()])
                     st.success(f"Added '{new_routine}' to your evening routine!")
                     st.session_state.evening_routine_df = pd.DataFrame(ws.get_all_records())
                     st.rerun()
@@ -186,11 +159,9 @@ else:
             else:
                 st.error("Please enter a routine.")
         
-        # Handle Clear Form
         if clear_clicked:
             st.rerun()
         
-        # Close management section button
         if st.button("✅ Done Managing", help="Close management section"):
             st.session_state["show_management"] = False
             st.rerun()
