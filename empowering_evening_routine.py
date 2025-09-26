@@ -22,24 +22,19 @@ ws = client.open("empowering_evening_routine").sheet1
 if "evening_routine_df" not in st.session_state:
     st.session_state.evening_routine_df = pd.DataFrame(ws.get_all_records())
 
+# Get today's date for daily reset
+today = date.today()
+today_str = today.strftime("%Y-%m-%d")
+
+# Initialize daily checklist state
+if f"daily_checklist_{today_str}" not in st.session_state:
+    st.session_state[f"daily_checklist_{today_str}"] = {}
+
 st.title("🌙 Empowering Evening Routine")
 
 # Entry Form
 st.subheader("Add New Routine Item")
-col1, col2 = st.columns([2, 1])
-
-with col1:
-    new_item = st.text_input("Routine Item", placeholder="e.g., Read for 30 minutes, Journal, Meditate")
-with col2:
-    priority = st.selectbox("Priority", ["High", "Medium", "Low"], index=1)
-
-col3, col4 = st.columns(2)
-with col3:
-    estimated_duration = st.number_input("Duration (minutes)", min_value=1, max_value=180, value=15, step=5)
-with col4:
-    category = st.selectbox("Category", ["Mindfulness", "Self-Care", "Planning", "Learning", "Health", "Other"])
-
-notes = st.text_area("Notes (optional)", placeholder="Any additional details or reminders...")
+new_routine = st.text_input("Routine", placeholder="e.g., Read, Journal, Meditate, Prepare tomorrow's clothes")
 
 # Action Buttons
 col_save, col_clear = st.columns([1, 1])
@@ -50,141 +45,97 @@ with col_clear:
 
 # Handle Add Item
 if add_clicked:
-    if new_item.strip():
+    if new_routine.strip():
         try:
-            # Get current max order
-            if not st.session_state.evening_routine_df.empty:
-                max_order = st.session_state.evening_routine_df.get('order', pd.Series([0])).max()
-                new_order = int(max_order) + 1 if not pd.isna(max_order) else 1
-            else:
-                new_order = 1
-            
-            # Add new item
+            # Add new routine
             ws.append_row([
-                str(date.today()),
-                new_item.strip(),
-                priority,
-                estimated_duration,
-                category,
-                notes.strip() if notes.strip() else "",
-                new_order
+                new_routine.strip()
             ])
-            st.success(f"Added '{new_item}' to your evening routine!")
+            st.success(f"Added '{new_routine}' to your evening routine!")
             st.session_state.evening_routine_df = pd.DataFrame(ws.get_all_records())
             st.rerun()
         except Exception as e:
-            st.error(f"Error adding item: {str(e)}")
+            st.error(f"Error adding routine: {str(e)}")
     else:
-        st.error("Please enter a routine item.")
+        st.error("Please enter a routine.")
 
 # Handle Clear Form
 if clear_clicked:
     st.rerun()
 
-# Display Current Routine
-st.subheader("Your Evening Routine")
+# Daily Checklist
+st.subheader(f"Today's Evening Routine - {today.strftime('%B %d, %Y')}")
 
 if not st.session_state.evening_routine_df.empty:
     df = st.session_state.evening_routine_df.copy()
     
-    # Convert order to numeric for proper sorting
-    df['order'] = pd.to_numeric(df.get('order', 0), errors='coerce')
-    df = df.sort_values('order', na_position='last')
+    # Display checklist items
+    for idx, row in df.iterrows():
+        routine_key = f"routine_{idx}"
+        routine_name = row.get('routine', 'N/A')
+        
+        # Create checkbox for each routine
+        checked = st.checkbox(
+            routine_name,
+            value=st.session_state[f"daily_checklist_{today_str}"].get(routine_key, False),
+            key=f"check_{routine_key}_{today_str}"
+        )
+        
+        # Update the daily checklist state
+        st.session_state[f"daily_checklist_{today_str}"][routine_key] = checked
+    
+    # Show progress
+    total_items = len(df)
+    checked_items = sum(st.session_state[f"daily_checklist_{today_str}"].values())
+    progress = checked_items / total_items if total_items > 0 else 0
+    
+    st.progress(progress)
+    st.caption(f"Completed: {checked_items}/{total_items} items ({progress:.0%})")
+    
+    st.divider()
+    
+    # Management section
+    st.subheader("Manage Routine Items")
     
     # Display routine items with controls
     for idx, row in df.iterrows():
         with st.container():
-            col1, col2, col3, col4, col5 = st.columns([3, 1, 1, 1, 1])
+            col1, col2, col3 = st.columns([3, 1, 1])
             
             with col1:
-                st.write(f"**{row.get('item', 'N/A')}**")
-                if row.get('notes'):
-                    st.caption(f"💭 {row.get('notes')}")
-                st.caption(f"⏱️ {row.get('duration', 'N/A')} min • {row.get('category', 'N/A')} • {row.get('priority', 'N/A')} priority")
+                st.write(f"**{row.get('routine', 'N/A')}**")
             
             with col2:
                 if st.button("✏️", key=f"edit_{idx}", help="Edit item"):
                     st.session_state[f"editing_{idx}"] = True
             
             with col3:
-                if st.button("⬆️", key=f"up_{idx}", help="Move up"):
-                    try:
-                        current_order = row.get('order', 0)
-                        # Find item above
-                        above_items = df[df['order'] < current_order]
-                        if not above_items.empty:
-                            above_order = above_items['order'].max()
-                            # Swap orders
-                            ws.update(f"G{idx+2}", [[above_order]])
-                            ws.update(f"G{above_items.index[above_items['order'] == above_order].tolist()[0]+2}", [[current_order]])
-                            st.success("Moved item up!")
-                            st.session_state.evening_routine_df = pd.DataFrame(ws.get_all_records())
-                            st.rerun()
-                    except Exception as e:
-                        st.error(f"Error moving item: {str(e)}")
-            
-            with col4:
-                if st.button("⬇️", key=f"down_{idx}", help="Move down"):
-                    try:
-                        current_order = row.get('order', 0)
-                        # Find item below
-                        below_items = df[df['order'] > current_order]
-                        if not below_items.empty:
-                            below_order = below_items['order'].min()
-                            # Swap orders
-                            ws.update(f"G{idx+2}", [[below_order]])
-                            ws.update(f"G{below_items.index[below_items['order'] == below_order].tolist()[0]+2}", [[current_order]])
-                            st.success("Moved item down!")
-                            st.session_state.evening_routine_df = pd.DataFrame(ws.get_all_records())
-                            st.rerun()
-                    except Exception as e:
-                        st.error(f"Error moving item: {str(e)}")
-            
-            with col5:
-                if st.button("🗑️", key=f"delete_{idx}", help="Delete item"):
+                if st.button("🗑️", key=f"delete_{idx}", help="Delete routine"):
                     try:
                         ws.delete_rows(idx + 2)  # +2 because of header row and 0-based index
-                        st.success(f"Deleted '{row.get('item', 'item')}' from routine!")
+                        st.success(f"Deleted '{row.get('routine', 'routine')}' from routine!")
                         st.session_state.evening_routine_df = pd.DataFrame(ws.get_all_records())
                         st.rerun()
                     except Exception as e:
-                        st.error(f"Error deleting item: {str(e)}")
+                        st.error(f"Error deleting routine: {str(e)}")
             
             # Edit form (appears when edit button is clicked)
             if st.session_state.get(f"editing_{idx}", False):
-                with st.expander(f"Edit: {row.get('item', 'N/A')}", expanded=True):
-                    edit_col1, edit_col2 = st.columns([2, 1])
-                    
-                    with edit_col1:
-                        edit_item = st.text_input("Item", value=row.get('item', ''), key=f"edit_item_{idx}")
-                    with edit_col2:
-                        edit_priority = st.selectbox("Priority", ["High", "Medium", "Low"], 
-                                                   index=["High", "Medium", "Low"].index(row.get('priority', 'Medium')), 
-                                                   key=f"edit_priority_{idx}")
-                    
-                    edit_col3, edit_col4 = st.columns(2)
-                    with edit_col3:
-                        edit_duration = st.number_input("Duration (minutes)", min_value=1, max_value=180, 
-                                                       value=int(row.get('duration', 15)), step=5, key=f"edit_duration_{idx}")
-                    with edit_col4:
-                        edit_category = st.selectbox("Category", ["Mindfulness", "Self-Care", "Planning", "Learning", "Health", "Other"],
-                                                   index=["Mindfulness", "Self-Care", "Planning", "Learning", "Health", "Other"].index(row.get('category', 'Other')), 
-                                                   key=f"edit_category_{idx}")
-                    
-                    edit_notes = st.text_area("Notes", value=row.get('notes', ''), key=f"edit_notes_{idx}")
+                with st.expander(f"Edit: {row.get('routine', 'N/A')}", expanded=True):
+                    edit_routine = st.text_input("Routine", value=row.get('routine', ''), key=f"edit_routine_{idx}")
                     
                     edit_save_col, edit_cancel_col = st.columns([1, 1])
                     with edit_save_col:
                         if st.button("💾 Save Changes", key=f"save_edit_{idx}"):
                             try:
-                                ws.update(values=[[edit_item, edit_priority, edit_duration, edit_category, edit_notes]], 
-                                         range_name=f"B{idx+2}:F{idx+2}")
-                                st.success("Item updated successfully!")
+                                ws.update(values=[[edit_routine]], 
+                                         range_name=f"A{idx+2}")
+                                st.success("Routine updated successfully!")
                                 st.session_state[f"editing_{idx}"] = False
                                 st.session_state.evening_routine_df = pd.DataFrame(ws.get_all_records())
                                 st.rerun()
                             except Exception as e:
-                                st.error(f"Error updating item: {str(e)}")
+                                st.error(f"Error updating routine: {str(e)}")
                     
                     with edit_cancel_col:
                         if st.button("❌ Cancel", key=f"cancel_edit_{idx}"):
@@ -197,43 +148,18 @@ if not st.session_state.evening_routine_df.empty:
     st.subheader("Routine Analytics")
     
     if len(df) > 0:
-        col1, col2, col3, col4 = st.columns(4)
+        col1, col2 = st.columns(2)
         
         with col1:
-            total_items = len(df)
-            st.metric("Total Items", total_items)
+            total_routines = len(df)
+            st.metric("Total Routines", total_routines)
         
         with col2:
-            total_duration = df['duration'].sum() if 'duration' in df.columns else 0
-            st.metric("Total Duration", f"{total_duration} min")
-        
-        with col3:
-            high_priority = len(df[df.get('priority') == 'High']) if 'priority' in df.columns else 0
-            st.metric("High Priority", high_priority)
-        
-        with col4:
-            categories = df['category'].nunique() if 'category' in df.columns else 0
-            st.metric("Categories", categories)
-        
-        # Category breakdown
-        if 'category' in df.columns and not df['category'].isna().all():
-            st.subheader("Routine by Category")
-            category_counts = df['category'].value_counts()
-            fig = px.pie(values=category_counts.values, names=category_counts.index, 
-                        title="Routine Items by Category")
-            st.plotly_chart(fig, use_container_width=True)
-        
-        # Priority breakdown
-        if 'priority' in df.columns and not df['priority'].isna().all():
-            st.subheader("Routine by Priority")
-            priority_counts = df['priority'].value_counts()
-            fig = px.bar(x=priority_counts.index, y=priority_counts.values,
-                        title="Routine Items by Priority",
-                        labels={'x': 'Priority', 'y': 'Count'})
-            st.plotly_chart(fig, use_container_width=True)
+            checked_routines = sum(st.session_state[f"daily_checklist_{today_str}"].values())
+            st.metric("Completed Today", f"{checked_routines}/{total_routines}")
 
 else:
-    st.info("No evening routine items yet. Add your first item above to get started!")
+    st.info("No evening routines yet. Add your first routine above to get started!")
     st.markdown("""
     ### 💡 Evening Routine Ideas:
     - **Mindfulness**: Meditation, deep breathing, gratitude journaling
