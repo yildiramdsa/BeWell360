@@ -107,6 +107,7 @@ if not st.session_state.evening_routine_df.empty:
         
         with col3:
             if st.button("🗑️", key="clear_new_routine", help="Clear", use_container_width=True):
+                st.session_state["new_routine_input"] = ""
                 st.rerun()
         
         if add_clicked:
@@ -143,6 +144,7 @@ else:
         
         with col3:
             if st.button("🗑️", key="clear_new_routine_empty", help="Clear", use_container_width=True):
+                st.session_state["new_routine_input_empty"] = ""
                 st.rerun()
         
         if add_clicked:
