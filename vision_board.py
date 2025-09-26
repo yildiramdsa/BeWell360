@@ -51,6 +51,10 @@ if not st.session_state.vision_board_df.empty:
                     if image_data:
                         with col:
                             try:
+                                # Debug: Check image data
+                                st.write(f"Debug: Image data length: {len(str(image_data))}")
+                                st.write(f"Debug: First 50 chars: {str(image_data)[:50]}")
+                                
                                 image_bytes = base64.b64decode(image_data)
                                 image = Image.open(BytesIO(image_bytes))
                                 st.image(image, use_column_width=True)
@@ -96,8 +100,9 @@ if not st.session_state.vision_board_df.empty:
                                             if st.button("❌ Cancel", key=f"cancel_edit_{idx}"):
                                                 st.session_state[f"editing_{idx}"] = False
                                                 st.rerun()
-                            except:
-                                st.write("Image could not be displayed")
+                            except Exception as e:
+                                st.write(f"Image could not be displayed: {str(e)}")
+                                st.write(f"Image data: {str(image_data)[:100]}...")
         
         if st.session_state.get("show_management", False):
             st.subheader("Add New Image")
