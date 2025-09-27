@@ -165,9 +165,6 @@ if not st.session_state.vision_board_df.empty:
                 except Exception as e:
                     st.error(f"Error adding image: {str(e)}")
         
-        total_items = len([row for _, row in df.iterrows() if str(row.get(image_col, '')).strip()])
-        
-        st.caption(f"Total images: {total_items}")
         
         col1, col2 = st.columns([1, 1])
         
