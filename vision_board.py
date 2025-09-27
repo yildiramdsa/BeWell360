@@ -15,7 +15,28 @@ creds = Credentials.from_service_account_info(
     scopes=SCOPES
 )
 client = gspread.authorize(creds)
-ws = client.open("vision_board").sheet1
+
+try:
+    ws = client.open("vision_board").sheet1
+except gspread.SpreadsheetNotFound:
+    st.error("""
+    **Vision Board Google Sheet not found!**
+    
+    Please create a Google Sheet named **"vision_board"** with the following structure:
+    
+    | A |
+    |---|
+    | image_data |
+    
+    **Steps:**
+    1. Go to [Google Sheets](https://sheets.google.com)
+    2. Create a new sheet
+    3. Name it exactly: **vision_board**
+    4. Add header in cell A1: **image_data**
+    5. Share the sheet with your service account email
+    6. Refresh this page
+    """)
+    st.stop()
 
 def compress_image(image_file, max_size_kb=30):
     """Compress image to fit within Google Sheets character limit."""
