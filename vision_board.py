@@ -145,14 +145,16 @@ if not st.session_state.vision_board_df.empty:
                                 st.error(f"Image could not be displayed: {str(e)}")
         
         if st.session_state.get("show_management", False):
-            st.subheader("Add New Image")
-            new_image = st.file_uploader("Upload Image", type=['png', 'jpg', 'jpeg'], key="new_image_input")
+            col1, col2, col3 = st.columns([4, 1, 1])
             
-            col1, col2 = st.columns([1, 1])
             with col1:
-                add_clicked = st.button("➕ Add Image", key="add_new_image", help="Add image to vision board")
+                new_image = st.file_uploader("", type=['png', 'jpg', 'jpeg'], key="new_image_input", label_visibility="collapsed")
+            
             with col2:
-                if st.button("🗑️ Clear", key="clear_new_image", help="Clear"):
+                add_clicked = st.button("➕", key="add_new_image", help="Add image", width='stretch')
+            
+            with col3:
+                if st.button("🗑️", key="clear_new_image", help="Clear", width='stretch'):
                     st.rerun()
             
             if add_clicked:
@@ -196,14 +198,16 @@ else:
         st.rerun()
     
     if st.session_state.get("show_management", False):
-        st.subheader("Add New Image")
-        new_image = st.file_uploader("Upload Image", type=['png', 'jpg', 'jpeg'], key="new_image_input_empty")
+        col1, col2, col3 = st.columns([4, 1, 1])
         
-        col1, col2 = st.columns([1, 1])
         with col1:
-            add_clicked = st.button("➕ Add Image", key="add_new_image_empty", help="Add image to vision board")
+            new_image = st.file_uploader("", type=['png', 'jpg', 'jpeg'], key="new_image_input_empty", label_visibility="collapsed")
+        
         with col2:
-            if st.button("🗑️ Clear", key="clear_new_image_empty", help="Clear"):
+            add_clicked = st.button("➕", key="add_new_image_empty", help="Add image", width='stretch')
+        
+        with col3:
+            if st.button("🗑️", key="clear_new_image_empty", help="Clear", width='stretch'):
                 st.rerun()
         
         if add_clicked:
