@@ -17,40 +17,9 @@ creds = Credentials.from_service_account_info(
 )
 client = gspread.authorize(creds)
 
-try:
-    ws = client.open("vision_board").sheet1
-except gspread.SpreadsheetNotFound:
-    st.error("""
-    **Vision Board Google Sheet not found!**
-    
-    Please create a Google Sheet named **"vision_board"** with the following structure:
-    
-    | A |
-    |---|
-    | image_data |
-    
-    **Steps:**
-    1. Go to [Google Sheets](https://sheets.google.com)
-    2. Create a new sheet
-    3. Name it exactly: **vision_board**
-    4. Add header in cell A1: **image_data**
-    5. Share the sheet with your service account email
-    6. Refresh this page
-    """)
-    st.stop()
-except Exception as e:
-    st.error(f"""
-    **Authentication Error: {str(e)}**
-    
-    Please check:
-    1. Service account has access to Google Drive
-    2. Service account email is shared on the sheet
-    3. Credentials are properly configured
-    """)
-    st.stop()
+ws = client.open("vision_board").sheet1
 
 def compress_image(image_file, max_size_kb=30):
-    """Compress image to fit within Google Sheets character limit."""
     try:
         image = Image.open(image_file)
         
@@ -84,7 +53,6 @@ def compress_image(image_file, max_size_kb=30):
         return None
 
 def get_image_from_base64(image_data):
-    """Get image from base64 data."""
     try:
         image_bytes = base64.b64decode(image_data)
         return Image.open(BytesIO(image_bytes))
