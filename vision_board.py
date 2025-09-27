@@ -147,13 +147,18 @@ if not st.session_state.vision_board_df.empty:
         if st.session_state.get("show_management", False):
             new_image = st.file_uploader("Upload Image", type=['png', 'jpg', 'jpeg'], key="new_image_input")
             
-            if new_image:
+            if new_image and new_image not in st.session_state.get("uploaded_files", []):
                 try:
                     compressed_data = compress_image(new_image)
                     if compressed_data:
                         ws.append_row([compressed_data])
                         st.success("Image added to your vision board!")
                         st.session_state.vision_board_df = pd.DataFrame(ws.get_all_records())
+                        
+                        if "uploaded_files" not in st.session_state:
+                            st.session_state.uploaded_files = []
+                        st.session_state.uploaded_files.append(new_image)
+                        
                         st.rerun()
                     else:
                         st.error("Failed to compress image.")
@@ -175,6 +180,7 @@ if not st.session_state.vision_board_df.empty:
             if st.session_state.get("show_management", False):
                 if st.button("☁️ Save", help="Close management section"):
                     st.session_state["show_management"] = False
+                    st.session_state.uploaded_files = []
                     st.rerun()
 
 else:
@@ -187,13 +193,18 @@ else:
     if st.session_state.get("show_management", False):
         new_image = st.file_uploader("Upload Image", type=['png', 'jpg', 'jpeg'], key="new_image_input_empty")
         
-        if new_image:
+        if new_image and new_image not in st.session_state.get("uploaded_files", []):
             try:
                 compressed_data = compress_image(new_image)
                 if compressed_data:
                     ws.append_row([compressed_data])
                     st.success("Image added to your vision board!")
                     st.session_state.vision_board_df = pd.DataFrame(ws.get_all_records())
+                    
+                    if "uploaded_files" not in st.session_state:
+                        st.session_state.uploaded_files = []
+                    st.session_state.uploaded_files.append(new_image)
+                    
                     st.rerun()
                 else:
                     st.error("Failed to compress image.")
@@ -202,4 +213,5 @@ else:
         
         if st.button("☁️ Save", help="Close management section"):
             st.session_state["show_management"] = False
+            st.session_state.uploaded_files = []
             st.rerun()
