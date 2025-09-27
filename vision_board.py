@@ -146,26 +146,31 @@ if not df.empty:
                                 st.error(f"Image could not be displayed: {str(e)}")
         
         if st.session_state.get("show_management", False):
-            new_image = st.file_uploader("Upload Image", type=['png', 'jpg', 'jpeg'], key="new_image_input")
+            new_images = st.file_uploader("Upload Images", type=['png', 'jpg', 'jpeg'], key="new_image_input", accept_multiple_files=True)
             
-            if new_image and new_image not in st.session_state.get("uploaded_files", []):
-                try:
-                    compressed_data = compress_image(new_image)
-                    if compressed_data:
-                        ws.append_row([compressed_data])
-                        st.success("Image added to your vision board!")
-                        st.session_state.vision_board_df = pd.DataFrame(ws.get_all_records())
-                        df = st.session_state.vision_board_df.copy()
-                        
-                        if "uploaded_files" not in st.session_state:
-                            st.session_state.uploaded_files = []
-                        st.session_state.uploaded_files.append(new_image)
-                        
-                        st.rerun()
-                    else:
-                        st.error("Failed to compress image.")
-                except Exception as e:
-                    st.error(f"Error adding image: {str(e)}")
+            if new_images:
+                uploaded_count = 0
+                for new_image in new_images:
+                    if new_image not in st.session_state.get("uploaded_files", []):
+                        try:
+                            compressed_data = compress_image(new_image)
+                            if compressed_data:
+                                ws.append_row([compressed_data])
+                                uploaded_count += 1
+                                
+                                if "uploaded_files" not in st.session_state:
+                                    st.session_state.uploaded_files = []
+                                st.session_state.uploaded_files.append(new_image)
+                            else:
+                                st.error(f"Failed to compress {new_image.name}")
+                        except Exception as e:
+                            st.error(f"Error adding {new_image.name}: {str(e)}")
+                
+                if uploaded_count > 0:
+                    st.success(f"{uploaded_count} image(s) added to your vision board!")
+                    st.session_state.vision_board_df = pd.DataFrame(ws.get_all_records())
+                    df = st.session_state.vision_board_df.copy()
+                    st.rerun()
         
         col1, col2 = st.columns([1, 1])
         
@@ -189,26 +194,31 @@ else:
         st.rerun()
     
     if st.session_state.get("show_management", False):
-        new_image = st.file_uploader("Upload Image", type=['png', 'jpg', 'jpeg'], key="new_image_input_empty")
+        new_images = st.file_uploader("Upload Images", type=['png', 'jpg', 'jpeg'], key="new_image_input_empty", accept_multiple_files=True)
         
-        if new_image and new_image not in st.session_state.get("uploaded_files", []):
-            try:
-                compressed_data = compress_image(new_image)
-                if compressed_data:
-                    ws.append_row([compressed_data])
-                    st.success("Image added to your vision board!")
-                    st.session_state.vision_board_df = pd.DataFrame(ws.get_all_records())
-                    df = st.session_state.vision_board_df.copy()
-                    
-                    if "uploaded_files" not in st.session_state:
-                        st.session_state.uploaded_files = []
-                    st.session_state.uploaded_files.append(new_image)
-                    
-                    st.rerun()
-                else:
-                    st.error("Failed to compress image.")
-            except Exception as e:
-                st.error(f"Error adding image: {str(e)}")
+        if new_images:
+            uploaded_count = 0
+            for new_image in new_images:
+                if new_image not in st.session_state.get("uploaded_files", []):
+                    try:
+                        compressed_data = compress_image(new_image)
+                        if compressed_data:
+                            ws.append_row([compressed_data])
+                            uploaded_count += 1
+                            
+                            if "uploaded_files" not in st.session_state:
+                                st.session_state.uploaded_files = []
+                            st.session_state.uploaded_files.append(new_image)
+                        else:
+                            st.error(f"Failed to compress {new_image.name}")
+                    except Exception as e:
+                        st.error(f"Error adding {new_image.name}: {str(e)}")
+            
+            if uploaded_count > 0:
+                st.success(f"{uploaded_count} image(s) added to your vision board!")
+                st.session_state.vision_board_df = pd.DataFrame(ws.get_all_records())
+                df = st.session_state.vision_board_df.copy()
+                st.rerun()
         
         if st.button("☁️ Save", help="Close management section"):
             st.session_state["show_management"] = False
