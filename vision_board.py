@@ -79,21 +79,14 @@ st.title("🎨 Vision Board")
 if not st.session_state.vision_board_df.empty:
     df = st.session_state.vision_board_df.copy()
     
-    # Debug: Show what's in the dataframe
-    st.write("Debug - DataFrame columns:", df.columns.tolist())
-    st.write("Debug - DataFrame shape:", df.shape)
-    st.write("Debug - First few rows:", df.head())
-    
     image_col = None
     for col in df.columns:
-        if col.lower() in ['image', 'image_data', 'picture', 'photo']:
+        if col.lower() in ['image', 'image_data', 'picture', 'photo', 'file_id']:
             image_col = col
             break
     
     if image_col is None and len(df.columns) > 0:
         image_col = df.columns[0]
-    
-    st.write(f"Debug - Using column: {image_col}")
     
     if image_col is None:
         st.error("No data found in the Google Sheet. Please add some images.")
@@ -114,7 +107,7 @@ if not st.session_state.vision_board_df.empty:
                             try:
                                 image = get_image_from_base64(image_data)
                                 if image:
-                                    st.image(image, use_column_width=True)
+                                    st.image(image, use_container_width=True)
                                 else:
                                     st.write("Could not load image from base64")
                                 
