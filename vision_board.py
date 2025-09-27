@@ -16,7 +16,6 @@ creds = Credentials.from_service_account_info(
     scopes=SCOPES
 )
 client = gspread.authorize(creds)
-
 ws = client.open("vision_board").sheet1
 
 def compress_image(image_file, max_size_kb=30):
@@ -63,11 +62,11 @@ def get_image_from_base64(image_data):
 if "vision_board_df" not in st.session_state:
     st.session_state.vision_board_df = pd.DataFrame(ws.get_all_records())
 
+df = st.session_state.vision_board_df.copy()
+
 st.title("🎨 Vision Board")
 
-if not st.session_state.vision_board_df.empty:
-    df = st.session_state.vision_board_df.copy()
-    
+if not df.empty:
     image_col = None
     for col in df.columns:
         if col.lower() in ['image', 'image_data', 'picture', 'photo', 'file_id']:
@@ -109,6 +108,7 @@ if not st.session_state.vision_board_df.empty:
                                                 ws.delete_rows(idx + 2)
                                                 st.success("Image deleted from vision board!")
                                                 st.session_state.vision_board_df = pd.DataFrame(ws.get_all_records())
+                                                df = st.session_state.vision_board_df.copy()
                                                 st.rerun()
                                             except Exception as e:
                                                 st.error(f"Error deleting image: {str(e)}")
@@ -129,6 +129,7 @@ if not st.session_state.vision_board_df.empty:
                                                             st.success("Image updated successfully!")
                                                             st.session_state[f"editing_{idx}"] = False
                                                             st.session_state.vision_board_df = pd.DataFrame(ws.get_all_records())
+                                                            df = st.session_state.vision_board_df.copy()
                                                             st.rerun()
                                                         else:
                                                             st.error("Failed to compress image.")
@@ -154,6 +155,7 @@ if not st.session_state.vision_board_df.empty:
                         ws.append_row([compressed_data])
                         st.success("Image added to your vision board!")
                         st.session_state.vision_board_df = pd.DataFrame(ws.get_all_records())
+                        df = st.session_state.vision_board_df.copy()
                         
                         if "uploaded_files" not in st.session_state:
                             st.session_state.uploaded_files = []
@@ -164,7 +166,6 @@ if not st.session_state.vision_board_df.empty:
                         st.error("Failed to compress image.")
                 except Exception as e:
                     st.error(f"Error adding image: {str(e)}")
-        
         
         col1, col2 = st.columns([1, 1])
         
@@ -197,6 +198,7 @@ else:
                     ws.append_row([compressed_data])
                     st.success("Image added to your vision board!")
                     st.session_state.vision_board_df = pd.DataFrame(ws.get_all_records())
+                    df = st.session_state.vision_board_df.copy()
                     
                     if "uploaded_files" not in st.session_state:
                         st.session_state.uploaded_files = []
