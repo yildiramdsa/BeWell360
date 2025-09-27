@@ -65,8 +65,17 @@ def compress_image(image_file, max_size_kb=30):
 def get_image_from_base64(image_data):
     """Get image from base64 data."""
     try:
+        # Debug: Check if data looks like base64
+        st.write(f"Debug - First 50 chars: {str(image_data)[:50]}")
+        st.write(f"Debug - Last 50 chars: {str(image_data)[-50:]}")
+        
         image_bytes = base64.b64decode(image_data)
-        return Image.open(BytesIO(image_bytes))
+        st.write(f"Debug - Decoded bytes length: {len(image_bytes)}")
+        
+        image = Image.open(BytesIO(image_bytes))
+        st.write(f"Debug - Image format: {image.format}, size: {image.size}")
+        
+        return image
     except Exception as e:
         st.error(f"Error loading image from base64: {str(e)}")
         return None
@@ -103,7 +112,6 @@ if not st.session_state.vision_board_df.empty:
                     
                     if image_data:
                         with col:
-                            st.write(f"Debug - Image data length: {len(str(image_data))}")
                             try:
                                 image = get_image_from_base64(image_data)
                                 if image:
