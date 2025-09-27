@@ -5,12 +5,9 @@ from google.oauth2.service_account import Credentials
 import base64
 from io import BytesIO
 from PIL import Image
-from googleapiclient.discovery import build
-from googleapiclient.http import MediaIoBaseUpload, MediaIoBaseDownload
 
 SCOPES = [
-    "https://www.googleapis.com/auth/spreadsheets",
-    "https://www.googleapis.com/auth/drive"
+    "https://www.googleapis.com/auth/spreadsheets"
 ]
 
 creds = Credentials.from_service_account_info(
@@ -20,23 +17,16 @@ creds = Credentials.from_service_account_info(
 client = gspread.authorize(creds)
 ws = client.open("vision_board").sheet1
 
-# Google Drive service for file uploads
-drive_service = build('drive', 'v3', credentials=creds)
-
 def compress_image(image_file, max_size_kb=30):
     """Compress image to fit within Google Sheets character limit."""
     try:
-        # Read the image
         image = Image.open(image_file)
         
-        # Convert to RGB if necessary
         if image.mode in ('RGBA', 'LA', 'P'):
             image = image.convert('RGB')
         
-        # Calculate target size (30KB = ~40,000 characters in base64)
         target_size = max_size_kb * 1024
         
-        # Start with high quality and reduce until it fits
         for quality in range(95, 10, -5):
             output = BytesIO()
             image.save(output, format='JPEG', quality=quality, optimize=True)
@@ -45,7 +35,6 @@ def compress_image(image_file, max_size_kb=30):
                 output.seek(0)
                 return base64.b64encode(output.read()).decode()
         
-        # If still too large, resize the image
         for scale in [0.8, 0.6, 0.4, 0.2]:
             new_size = (int(image.width * scale), int(image.height * scale))
             resized = image.resize(new_size, Image.Resampling.LANCZOS)
@@ -65,17 +54,8 @@ def compress_image(image_file, max_size_kb=30):
 def get_image_from_base64(image_data):
     """Get image from base64 data."""
     try:
-        # Debug: Check if data looks like base64
-        st.write(f"Debug - First 50 chars: {str(image_data)[:50]}")
-        st.write(f"Debug - Last 50 chars: {str(image_data)[-50:]}")
-        
         image_bytes = base64.b64decode(image_data)
-        st.write(f"Debug - Decoded bytes length: {len(image_bytes)}")
-        
-        image = Image.open(BytesIO(image_bytes))
-        st.write(f"Debug - Image format: {image.format}, size: {image.size}")
-        
-        return image
+        return Image.open(BytesIO(image_bytes))
     except Exception as e:
         st.error(f"Error loading image from base64: {str(e)}")
         return None
@@ -100,7 +80,6 @@ if not st.session_state.vision_board_df.empty:
     if image_col is None:
         st.error("No data found in the Google Sheet. Please add some images.")
     else:
-        # Display images in a grid
         images_per_row = 3
         for i in range(0, len(df), images_per_row):
             cols = st.columns(images_per_row)
@@ -115,17 +94,17 @@ if not st.session_state.vision_board_df.empty:
                             try:
                                 image = get_image_from_base64(image_data)
                                 if image:
-                                    st.image(image, use_container_width=True)
+                                    st.image(image, width='stretch')
                                 else:
-                                    st.write("Could not load image from base64")
+                                    st.error("Could not load image")
                                 
                                 if st.session_state.get("show_management", False):
                                     col_edit, col_delete = st.columns([1, 1])
                                     with col_edit:
-                                        if st.button("✏️", key=f"edit_{idx}", help="Edit", use_container_width=True):
+                                        if st.button("✏️", key=f"edit_{idx}", help="Edit", width='stretch'):
                                             st.session_state[f"editing_{idx}"] = True
                                     with col_delete:
-                                        if st.button("🗑️", key=f"delete_{idx}", help="Delete", use_container_width=True):
+                                        if st.button("🗑️", key=f"delete_{idx}", help="Delete", width='stretch'):
                                             try:
                                                 ws.delete_rows(idx + 2)
                                                 st.success("Image deleted from vision board!")
@@ -163,7 +142,7 @@ if not st.session_state.vision_board_df.empty:
                                                 st.session_state[f"editing_{idx}"] = False
                                                 st.rerun()
                             except Exception as e:
-                                st.write(f"Image could not be displayed: {str(e)}")
+                                st.error(f"Image could not be displayed: {str(e)}")
         
         if st.session_state.get("show_management", False):
             st.subheader("Add New Image")
