@@ -7,7 +7,8 @@ from io import BytesIO
 from PIL import Image
 
 SCOPES = [
-    "https://www.googleapis.com/auth/spreadsheets"
+    "https://www.googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/auth/drive"
 ]
 
 creds = Credentials.from_service_account_info(
@@ -35,6 +36,16 @@ except gspread.SpreadsheetNotFound:
     4. Add header in cell A1: **image_data**
     5. Share the sheet with your service account email
     6. Refresh this page
+    """)
+    st.stop()
+except Exception as e:
+    st.error(f"""
+    **Authentication Error: {str(e)}**
+    
+    Please check:
+    1. Service account has access to Google Drive
+    2. Service account email is shared on the sheet
+    3. Credentials are properly configured
     """)
     st.stop()
 
