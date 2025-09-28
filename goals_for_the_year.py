@@ -79,12 +79,24 @@ if not st.session_state.yearly_goals_df.empty:
                 col1, col2, col3 = st.columns([4, 1, 1])
                 
                 with col1:
+                    # Create display text with additional info
+                    display_parts = [goal_name]
+                    if category:
+                        display_parts.append(f"[{category}]")
+                    if deadline:
+                        display_parts.append(f"Due: {deadline}")
+                    
+                    display_text = " | ".join(display_parts)
+                    
                     checked = st.checkbox(
-                        goal_name,
+                        display_text,
                         value=st.session_state.yearly_goals_completed.get(goal_key, False),
                         key=f"check_{goal_key}"
                     )
                     st.session_state.yearly_goals_completed[goal_key] = checked
+                    
+                    if why:
+                        st.caption(f"Why: {why}")
                 
                 with col2:
                     if st.button("✏️", key=f"edit_{idx}", help="Edit", width='stretch'):
@@ -100,12 +112,24 @@ if not st.session_state.yearly_goals_df.empty:
                         except Exception as e:
                             st.error(f"Error deleting goal: {str(e)}")
             else:
+                # Create display text with additional info
+                display_parts = [goal_name]
+                if category:
+                    display_parts.append(f"[{category}]")
+                if deadline:
+                    display_parts.append(f"Due: {deadline}")
+                
+                display_text = " | ".join(display_parts)
+                
                 checked = st.checkbox(
-                    goal_name,
+                    display_text,
                     value=st.session_state.yearly_goals_completed.get(goal_key, False),
                     key=f"check_{goal_key}"
                 )
                 st.session_state.yearly_goals_completed[goal_key] = checked
+                
+                if why:
+                    st.caption(f"Why: {why}")
             
             if st.session_state.get(f"editing_{idx}", False):
                 with st.expander(f"Edit: {goal_name}", expanded=True):
