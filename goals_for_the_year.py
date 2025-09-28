@@ -75,46 +75,37 @@ if not st.session_state.yearly_goals_df.empty:
             if goal_name == '':
                 continue
             
-            # Compact display
-            col1, col2 = st.columns([4, 1])
-            
-            with col1:
-                info_parts = []
-                if category:
-                    info_parts.append(category)
-                if deadline:
-                    info_parts.append(deadline)
+            if st.session_state.get("show_management", False):
+                col1, col2, col3 = st.columns([4, 1, 1])
                 
-                if info_parts:
-                    st.markdown(f"**{goal_name}** | {' | '.join(info_parts)}")
-                else:
-                    st.markdown(f"**{goal_name}**")
-                
-                if why:
-                    st.caption(why)
-            
-            with col2:
-                if st.session_state.get("show_management", False):
-                    col_edit, col_delete = st.columns([1, 1])
-                    with col_edit:
-                        if st.button("✏️", key=f"edit_{idx}", help="Edit", width='stretch'):
-                            st.session_state[f"editing_{idx}"] = True
-                    with col_delete:
-                        if st.button("🗑️", key=f"delete_{idx}", help="Delete", width='stretch'):
-                            try:
-                                ws.delete_rows(idx + 2)
-                                st.success("Goal deleted successfully!")
-                                st.session_state.yearly_goals_df = pd.DataFrame(ws.get_all_records(expected_headers=["category", "goal", "by_when", "why_i_want_it"]))
-                                st.rerun()
-                            except Exception as e:
-                                st.error(f"Error deleting goal: {str(e)}")
-                else:
+                with col1:
                     checked = st.checkbox(
-                        "",
+                        goal_name,
                         value=st.session_state.yearly_goals_completed.get(goal_key, False),
                         key=f"check_{goal_key}"
                     )
                     st.session_state.yearly_goals_completed[goal_key] = checked
+                
+                with col2:
+                    if st.button("✏️", key=f"edit_{idx}", help="Edit", width='stretch'):
+                        st.session_state[f"editing_{idx}"] = True
+                
+                with col3:
+                    if st.button("🗑️", key=f"delete_{idx}", help="Delete", width='stretch'):
+                        try:
+                            ws.delete_rows(idx + 2)
+                            st.success("Goal deleted successfully!")
+                            st.session_state.yearly_goals_df = pd.DataFrame(ws.get_all_records(expected_headers=["category", "goal", "by_when", "why_i_want_it"]))
+                            st.rerun()
+                        except Exception as e:
+                            st.error(f"Error deleting goal: {str(e)}")
+            else:
+                checked = st.checkbox(
+                    goal_name,
+                    value=st.session_state.yearly_goals_completed.get(goal_key, False),
+                    key=f"check_{goal_key}"
+                )
+                st.session_state.yearly_goals_completed[goal_key] = checked
             
             if st.session_state.get(f"editing_{idx}", False):
                 with st.expander(f"Edit: {goal_name}", expanded=True):
