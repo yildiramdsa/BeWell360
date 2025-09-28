@@ -27,7 +27,7 @@ CATEGORIES = [
 ]
 
 if "yearly_goals_df" not in st.session_state:
-    st.session_state.yearly_goals_df = pd.DataFrame(ws.get_all_records(expected_headers=["Category", "Goal", "By When", "Why I Want It"]))
+    st.session_state.yearly_goals_df = pd.DataFrame(ws.get_all_records(expected_headers=["category", "goal", "by_when", "why_i_want_it"]))
 
 if "yearly_goals_completed" not in st.session_state:
     st.session_state.yearly_goals_completed = {}
@@ -46,11 +46,11 @@ if not st.session_state.yearly_goals_df.empty:
         col_lower = col.lower()
         if col_lower in ['category']:
             category_col = col
-        elif col_lower in ['goal', 'what i want', 'specific goal']:
+        elif col_lower in ['goal']:
             goal_col = col
-        elif col_lower in ['by when', 'deadline', 'when']:
+        elif col_lower in ['by_when', 'by when']:
             deadline_col = col
-        elif col_lower in ['why', 'why i want it', 'reason']:
+        elif col_lower in ['why_i_want_it', 'why i want it']:
             why_col = col
     
     if category_col is None and len(df.columns) > 0:
@@ -124,7 +124,7 @@ if not st.session_state.yearly_goals_df.empty:
                                              range_name=f"A{idx+2}:D{idx+2}")
                                     st.success("Goal updated successfully!")
                                     st.session_state[f"editing_{idx}"] = False
-                                    st.session_state.yearly_goals_df = pd.DataFrame(ws.get_all_records(expected_headers=["Category", "Goal", "By When", "Why I Want It"]))
+                                    st.session_state.yearly_goals_df = pd.DataFrame(ws.get_all_records(expected_headers=["category", "goal", "by_when", "why_i_want_it"]))
                                     st.rerun()
                                 except Exception as e:
                                     st.error(f"Error updating goal: {str(e)}")
@@ -176,7 +176,7 @@ if not st.session_state.yearly_goals_df.empty:
                         try:
                             ws.append_row(st.session_state["pending_goal"])
                             st.success(f"Added '{st.session_state['pending_goal'][1]}' to your yearly goals!")
-                            st.session_state.yearly_goals_df = pd.DataFrame(ws.get_all_records(expected_headers=["Category", "Goal", "By When", "Why I Want It"]))
+                            st.session_state.yearly_goals_df = pd.DataFrame(ws.get_all_records(expected_headers=["category", "goal", "by_when", "why_i_want_it"]))
                             st.session_state["pending_goal"] = []
                             st.rerun()
                         except Exception as e:
@@ -208,7 +208,7 @@ else:
                 try:
                     ws.append_row(st.session_state["pending_goal"])
                     st.success(f"Added '{st.session_state['pending_goal'][1]}' to your yearly goals!")
-                    st.session_state.yearly_goals_df = pd.DataFrame(ws.get_all_records(expected_headers=["Category", "Goal", "By When", "Why I Want It"]))
+                    st.session_state.yearly_goals_df = pd.DataFrame(ws.get_all_records(expected_headers=["category", "goal", "by_when", "why_i_want_it"]))
                     st.session_state["pending_goal"] = []
                     st.rerun()
                 except Exception as e:
