@@ -132,6 +132,13 @@ if not st.session_state.yearly_goals_df.empty:
                             st.session_state[f"editing_{idx}"] = False
                             st.rerun()
         
+        total_items = len([row for _, row in df.iterrows() if str(row.get(goal_col, '')).strip()])
+        checked_items = sum(st.session_state.yearly_goals_completed.values())
+        progress = checked_items / total_items if total_items > 0 else 0
+        
+        st.progress(progress)
+        st.caption(f"Completed: {checked_items}/{total_items} goals ({progress:.0%})")
+        
         if st.session_state.get("show_management", False):
             st.subheader("Add New Goal")
             
@@ -142,13 +149,6 @@ if not st.session_state.yearly_goals_df.empty:
             
             if new_goal.strip():
                 st.session_state["pending_goal"] = [new_category, new_goal.strip(), new_deadline.strip(), new_why.strip()]
-        
-        total_items = len([row for _, row in df.iterrows() if str(row.get(goal_col, '')).strip()])
-        checked_items = sum(st.session_state.yearly_goals_completed.values())
-        progress = checked_items / total_items if total_items > 0 else 0
-        
-        st.progress(progress)
-        st.caption(f"Completed: {checked_items}/{total_items} goals ({progress:.0%})")
         
         col1, col2 = st.columns([1, 1])
         
