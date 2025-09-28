@@ -79,18 +79,16 @@ if not st.session_state.yearly_goals_df.empty:
                 col1, col2, col3 = st.columns([4, 1, 1])
                 
                 with col1:
-                    # Create display text with additional info
-                    display_parts = [goal_name]
+                    # Create display text with better formatting
+                    display_parts = [f"**{goal_name}**"]
                     if category:
-                        display_parts.append(f"[{category}]")
+                        display_parts.append(f"*{category}*")
                     if deadline:
-                        display_parts.append(f"Due: {deadline}")
+                        display_parts.append(f"📅 {deadline}")
+                    if why:
+                        display_parts.append(f"💭 {why}")
                     
                     display_text = " | ".join(display_parts)
-                    
-                    # Include why in the main display text
-                    if why:
-                        display_text += f" | Why: {why}"
                     
                     checked = st.checkbox(
                         display_text,
@@ -113,18 +111,16 @@ if not st.session_state.yearly_goals_df.empty:
                         except Exception as e:
                             st.error(f"Error deleting goal: {str(e)}")
             else:
-                # Create display text with additional info
-                display_parts = [goal_name]
+                # Create display text with better formatting
+                display_parts = [f"**{goal_name}**"]
                 if category:
-                    display_parts.append(f"[{category}]")
+                    display_parts.append(f"*{category}*")
                 if deadline:
-                    display_parts.append(f"Due: {deadline}")
+                    display_parts.append(f"📅 {deadline}")
+                if why:
+                    display_parts.append(f"💭 {why}")
                 
                 display_text = " | ".join(display_parts)
-                
-                # Include why in the main display text
-                if why:
-                    display_text += f" | Why: {why}"
                 
                 checked = st.checkbox(
                     display_text,
