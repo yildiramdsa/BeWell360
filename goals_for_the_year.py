@@ -112,8 +112,7 @@ if not st.session_state.yearly_goals_df.empty:
                     checked = st.checkbox(
                         "",
                         value=st.session_state.yearly_goals_completed.get(goal_key, False),
-                        key=f"check_{goal_key}",
-                        help="Mark as completed"
+                        key=f"check_{goal_key}"
                     )
                     st.session_state.yearly_goals_completed[goal_key] = checked
             
