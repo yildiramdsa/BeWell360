@@ -187,6 +187,12 @@ if not st.session_state.yearly_goals_df.empty:
                         if key.startswith("editing_"):
                             st.session_state[key] = False
                     
+                    # Clear form inputs
+                    st.session_state["new_category_input"] = CATEGORIES[0]
+                    st.session_state["new_goal_input"] = ""
+                    st.session_state["new_deadline_input"] = ""
+                    st.session_state["new_why_input"] = ""
+                    
                     st.session_state["show_management"] = False
                     st.rerun()
 
@@ -223,6 +229,12 @@ else:
             for key in list(st.session_state.keys()):
                 if key.startswith("editing_"):
                     st.session_state[key] = False
+            
+            # Clear form inputs
+            st.session_state["new_category_input_empty"] = CATEGORIES[0]
+            st.session_state["new_goal_input_empty"] = ""
+            st.session_state["new_deadline_input_empty"] = ""
+            st.session_state["new_why_input_empty"] = ""
             
             st.session_state["show_management"] = False
             st.rerun()
