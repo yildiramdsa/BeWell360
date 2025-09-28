@@ -178,7 +178,6 @@ if not st.session_state.yearly_goals_df.empty:
                             st.success(f"Added '{st.session_state['pending_goal'][1]}' to your yearly goals!")
                             st.session_state.yearly_goals_df = pd.DataFrame(ws.get_all_records(expected_headers=["category", "goal", "by_when", "why_i_want_it"]))
                             st.session_state["pending_goal"] = []
-                            st.rerun()
                         except Exception as e:
                             st.error(f"Error adding goal: {str(e)}")
                     
@@ -221,7 +220,6 @@ else:
                     st.success(f"Added '{st.session_state['pending_goal'][1]}' to your yearly goals!")
                     st.session_state.yearly_goals_df = pd.DataFrame(ws.get_all_records(expected_headers=["category", "goal", "by_when", "why_i_want_it"]))
                     st.session_state["pending_goal"] = []
-                    st.rerun()
                 except Exception as e:
                     st.error(f"Error adding goal: {str(e)}")
             
