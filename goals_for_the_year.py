@@ -75,43 +75,44 @@ if not st.session_state.yearly_goals_df.empty:
             if goal_name == '':
                 continue
             
-            # Create a more user-friendly display
-            with st.container():
-                col1, col2 = st.columns([3, 1])
-                
-                with col1:
-                    st.markdown(f"### {goal_name}")
-                    if category:
-                        st.markdown(f"**Category:** {category}")
-                    if deadline:
-                        st.markdown(f"**Due:** {deadline}")
-                    if why:
-                        st.markdown(f"*{why}*")
-                
-                with col2:
-                    if st.session_state.get("show_management", False):
-                        col_edit, col_delete = st.columns([1, 1])
-                        with col_edit:
-                            if st.button("✏️", key=f"edit_{idx}", help="Edit", width='stretch'):
-                                st.session_state[f"editing_{idx}"] = True
-                        with col_delete:
-                            if st.button("🗑️", key=f"delete_{idx}", help="Delete", width='stretch'):
-                                try:
-                                    ws.delete_rows(idx + 2)
-                                    st.success("Goal deleted successfully!")
-                                    st.session_state.yearly_goals_df = pd.DataFrame(ws.get_all_records(expected_headers=["category", "goal", "by_when", "why_i_want_it"]))
-                                    st.rerun()
-                                except Exception as e:
-                                    st.error(f"Error deleting goal: {str(e)}")
-                    else:
-                        checked = st.checkbox(
-                            "Completed",
-                            value=st.session_state.yearly_goals_completed.get(goal_key, False),
-                            key=f"check_{goal_key}"
-                        )
-                        st.session_state.yearly_goals_completed[goal_key] = checked
-                
-                st.divider()
+            # Compact display
+            col1, col2 = st.columns([4, 1])
+            
+            with col1:
+                st.markdown(f"**{goal_name}**")
+                info_parts = []
+                if category:
+                    info_parts.append(f"📂 {category}")
+                if deadline:
+                    info_parts.append(f"📅 {deadline}")
+                if info_parts:
+                    st.caption(" | ".join(info_parts))
+                if why:
+                    st.caption(f"💭 {why}")
+            
+            with col2:
+                if st.session_state.get("show_management", False):
+                    col_edit, col_delete = st.columns([1, 1])
+                    with col_edit:
+                        if st.button("✏️", key=f"edit_{idx}", help="Edit", width='stretch'):
+                            st.session_state[f"editing_{idx}"] = True
+                    with col_delete:
+                        if st.button("🗑️", key=f"delete_{idx}", help="Delete", width='stretch'):
+                            try:
+                                ws.delete_rows(idx + 2)
+                                st.success("Goal deleted successfully!")
+                                st.session_state.yearly_goals_df = pd.DataFrame(ws.get_all_records(expected_headers=["category", "goal", "by_when", "why_i_want_it"]))
+                                st.rerun()
+                            except Exception as e:
+                                st.error(f"Error deleting goal: {str(e)}")
+                else:
+                    checked = st.checkbox(
+                        "✓",
+                        value=st.session_state.yearly_goals_completed.get(goal_key, False),
+                        key=f"check_{goal_key}",
+                        help="Mark as completed"
+                    )
+                    st.session_state.yearly_goals_completed[goal_key] = checked
             
             if st.session_state.get(f"editing_{idx}", False):
                 with st.expander(f"Edit: {goal_name}", expanded=True):
