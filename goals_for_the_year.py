@@ -75,74 +75,68 @@ if not st.session_state.yearly_goals_df.empty:
             if goal_name == '':
                 continue
             
-            display_text = f"**{goal_name}**"
-            if category:
-                display_text += f" | {category}"
-            if deadline:
-                display_text += f" | Due: {deadline}"
-            
-            if st.session_state.get("show_management", False):
-                col1, col2, col3 = st.columns([4, 1, 1])
+            # Create a more user-friendly display
+            with st.container():
+                col1, col2 = st.columns([3, 1])
                 
                 with col1:
-                    checked = st.checkbox(
-                        display_text,
-                        value=st.session_state.yearly_goals_completed.get(goal_key, False),
-                        key=f"check_{goal_key}"
-                    )
-                    st.session_state.yearly_goals_completed[goal_key] = checked
-                    
+                    st.markdown(f"### {goal_name}")
+                    if category:
+                        st.markdown(f"**Category:** {category}")
+                    if deadline:
+                        st.markdown(f"**Due:** {deadline}")
                     if why:
-                        st.caption(f"Why: {why}")
+                        st.markdown(f"*{why}*")
                 
                 with col2:
-                    if st.button("✏️", key=f"edit_{idx}", help="Edit", width='stretch'):
-                        st.session_state[f"editing_{idx}"] = True
-                
-                with col3:
-                    if st.button("🗑️", key=f"delete_{idx}", help="Delete", width='stretch'):
-                        try:
-                            ws.delete_rows(idx + 2)
-                            st.success(f"Deleted '{goal_name}' from goals!")
-                            st.session_state.yearly_goals_df = pd.DataFrame(ws.get_all_records())
-                            st.rerun()
-                        except Exception as e:
-                            st.error(f"Error deleting goal: {str(e)}")
-                
-                if st.session_state.get(f"editing_{idx}", False):
-                    with st.expander(f"Edit: {goal_name}", expanded=True):
-                        edit_category = st.selectbox("Category", CATEGORIES, index=CATEGORIES.index(category) if category in CATEGORIES else 0, key=f"edit_category_{idx}")
-                        edit_goal = st.text_input("What I Want (Specific Goal)", value=goal_name, key=f"edit_goal_{idx}")
-                        edit_deadline = st.text_input("By When", value=deadline, key=f"edit_deadline_{idx}")
-                        edit_why = st.text_area("Why I Want It", value=why, key=f"edit_why_{idx}")
-                        
-                        edit_save_col, edit_cancel_col = st.columns([1, 1])
-                        with edit_save_col:
-                            if st.button("☁️ Save Changes", key=f"save_edit_{idx}"):
+                    if st.session_state.get("show_management", False):
+                        col_edit, col_delete = st.columns([1, 1])
+                        with col_edit:
+                            if st.button("✏️", key=f"edit_{idx}", help="Edit", width='stretch'):
+                                st.session_state[f"editing_{idx}"] = True
+                        with col_delete:
+                            if st.button("🗑️", key=f"delete_{idx}", help="Delete", width='stretch'):
                                 try:
-                                    ws.update(values=[[edit_category, edit_goal, edit_deadline, edit_why]], 
-                                             range_name=f"A{idx+2}:D{idx+2}")
-                                    st.success("Goal updated successfully!")
-                                    st.session_state[f"editing_{idx}"] = False
+                                    ws.delete_rows(idx + 2)
+                                    st.success("Goal deleted successfully!")
                                     st.session_state.yearly_goals_df = pd.DataFrame(ws.get_all_records(expected_headers=["category", "goal", "by_when", "why_i_want_it"]))
                                     st.rerun()
                                 except Exception as e:
-                                    st.error(f"Error updating goal: {str(e)}")
-                        
-                        with edit_cancel_col:
-                            if st.button("❌ Cancel", key=f"cancel_edit_{idx}"):
-                                st.session_state[f"editing_{idx}"] = False
-                                st.rerun()
-            else:
-                checked = st.checkbox(
-                    display_text,
-                    value=st.session_state.yearly_goals_completed.get(goal_key, False),
-                    key=f"check_{goal_key}"
-                )
-                st.session_state.yearly_goals_completed[goal_key] = checked
+                                    st.error(f"Error deleting goal: {str(e)}")
+                    else:
+                        checked = st.checkbox(
+                            "Completed",
+                            value=st.session_state.yearly_goals_completed.get(goal_key, False),
+                            key=f"check_{goal_key}"
+                        )
+                        st.session_state.yearly_goals_completed[goal_key] = checked
                 
-                if why:
-                    st.caption(f"Why: {why}")
+                st.divider()
+            
+            if st.session_state.get(f"editing_{idx}", False):
+                with st.expander(f"Edit: {goal_name}", expanded=True):
+                    edit_category = st.selectbox("Category", CATEGORIES, index=CATEGORIES.index(category) if category in CATEGORIES else 0, key=f"edit_category_{idx}")
+                    edit_goal = st.text_input("What I Want (Specific Goal)", value=goal_name, key=f"edit_goal_{idx}")
+                    edit_deadline = st.text_input("By When", value=deadline, key=f"edit_deadline_{idx}")
+                    edit_why = st.text_area("Why I Want It", value=why, key=f"edit_why_{idx}")
+                    
+                    edit_save_col, edit_cancel_col = st.columns([1, 1])
+                    with edit_save_col:
+                        if st.button("☁️ Save Changes", key=f"save_edit_{idx}"):
+                            try:
+                                ws.update(values=[[edit_category, edit_goal, edit_deadline, edit_why]], 
+                                         range_name=f"A{idx+2}:D{idx+2}")
+                                st.success("Goal updated successfully!")
+                                st.session_state[f"editing_{idx}"] = False
+                                st.session_state.yearly_goals_df = pd.DataFrame(ws.get_all_records(expected_headers=["category", "goal", "by_when", "why_i_want_it"]))
+                                st.rerun()
+                            except Exception as e:
+                                st.error(f"Error updating goal: {str(e)}")
+                    
+                    with edit_cancel_col:
+                        if st.button("❌ Cancel", key=f"cancel_edit_{idx}"):
+                            st.session_state[f"editing_{idx}"] = False
+                            st.rerun()
         
         if st.session_state.get("show_management", False):
             st.subheader("Add New Goal")
