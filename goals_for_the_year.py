@@ -27,7 +27,7 @@ CATEGORIES = [
 ]
 
 if "yearly_goals_df" not in st.session_state:
-    st.session_state.yearly_goals_df = pd.DataFrame(ws.get_all_records())
+    st.session_state.yearly_goals_df = pd.DataFrame(ws.get_all_records(expected_headers=["Category", "Goal", "By When", "Why I Want It"]))
 
 if "yearly_goals_completed" not in st.session_state:
     st.session_state.yearly_goals_completed = {}
@@ -124,7 +124,7 @@ if not st.session_state.yearly_goals_df.empty:
                                              range_name=f"A{idx+2}:D{idx+2}")
                                     st.success("Goal updated successfully!")
                                     st.session_state[f"editing_{idx}"] = False
-                                    st.session_state.yearly_goals_df = pd.DataFrame(ws.get_all_records())
+                                    st.session_state.yearly_goals_df = pd.DataFrame(ws.get_all_records(expected_headers=["Category", "Goal", "By When", "Why I Want It"]))
                                     st.rerun()
                                 except Exception as e:
                                     st.error(f"Error updating goal: {str(e)}")
@@ -152,28 +152,8 @@ if not st.session_state.yearly_goals_df.empty:
             new_deadline = st.text_input("By When", key="new_deadline_input")
             new_why = st.text_area("Why I Want It", key="new_why_input")
             
-            col1, col2 = st.columns([1, 1])
-            with col1:
-                add_clicked = st.button("➕ Add Goal", key="add_new_goal")
-            with col2:
-                if st.button("🗑️ Clear", key="clear_new_goal"):
-                    st.session_state["new_category_input"] = CATEGORIES[0]
-                    st.session_state["new_goal_input"] = ""
-                    st.session_state["new_deadline_input"] = ""
-                    st.session_state["new_why_input"] = ""
-                    st.rerun()
-            
-            if add_clicked:
-                if new_goal.strip():
-                    try:
-                        ws.append_row([new_category, new_goal.strip(), new_deadline.strip(), new_why.strip()])
-                        st.success(f"Added '{new_goal}' to your yearly goals!")
-                        st.session_state.yearly_goals_df = pd.DataFrame(ws.get_all_records())
-                        st.rerun()
-                    except Exception as e:
-                        st.error(f"Error adding goal: {str(e)}")
-                else:
-                    st.error("Please enter a goal.")
+            if new_goal.strip():
+                st.session_state["pending_goal"] = [new_category, new_goal.strip(), new_deadline.strip(), new_why.strip()]
         
         total_items = len([row for _, row in df.iterrows() if str(row.get(goal_col, '')).strip()])
         checked_items = sum(st.session_state.yearly_goals_completed.values())
@@ -191,7 +171,17 @@ if not st.session_state.yearly_goals_df.empty:
         
         with col2:
             if st.session_state.get("show_management", False):
-                if st.button("☁️ Save", help="Close management section"):
+                if st.button("☁️ Save", help="Save and close management section"):
+                    if st.session_state.get("pending_goal"):
+                        try:
+                            ws.append_row(st.session_state["pending_goal"])
+                            st.success(f"Added '{st.session_state['pending_goal'][1]}' to your yearly goals!")
+                            st.session_state.yearly_goals_df = pd.DataFrame(ws.get_all_records(expected_headers=["Category", "Goal", "By When", "Why I Want It"]))
+                            st.session_state["pending_goal"] = []
+                            st.rerun()
+                        except Exception as e:
+                            st.error(f"Error adding goal: {str(e)}")
+                    
                     st.session_state["show_management"] = False
                     st.rerun()
 
@@ -210,29 +200,19 @@ else:
         new_deadline = st.text_input("By When", key="new_deadline_input_empty")
         new_why = st.text_area("Why I Want It", key="new_why_input_empty")
         
-        col1, col2 = st.columns([1, 1])
-        with col1:
-            add_clicked = st.button("➕ Add Goal", key="add_new_goal_empty")
-        with col2:
-            if st.button("🗑️ Clear", key="clear_new_goal_empty"):
-                st.session_state["new_category_input_empty"] = CATEGORIES[0]
-                st.session_state["new_goal_input_empty"] = ""
-                st.session_state["new_deadline_input_empty"] = ""
-                st.session_state["new_why_input_empty"] = ""
-                st.rerun()
+        if new_goal.strip():
+            st.session_state["pending_goal"] = [new_category, new_goal.strip(), new_deadline.strip(), new_why.strip()]
         
-        if add_clicked:
-            if new_goal.strip():
+        if st.button("☁️ Save", help="Save and close management section"):
+            if st.session_state.get("pending_goal"):
                 try:
-                    ws.append_row([new_category, new_goal.strip(), new_deadline.strip(), new_why.strip()])
-                    st.success(f"Added '{new_goal}' to your yearly goals!")
-                    st.session_state.yearly_goals_df = pd.DataFrame(ws.get_all_records())
+                    ws.append_row(st.session_state["pending_goal"])
+                    st.success(f"Added '{st.session_state['pending_goal'][1]}' to your yearly goals!")
+                    st.session_state.yearly_goals_df = pd.DataFrame(ws.get_all_records(expected_headers=["Category", "Goal", "By When", "Why I Want It"]))
+                    st.session_state["pending_goal"] = []
                     st.rerun()
                 except Exception as e:
                     st.error(f"Error adding goal: {str(e)}")
-            else:
-                st.error("Please enter a goal.")
-        
-        if st.button("☁️ Save", help="Close management section"):
+            
             st.session_state["show_management"] = False
             st.rerun()
