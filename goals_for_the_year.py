@@ -26,6 +26,17 @@ CATEGORIES = [
     "Lifestyle & Environment"
 ]
 
+CATEGORY_ICONS = {
+    "Health & Vitality": "💪",
+    "Fun, Free Time & Family": "🎉",
+    "Relationships": "❤️",
+    "Career & Business": "💼",
+    "Financial": "💰",
+    "Personal Growth & Learning": "📚",
+    "Spiritual & Emotional Well-Being": "🧘",
+    "Lifestyle & Environment": "🏠"
+}
+
 if "yearly_goals_df" not in st.session_state:
     st.session_state.yearly_goals_df = pd.DataFrame(ws.get_all_records(expected_headers=["category", "goal", "by_when", "why_i_want_it"]))
 
@@ -82,7 +93,8 @@ if not st.session_state.yearly_goals_df.empty:
                     # Create display text with better formatting
                     display_parts = [f"**{goal_name}**"]
                     if category:
-                        display_parts.append(f"*{category}*")
+                        category_icon = CATEGORY_ICONS.get(category, "📋")
+                        display_parts.append(f"{category_icon} *{category}*")
                     if deadline:
                         display_parts.append(f"📅 {deadline}")
                     if why:
@@ -114,7 +126,8 @@ if not st.session_state.yearly_goals_df.empty:
                 # Create display text with better formatting
                 display_parts = [f"**{goal_name}**"]
                 if category:
-                    display_parts.append(f"*{category}*")
+                    category_icon = CATEGORY_ICONS.get(category, "📋")
+                    display_parts.append(f"{category_icon} *{category}*")
                 if deadline:
                     display_parts.append(f"📅 {deadline}")
                 if why:
