@@ -110,7 +110,7 @@ if not st.session_state.yearly_goals_df.empty:
                                 st.error(f"Error deleting goal: {str(e)}")
                 else:
                     checked = st.checkbox(
-                        "✓",
+                        "",
                         value=st.session_state.yearly_goals_completed.get(goal_key, False),
                         key=f"check_{goal_key}",
                         help="Mark as completed"
