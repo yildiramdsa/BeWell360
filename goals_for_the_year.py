@@ -81,9 +81,9 @@ if not st.session_state.yearly_goals_df.empty:
             with col1:
                 info_parts = []
                 if category:
-                    info_parts.append(f"📂 {category}")
+                    info_parts.append(category)
                 if deadline:
-                    info_parts.append(f"📅 {deadline}")
+                    info_parts.append(deadline)
                 
                 if info_parts:
                     st.markdown(f"**{goal_name}** | {' | '.join(info_parts)}")
@@ -91,7 +91,7 @@ if not st.session_state.yearly_goals_df.empty:
                     st.markdown(f"**{goal_name}**")
                 
                 if why:
-                    st.caption(f"💭 {why}")
+                    st.caption(why)
             
             with col2:
                 if st.session_state.get("show_management", False):
