@@ -79,14 +79,17 @@ if not st.session_state.yearly_goals_df.empty:
             col1, col2 = st.columns([4, 1])
             
             with col1:
-                st.markdown(f"**{goal_name}**")
                 info_parts = []
                 if category:
                     info_parts.append(f"📂 {category}")
                 if deadline:
                     info_parts.append(f"📅 {deadline}")
+                
                 if info_parts:
-                    st.caption(" | ".join(info_parts))
+                    st.markdown(f"**{goal_name}** | {' | '.join(info_parts)}")
+                else:
+                    st.markdown(f"**{goal_name}**")
+                
                 if why:
                     st.caption(f"💭 {why}")
             
