@@ -182,6 +182,11 @@ if not st.session_state.yearly_goals_df.empty:
                         except Exception as e:
                             st.error(f"Error adding goal: {str(e)}")
                     
+                    # Close all edit modes
+                    for key in list(st.session_state.keys()):
+                        if key.startswith("editing_"):
+                            st.session_state[key] = False
+                    
                     st.session_state["show_management"] = False
                     st.rerun()
 
@@ -213,6 +218,11 @@ else:
                     st.rerun()
                 except Exception as e:
                     st.error(f"Error adding goal: {str(e)}")
+            
+            # Close all edit modes
+            for key in list(st.session_state.keys()):
+                if key.startswith("editing_"):
+                    st.session_state[key] = False
             
             st.session_state["show_management"] = False
             st.rerun()
