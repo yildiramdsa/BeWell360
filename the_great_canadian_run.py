@@ -120,38 +120,20 @@ if not st.session_state.challenge_data.empty:
     elif len(st.session_state.challenge_data.columns) >= 2:
         total_logged = st.session_state.challenge_data.iloc[:, 1].fillna(0).astype(float).sum()
 
-# Hero Section
-st.markdown("### Your Journey Progress")
-st.write(f"**Total Distance:** {total_logged:,.0f} km / 7,800 km")
-st.write("*Every kilometer takes you further across Canada.*")
+# Main Progress Section
+col1, col2 = st.columns([2, 1])
 
-# Progress bar
-progress_percentage = min((total_logged / 7800) * 100, 100)
-st.progress(progress_percentage / 100)
-st.caption(f"Progress: {progress_percentage:.1f}%")
-
-# Log Your Kilometers
-st.markdown("### Log Your Kilometers")
-with st.form("log_run"):
-    activity_date = st.date_input("Date", value=date.today())
-    distance = st.number_input("Distance (km)", min_value=0.0, step=0.1)
+with col1:
+    st.markdown("### Your Journey Progress")
+    st.write(f"**Total Distance:** {total_logged:,.0f} km / 7,800 km")
+    st.write("*Every kilometer takes you further across Canada.*")
     
-    if st.form_submit_button("Log Run"):
-        if distance > 0:
-            try:
-                ws.append_row([str(activity_date), distance])
-                st.success("Run logged successfully!")
-                st.session_state.challenge_data = pd.DataFrame(ws.get_all_records())
-                st.rerun()
-            except Exception as e:
-                st.error(f"Error logging run: {str(e)}")
-
-# Interactive map simulation (simplified visual representation)
-st.markdown("### Your Journey Across Canada")
-col1, col2, col3 = st.columns([1, 2, 1])
-
-with col2:
-    # Simple progress visualization
+    # Progress bar
+    progress_percentage = min((total_logged / 7800) * 100, 100)
+    st.progress(progress_percentage / 100)
+    st.caption(f"Progress: {progress_percentage:.1f}%")
+    
+    # Current location
     if total_logged < 500:
         st.write("**Current Location:** Newfoundland")
         st.write("**Next Milestone:** Port aux Basques (500 km)")
@@ -170,42 +152,60 @@ with col2:
     else:
         st.write("**Congratulations!** You've completed the coast-to-coast journey!")
 
-# Combined Challenge Achievements and Journey Checkpoints
-st.markdown("### Challenge Progress & Journey Checkpoints")
-
-for tier_name, tier_info in CHALLENGE_CHECKPOINTS.items():
-    tier_completed = total_logged >= tier_info['total_km']
-    
-    # Show achievement status
-    if tier_completed:
-        st.success(f"**{tier_name}** - {tier_info['total_km']:,} km - COMPLETED!")
-        if 'badge' in tier_info['checkpoints'][-1]:
-            st.write(f"**Badge Unlocked:** {tier_info['checkpoints'][-1]['badge']}")
-    else:
-        remaining = tier_info['total_km'] - total_logged
-        st.info(f"**{tier_name}** - {tier_info['total_km']:,} km - {remaining:,.0f} km to go")
-    
-    # Show detailed checkpoints in expander
-    with st.expander(f"View {tier_name} checkpoints", expanded=False):
-        st.write(f"**Route:** {tier_info['route']}")
-        st.write(f"**Description:** {tier_info['description']}")
+with col2:
+    st.markdown("### Log Your Kilometers")
+    with st.form("log_run"):
+        activity_date = st.date_input("Date", value=date.today())
+        distance = st.number_input("Distance (km)", min_value=0.0, step=0.1)
         
-        st.write("**Checkpoints:**")
-        for checkpoint in tier_info['checkpoints']:
-            if total_logged >= checkpoint['km']:
-                st.write(f"{checkpoint['km']:,} km - {checkpoint['location']}")
-                if 'description' in checkpoint:
-                    st.write(f"   *{checkpoint['description']}*")
-                if 'badge' in checkpoint:
-                    st.write(f"   **Badge:** {checkpoint['badge']}")
-            else:
-                remaining = checkpoint['km'] - total_logged
-                st.write(f"{checkpoint['km']:,} km - {checkpoint['location']} ({remaining:,.0f} km to go)")
+        if st.form_submit_button("Log Run"):
+            if distance > 0:
+                try:
+                    ws.append_row([str(activity_date), distance])
+                    st.success("Run logged successfully!")
+                    st.session_state.challenge_data = pd.DataFrame(ws.get_all_records())
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"Error logging run: {str(e)}")
 
-# Recent runs
-if not st.session_state.challenge_data.empty:
-    st.markdown("### Recent Runs")
-    st.dataframe(st.session_state.challenge_data.tail(10), use_container_width=True)
+# Challenge Progress & Recent Runs
+col1, col2 = st.columns([2, 1])
+
+with col1:
+    st.markdown("### Challenge Progress")
+    for tier_name, tier_info in CHALLENGE_CHECKPOINTS.items():
+        tier_completed = total_logged >= tier_info['total_km']
+        
+        # Show achievement status
+        if tier_completed:
+            st.success(f"**{tier_name}** - {tier_info['total_km']:,} km - COMPLETED!")
+            if 'badge' in tier_info['checkpoints'][-1]:
+                st.write(f"**Badge Unlocked:** {tier_info['checkpoints'][-1]['badge']}")
+        else:
+            remaining = tier_info['total_km'] - total_logged
+            st.info(f"**{tier_name}** - {tier_info['total_km']:,} km - {remaining:,.0f} km to go")
+        
+        # Show detailed checkpoints in expander
+        with st.expander(f"View {tier_name} checkpoints", expanded=False):
+            st.write(f"**Route:** {tier_info['route']}")
+            st.write(f"**Description:** {tier_info['description']}")
+            
+            st.write("**Checkpoints:**")
+            for checkpoint in tier_info['checkpoints']:
+                if total_logged >= checkpoint['km']:
+                    st.write(f"{checkpoint['km']:,} km - {checkpoint['location']}")
+                    if 'description' in checkpoint:
+                        st.write(f"   *{checkpoint['description']}*")
+                    if 'badge' in checkpoint:
+                        st.write(f"   **Badge:** {checkpoint['badge']}")
+                else:
+                    remaining = checkpoint['km'] - total_logged
+                    st.write(f"{checkpoint['km']:,} km - {checkpoint['location']} ({remaining:,.0f} km to go)")
+
+with col2:
+    if not st.session_state.challenge_data.empty:
+        st.markdown("### Recent Runs")
+        st.dataframe(st.session_state.challenge_data.tail(10), use_container_width=True)
 
 # Challenge completion celebration
 if total_logged >= 7800:
