@@ -26,7 +26,7 @@ CHALLENGE_CHECKPOINTS = {
         "route": "St. John's → Port aux Basques",
         "description": "Perfect for beginners — ~10 km/week",
         "checkpoints": [
-            {"km": 0, "location": "St. John's, NL", "description": "Start"},
+            {"km": 0, "location": "St. John's, NL"},
             {"km": 100, "location": "Bishop's Falls, NL"},
             {"km": 200, "location": "Gander, NL"},
             {"km": 300, "location": "Grand Falls-Windsor, NL"},
