@@ -49,7 +49,7 @@ CATEGORY_EXAMPLES = {
 }
 
 if "yearly_goals_df" not in st.session_state:
-    st.session_state.yearly_goals_df = pd.DataFrame(ws.get_all_records(expected_headers=["category", "goal", "by_when", "why_i_want_it"]))
+    st.session_state.yearly_goals_df = pd.DataFrame(ws.get_all_records(expected_headers=["category", "goal", "why_i_want_it"]))
 
 if "yearly_goals_completed" not in st.session_state:
     st.session_state.yearly_goals_completed = {}
@@ -61,7 +61,6 @@ if not st.session_state.yearly_goals_df.empty:
     
     category_col = None
     goal_col = None
-    deadline_col = None
     why_col = None
     
     for col in df.columns:
@@ -70,8 +69,6 @@ if not st.session_state.yearly_goals_df.empty:
             category_col = col
         elif col_lower in ['goal']:
             goal_col = col
-        elif col_lower in ['by_when', 'by when']:
-            deadline_col = col
         elif col_lower in ['why_i_want_it', 'why i want it']:
             why_col = col
     
@@ -79,10 +76,8 @@ if not st.session_state.yearly_goals_df.empty:
         category_col = df.columns[0] if len(df.columns) > 0 else None
     if goal_col is None and len(df.columns) > 1:
         goal_col = df.columns[1] if len(df.columns) > 1 else None
-    if deadline_col is None and len(df.columns) > 2:
-        deadline_col = df.columns[2] if len(df.columns) > 2 else None
-    if why_col is None and len(df.columns) > 3:
-        why_col = df.columns[3] if len(df.columns) > 3 else None
+    if why_col is None and len(df.columns) > 2:
+        why_col = df.columns[2] if len(df.columns) > 2 else None
     
     if goal_col is None:
         st.error("No data found in the Google Sheet. Please add some goals.")
@@ -91,7 +86,6 @@ if not st.session_state.yearly_goals_df.empty:
             goal_key = f"goal_{idx}"
             goal_name = str(row.get(goal_col, '')).strip()
             category = str(row.get(category_col, '')).strip() if category_col else ""
-            deadline = str(row.get(deadline_col, '')).strip() if deadline_col else ""
             why = str(row.get(why_col, '')).strip() if why_col else ""
             
             if goal_name == '':
@@ -105,8 +99,6 @@ if not st.session_state.yearly_goals_df.empty:
                     display_parts = [f"**{goal_name}**"]
                     if category:
                         display_parts.append(f"*{category}*")
-                    if deadline:
-                        display_parts.append(f"🗓 **{deadline}**")
                     if why:
                         display_parts.append(f"💭 {why}")
                     
@@ -128,7 +120,7 @@ if not st.session_state.yearly_goals_df.empty:
                         try:
                             ws.delete_rows(idx + 2)
                             st.success("Goal deleted successfully!")
-                            st.session_state.yearly_goals_df = pd.DataFrame(ws.get_all_records(expected_headers=["category", "goal", "by_when", "why_i_want_it"]))
+                            st.session_state.yearly_goals_df = pd.DataFrame(ws.get_all_records(expected_headers=["category", "goal", "why_i_want_it"]))
                             st.rerun()
                         except Exception as e:
                             st.error(f"Error deleting goal: {str(e)}")
@@ -137,8 +129,6 @@ if not st.session_state.yearly_goals_df.empty:
                 display_parts = [f"**{goal_name}**"]
                 if category:
                     display_parts.append(f"*{category}*")
-                if deadline:
-                    display_parts.append(f"🗓 **{deadline}**")
                 if why:
                     display_parts.append(f"💭 {why}")
                 
@@ -154,25 +144,24 @@ if not st.session_state.yearly_goals_df.empty:
             if st.session_state.get(f"editing_{idx}", False):
                 with st.expander(f"Edit: {goal_name}", expanded=True):
                     # Create category options with examples for edit form
-                    edit_category_options = [f"{cat} <span style='color: grey; font-style: italic;'>({CATEGORY_EXAMPLES.get(cat, '')})</span>" for cat in CATEGORIES]
+                    edit_category_options = [f"{cat} ({CATEGORY_EXAMPLES.get(cat, '')})" for cat in CATEGORIES]
                     edit_selected_category = st.selectbox("Category", edit_category_options, 
                                                         index=CATEGORIES.index(category) if category in CATEGORIES else 0, 
                                                         key=f"edit_category_{idx}")
                     # Extract the actual category name (remove examples)
                     edit_category = edit_selected_category.split(" (")[0] if " (" in edit_selected_category else edit_selected_category
                     edit_goal = st.text_input("What I Want (Specific Goal)", value=goal_name, key=f"edit_goal_{idx}")
-                    edit_deadline = st.text_input("By When", value=deadline, key=f"edit_deadline_{idx}")
                     edit_why = st.text_area("Why I Want It", value=why, key=f"edit_why_{idx}")
                     
                     edit_save_col, edit_cancel_col = st.columns([1, 1])
                     with edit_save_col:
                         if st.button("☁️ Save Changes", key=f"save_edit_{idx}"):
                             try:
-                                ws.update(values=[[edit_category, edit_goal, edit_deadline, edit_why]], 
-                                         range_name=f"A{idx+2}:D{idx+2}")
+                                ws.update(values=[[edit_category, edit_goal, edit_why]], 
+                                         range_name=f"A{idx+2}:C{idx+2}")
                                 st.success("Goal updated successfully!")
                                 st.session_state[f"editing_{idx}"] = False
-                                st.session_state.yearly_goals_df = pd.DataFrame(ws.get_all_records(expected_headers=["category", "goal", "by_when", "why_i_want_it"]))
+                                st.session_state.yearly_goals_df = pd.DataFrame(ws.get_all_records(expected_headers=["category", "goal", "why_i_want_it"]))
                                 st.rerun()
                             except Exception as e:
                                 st.error(f"Error updating goal: {str(e)}")
@@ -193,16 +182,15 @@ if not st.session_state.yearly_goals_df.empty:
             st.subheader("Add New Goal")
             
             # Create category options with examples
-            category_options = [f"{cat} <span style='color: grey; font-style: italic;'>({CATEGORY_EXAMPLES.get(cat, '')})</span>" for cat in CATEGORIES]
+            category_options = [f"{cat} ({CATEGORY_EXAMPLES.get(cat, '')})" for cat in CATEGORIES]
             selected_category = st.selectbox("Category", category_options, key="new_category_input")
             # Extract the actual category name (remove examples)
             new_category = selected_category.split(" (")[0] if " (" in selected_category else selected_category
             new_goal = st.text_input("What I Want (Specific Goal)", key="new_goal_input")
-            new_deadline = st.text_input("By When", key="new_deadline_input")
             new_why = st.text_area("Why I Want It", key="new_why_input")
             
             if new_goal.strip():
-                st.session_state["pending_goal"] = [new_category, new_goal.strip(), new_deadline.strip(), new_why.strip()]
+                st.session_state["pending_goal"] = [new_category, new_goal.strip(), new_why.strip()]
         
         col1, col2 = st.columns([1, 1])
         
@@ -218,7 +206,7 @@ if not st.session_state.yearly_goals_df.empty:
                         try:
                             ws.append_row(st.session_state["pending_goal"])
                             st.success(f"Added '{st.session_state['pending_goal'][1]}' to your yearly goals!")
-                            st.session_state.yearly_goals_df = pd.DataFrame(ws.get_all_records(expected_headers=["category", "goal", "by_when", "why_i_want_it"]))
+                            st.session_state.yearly_goals_df = pd.DataFrame(ws.get_all_records(expected_headers=["category", "goal", "why_i_want_it"]))
                             st.session_state["pending_goal"] = []
                         except Exception as e:
                             st.error(f"Error adding goal: {str(e)}")
@@ -257,7 +245,7 @@ else:
                 try:
                     ws.append_row(st.session_state["pending_goal"])
                     st.success(f"Added '{st.session_state['pending_goal'][1]}' to your yearly goals!")
-                    st.session_state.yearly_goals_df = pd.DataFrame(ws.get_all_records(expected_headers=["category", "goal", "by_when", "why_i_want_it"]))
+                    st.session_state.yearly_goals_df = pd.DataFrame(ws.get_all_records(expected_headers=["category", "goal", "why_i_want_it"]))
                     st.session_state["pending_goal"] = []
                 except Exception as e:
                     st.error(f"Error adding goal: {str(e)}")
