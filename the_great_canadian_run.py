@@ -98,16 +98,6 @@ CHALLENGE_CHECKPOINTS = {
     }
 }
 
-# Canadian fun facts for milestones
-FUN_FACTS = {
-    "Halifax": "Halifax has one of the world's largest natural harbors!",
-    "Montréal": "Montréal is the second-largest French-speaking city in the world!",
-    "Toronto": "Toronto is home to the CN Tower, one of the world's tallest free-standing structures!",
-    "Winnipeg": "Winnipeg is known as the 'Gateway to the West' and has the longest skating rink in the world!",
-    "Calgary": "Calgary hosts the world-famous Calgary Stampede, the 'Greatest Outdoor Show on Earth'!",
-    "Vancouver": "Vancouver is consistently ranked as one of the world's most livable cities!",
-    "Victoria": "Victoria is known as the 'Garden City' and has the mildest climate in Canada!"
-}
 
 st.title("🍁 The Great Canadian Run")
 st.subheader("A virtual journey across Canada — one step at a time.")
@@ -131,7 +121,7 @@ if not st.session_state.challenge_data.empty:
         total_logged = st.session_state.challenge_data.iloc[:, 1].fillna(0).astype(float).sum()
 
 # Hero Section
-st.markdown("### 🏃‍♂️ Your Journey Progress")
+st.markdown("### Your Journey Progress")
 st.write(f"**Total Distance:** {total_logged:,.0f} km / 7,800 km")
 st.write("*Every kilometer takes you further across Canada.*")
 
@@ -140,8 +130,24 @@ progress_percentage = min((total_logged / 7800) * 100, 100)
 st.progress(progress_percentage / 100)
 st.caption(f"Progress: {progress_percentage:.1f}%")
 
+# Log Your Kilometers
+st.markdown("### Log Your Kilometers")
+with st.form("log_run"):
+    activity_date = st.date_input("Date", value=date.today())
+    distance = st.number_input("Distance (km)", min_value=0.0, step=0.1)
+    
+    if st.form_submit_button("Log Run"):
+        if distance > 0:
+            try:
+                ws.append_row([str(activity_date), distance])
+                st.success("Run logged successfully!")
+                st.session_state.challenge_data = pd.DataFrame(ws.get_all_records())
+                st.rerun()
+            except Exception as e:
+                st.error(f"Error logging run: {str(e)}")
+
 # Interactive map simulation (simplified visual representation)
-st.markdown("### 🗺️ Your Journey Across Canada")
+st.markdown("### Your Journey Across Canada")
 col1, col2, col3 = st.columns([1, 2, 1])
 
 with col2:
@@ -215,31 +221,6 @@ if unlocked_badges:
 else:
     st.write("Keep running to unlock your first badge! 🏃‍♂️")
 
-# Fun Facts
-st.markdown("### 🇨🇦 Canadian Fun Facts")
-for location, fact in FUN_FACTS.items():
-    if any(location.lower() in checkpoint['location'].lower() for tier_info in CHALLENGE_CHECKPOINTS.values() for checkpoint in tier_info['checkpoints']):
-        # Check if user has reached this location
-        reached = any(total_logged >= checkpoint['km'] and location.lower() in checkpoint['location'].lower() 
-                     for tier_info in CHALLENGE_CHECKPOINTS.values() for checkpoint in tier_info['checkpoints'])
-        if reached:
-            st.write(f"**{location}:** {fact}")
-
-# Log Your Kilometers
-st.markdown("### 📝 Log Your Kilometers")
-with st.form("log_run"):
-    activity_date = st.date_input("Date", value=date.today())
-    distance = st.number_input("Distance (km)", min_value=0.0, step=0.1)
-    
-    if st.form_submit_button("Log Run"):
-        if distance > 0:
-            try:
-                ws.append_row([str(activity_date), distance])
-                st.success("Run logged successfully!")
-                st.session_state.challenge_data = pd.DataFrame(ws.get_all_records())
-                st.rerun()
-            except Exception as e:
-                st.error(f"Error logging run: {str(e)}")
 
 # Recent runs
 if not st.session_state.challenge_data.empty:
