@@ -21,7 +21,7 @@ ws = client.open("the_great_canadian_run").sheet1
 
 # Challenge tiers configuration
 CHALLENGE_TIERS = {
-    "Tier 1 - The Atlantic Challenge": {
+    "The Atlantic Challenge": {
         "total_km": 500,
         "route": "St. John's → Port aux Basques",
         "description": "Perfect for beginners — achievable at ~10 km/week",
@@ -30,7 +30,7 @@ CHALLENGE_TIERS = {
             {"km": 500, "location": "Port aux Basques"}
         ]
     },
-    "Tier 2 - The Eastern Challenge": {
+    "The Eastern Challenge": {
         "total_km": 2000,
         "route": "St. John's → Québec City",
         "description": "Great for walkers, casual runners, or first-time big challenge",
@@ -40,7 +40,7 @@ CHALLENGE_TIERS = {
             {"km": 2000, "location": "Québec City"}
         ]
     },
-    "Tier 3 - The Central Challenge": {
+    "The Central Challenge": {
         "total_km": 4000,
         "route": "St. John's → Toronto",
         "description": "Ambitious but doable in a year at ~80 km/week",
@@ -51,7 +51,7 @@ CHALLENGE_TIERS = {
             {"km": 4000, "location": "Toronto"}
         ]
     },
-    "Tier 4 - The Prairies & Rockies": {
+    "The Prairies & Rockies": {
         "total_km": 6000,
         "route": "St. John's → Calgary",
         "description": "Ideal for advanced runners aiming for long-term consistency",
@@ -61,7 +61,7 @@ CHALLENGE_TIERS = {
             {"km": 6000, "location": "Calgary"}
         ]
     },
-    "Tier 5 - The Full Coast-to-Coast": {
+    "The Full Coast-to-Coast": {
         "total_km": 7800,
         "route": "St. John's → Victoria",
         "description": "The ultimate Canadian journey — ~150 km/week, elite-level dedication",
