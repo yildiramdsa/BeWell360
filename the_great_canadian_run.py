@@ -99,7 +99,7 @@ if st.session_state.user_tier is None:
             
             st.write("**Milestones:**")
             for milestone in tier_info['milestones']:
-                st.write(f"{milestone['icon']} {milestone['km']} km - {milestone['location']}")
+                st.write(f"{milestone['km']} km - {milestone['location']}")
             
             if st.button(f"Join {tier_name}", key=f"join_{tier_name}"):
                 st.session_state.user_tier = tier_name
@@ -142,7 +142,7 @@ else:
         
         col1, col2 = st.columns([3, 1])
         with col1:
-            st.write(f"{milestone['icon']} **{milestone['location']}** ({milestone_km:,} km)")
+            st.write(f"**{milestone['location']}** ({milestone_km:,} km)")
             st.progress(milestone_progress / 100)
         with col2:
             if total_logged >= milestone_km:
