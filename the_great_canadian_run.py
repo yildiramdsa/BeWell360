@@ -121,97 +121,91 @@ if not st.session_state.challenge_data.empty:
         total_logged = st.session_state.challenge_data.iloc[:, 1].fillna(0).astype(float).sum()
 
 # Main Progress Section
-col1, col2 = st.columns([2, 1])
+st.markdown("### Your Journey Progress")
+st.write(f"**Total Distance:** {total_logged:,.0f} km / 7,800 km")
+st.write("*Every kilometer takes you further across Canada.*")
 
-with col1:
-    st.markdown("### Your Journey Progress")
-    st.write(f"**Total Distance:** {total_logged:,.0f} km / 7,800 km")
-    st.write("*Every kilometer takes you further across Canada.*")
+# Progress bar
+progress_percentage = min((total_logged / 7800) * 100, 100)
+st.progress(progress_percentage / 100)
+st.caption(f"Progress: {progress_percentage:.1f}%")
+
+# Current location
+if total_logged < 500:
+    st.write("**Current Location:** Newfoundland")
+    st.write("**Next Milestone:** Port aux Basques (500 km)")
+elif total_logged < 2000:
+    st.write("**Current Location:** Eastern Canada")
+    st.write("**Next Milestone:** Québec City (2,000 km)")
+elif total_logged < 4000:
+    st.write("**Current Location:** Central Canada")
+    st.write("**Next Milestone:** Sault Ste. Marie (4,000 km)")
+elif total_logged < 6000:
+    st.write("**Current Location:** Prairies & Rockies")
+    st.write("**Next Milestone:** Calgary (6,000 km)")
+elif total_logged < 7800:
+    st.write("**Current Location:** British Columbia")
+    st.write("**Next Milestone:** Victoria (7,800 km)")
+else:
+    st.write("**Congratulations!** You've completed the coast-to-coast journey!")
+
+# Log Your Kilometers
+st.markdown("### Log Your Kilometers")
+with st.form("log_run"):
+    activity_date = st.date_input("Date", value=date.today())
+    distance = st.number_input("Distance (km)", min_value=0.0, step=0.1)
     
-    # Progress bar
-    progress_percentage = min((total_logged / 7800) * 100, 100)
-    st.progress(progress_percentage / 100)
-    st.caption(f"Progress: {progress_percentage:.1f}%")
+    if st.form_submit_button("Log Run"):
+        if distance > 0:
+            try:
+                ws.append_row([str(activity_date), distance])
+                st.success("Run logged successfully!")
+                st.session_state.challenge_data = pd.DataFrame(ws.get_all_records())
+                st.rerun()
+            except Exception as e:
+                st.error(f"Error logging run: {str(e)}")
+
+# Challenge Progress
+st.markdown("### Challenge Progress")
+for tier_name, tier_info in CHALLENGE_CHECKPOINTS.items():
+    tier_completed = total_logged >= tier_info['total_km']
     
-    # Current location
-    if total_logged < 500:
-        st.write("**Current Location:** Newfoundland")
-        st.write("**Next Milestone:** Port aux Basques (500 km)")
-    elif total_logged < 2000:
-        st.write("**Current Location:** Eastern Canada")
-        st.write("**Next Milestone:** Québec City (2,000 km)")
-    elif total_logged < 4000:
-        st.write("**Current Location:** Central Canada")
-        st.write("**Next Milestone:** Sault Ste. Marie (4,000 km)")
-    elif total_logged < 6000:
-        st.write("**Current Location:** Prairies & Rockies")
-        st.write("**Next Milestone:** Calgary (6,000 km)")
-    elif total_logged < 7800:
-        st.write("**Current Location:** British Columbia")
-        st.write("**Next Milestone:** Victoria (7,800 km)")
+    # Combined achievement status and checkpoints in one expander
+    if tier_completed:
+        status_text = f"**{tier_name}** - {tier_info['total_km']:,} km - COMPLETED!"
+        if 'badge' in tier_info['checkpoints'][-1]:
+            status_text += f" | **Badge:** {tier_info['checkpoints'][-1]['badge']}"
     else:
-        st.write("**Congratulations!** You've completed the coast-to-coast journey!")
-
-with col2:
-    st.markdown("### Log Your Kilometers")
-    with st.form("log_run"):
-        activity_date = st.date_input("Date", value=date.today())
-        distance = st.number_input("Distance (km)", min_value=0.0, step=0.1)
+        remaining = tier_info['total_km'] - total_logged
+        status_text = f"**{tier_name}** - {tier_info['total_km']:,} km - {remaining:,.0f} km to go"
+    
+    with st.expander(status_text, expanded=False):
+        # Route only
+        st.markdown(f"**Route:** {tier_info['route']}")
         
-        if st.form_submit_button("Log Run"):
-            if distance > 0:
-                try:
-                    ws.append_row([str(activity_date), distance])
-                    st.success("Run logged successfully!")
-                    st.session_state.challenge_data = pd.DataFrame(ws.get_all_records())
-                    st.rerun()
-                except Exception as e:
-                    st.error(f"Error logging run: {str(e)}")
-
-# Challenge Progress & Recent Runs
-col1, col2 = st.columns([2, 1])
-
-with col1:
-    st.markdown("### Challenge Progress")
-    for tier_name, tier_info in CHALLENGE_CHECKPOINTS.items():
-        tier_completed = total_logged >= tier_info['total_km']
+        st.markdown("**Checkpoints:**")
         
-        # Combined achievement status and checkpoints in one expander
-        if tier_completed:
-            status_text = f"**{tier_name}** - {tier_info['total_km']:,} km - COMPLETED!"
-            if 'badge' in tier_info['checkpoints'][-1]:
-                status_text += f" | **Badge:** {tier_info['checkpoints'][-1]['badge']}"
-        else:
-            remaining = tier_info['total_km'] - total_logged
-            status_text = f"**{tier_name}** - {tier_info['total_km']:,} km - {remaining:,.0f} km to go"
-        
-        with st.expander(status_text, expanded=False):
-            # Route only
-            st.markdown(f"**Route:** {tier_info['route']}")
+        # Checkpoints in a more organized format
+        for i, checkpoint in enumerate(tier_info['checkpoints']):
+            checkpoint_reached = total_logged >= checkpoint['km']
             
-            st.markdown("**Checkpoints:**")
+            if checkpoint_reached:
+                st.markdown(f"✅ **{checkpoint['km']:,} km** - {checkpoint['location']}")
+                if 'description' in checkpoint:
+                    st.markdown(f"   *{checkpoint['description']}*")
+                if 'badge' in checkpoint:
+                    st.markdown(f"   **Badge:** {checkpoint['badge']}")
+            else:
+                remaining = checkpoint['km'] - total_logged
+                st.markdown(f"⏳ **{checkpoint['km']:,} km** - {checkpoint['location']} (*{remaining:,.0f} km to go*)")
             
-            # Checkpoints in a more organized format
-            for i, checkpoint in enumerate(tier_info['checkpoints']):
-                checkpoint_reached = total_logged >= checkpoint['km']
-                
-                if checkpoint_reached:
-                    st.markdown(f"✅ **{checkpoint['km']:,} km** - {checkpoint['location']}")
-                    if 'description' in checkpoint:
-                        st.markdown(f"   *{checkpoint['description']}*")
-                    if 'badge' in checkpoint:
-                        st.markdown(f"   **Badge:** {checkpoint['badge']}")
-                else:
-                    remaining = checkpoint['km'] - total_logged
-                    st.markdown(f"⏳ **{checkpoint['km']:,} km** - {checkpoint['location']} (*{remaining:,.0f} km to go*)")
-                
-                # Add spacing between checkpoints (except for the last one)
-                if i < len(tier_info['checkpoints']) - 1:
-                    st.markdown("")
+            # Add spacing between checkpoints (except for the last one)
+            if i < len(tier_info['checkpoints']) - 1:
+                st.markdown("")
 
-with col2:
-    if not st.session_state.challenge_data.empty:
-        st.markdown("### Recent Runs")
+# Recent Runs
+if not st.session_state.challenge_data.empty:
+    with st.expander("Recent Runs", expanded=False):
         st.dataframe(st.session_state.challenge_data.tail(10), use_container_width=True)
 
 # Challenge completion celebration
