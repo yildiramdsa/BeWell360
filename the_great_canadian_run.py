@@ -170,12 +170,13 @@ with col2:
     else:
         st.write("**Congratulations!** You've completed the coast-to-coast journey!")
 
-# Challenge Tiers as Achievements
-st.markdown("### Challenge Achievements")
+# Combined Challenge Achievements and Journey Checkpoints
+st.markdown("### Challenge Progress & Journey Checkpoints")
 
 for tier_name, tier_info in CHALLENGE_CHECKPOINTS.items():
     tier_completed = total_logged >= tier_info['total_km']
     
+    # Show achievement status
     if tier_completed:
         st.success(f"**{tier_name}** - {tier_info['total_km']:,} km - COMPLETED!")
         if 'badge' in tier_info['checkpoints'][-1]:
@@ -183,12 +184,9 @@ for tier_name, tier_info in CHALLENGE_CHECKPOINTS.items():
     else:
         remaining = tier_info['total_km'] - total_logged
         st.info(f"**{tier_name}** - {tier_info['total_km']:,} km - {remaining:,.0f} km to go")
-
-# Detailed Checkpoints
-st.markdown("### Journey Checkpoints")
-
-for tier_name, tier_info in CHALLENGE_CHECKPOINTS.items():
-    with st.expander(f"**{tier_name}** ({tier_info['total_km']:,} km)", expanded=False):
+    
+    # Show detailed checkpoints in expander
+    with st.expander(f"View {tier_name} checkpoints", expanded=False):
         st.write(f"**Route:** {tier_info['route']}")
         st.write(f"**Description:** {tier_info['description']}")
         
