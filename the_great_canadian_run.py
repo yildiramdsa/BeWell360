@@ -24,7 +24,7 @@ CHALLENGE_CHECKPOINTS = {
     "Tier 1 - Atlantic Challenge": {
         "total_km": 500,
         "route": "St. John's → Port aux Basques",
-        "description": "Begin in St. John's and explore Newfoundland's rugged beauty. Achieve your first milestone at Port aux Basques and build early momentum.",
+        "description": "Perfect for beginners — ~10 km/week",
         "checkpoints": [
             {"km": 0, "location": "St. John's, NL", "description": "Start"},
             {"km": 100, "location": "Bishop's Falls, NL"},
@@ -186,12 +186,8 @@ with col1:
             status_text = f"**{tier_name}** - {tier_info['total_km']:,} km - {remaining:,.0f} km to go"
         
         with st.expander(status_text, expanded=False):
-            # Route and description in a clean format
-            col_route, col_desc = st.columns([1, 1])
-            with col_route:
-                st.markdown(f"**Route:** {tier_info['route']}")
-            with col_desc:
-                st.markdown(f"**Description:** {tier_info['description']}")
+            # Route only
+            st.markdown(f"**Route:** {tier_info['route']}")
             
             st.markdown("---")
             st.markdown("**Checkpoints:**")
