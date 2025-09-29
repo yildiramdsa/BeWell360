@@ -89,8 +89,7 @@ if "challenge_data" not in st.session_state:
 
 # Load user data
 try:
-    if st.session_state.user_tier:
-        st.session_state.challenge_data = pd.DataFrame(ws.get_all_records())
+    st.session_state.challenge_data = pd.DataFrame(ws.get_all_records())
 except:
     st.session_state.challenge_data = pd.DataFrame()
 
@@ -117,17 +116,15 @@ else:
     tier_info = CHALLENGE_TIERS[st.session_state.user_tier]
     total_km = tier_info['total_km']
     
-    # Calculate total distance logged
+    # Calculate total distance logged from challenge data
     total_logged = 0
     if not st.session_state.challenge_data.empty:
-        # Look for distance column in fitness data
-        try:
-            fitness_ws = client.open("fitness_activities").sheet1
-            fitness_data = pd.DataFrame(fitness_ws.get_all_records())
-            if 'distance_km' in fitness_data.columns:
-                total_logged = fitness_data['distance_km'].fillna(0).astype(float).sum()
-        except:
-            pass
+        # Look for distance column in challenge data
+        if 'distance_km' in st.session_state.challenge_data.columns:
+            total_logged = st.session_state.challenge_data['distance_km'].fillna(0).astype(float).sum()
+        elif len(st.session_state.challenge_data.columns) >= 2:
+            # If column names are not detected, use the second column (index 1) as distance
+            total_logged = st.session_state.challenge_data.iloc[:, 1].fillna(0).astype(float).sum()
     
     # Progress calculation
     progress_percentage = min((total_logged / total_km) * 100, 100)
@@ -177,6 +174,8 @@ else:
                 try:
                     ws.append_row([str(activity_date), distance])
                     st.success("Run logged successfully!")
+                    # Refresh the challenge data
+                    st.session_state.challenge_data = pd.DataFrame(ws.get_all_records())
                     st.rerun()
                 except Exception as e:
                     st.error(f"Error logging run: {str(e)}")
