@@ -153,39 +153,39 @@ col1, col2, col3 = st.columns([1, 2, 1])
 with col2:
     # Simple progress visualization
     if total_logged < 500:
-        st.write("📍 **Current Location:** Newfoundland")
-        st.write("🎯 **Next Milestone:** Port aux Basques (500 km)")
+        st.write("**Current Location:** Newfoundland")
+        st.write("**Next Milestone:** Port aux Basques (500 km)")
     elif total_logged < 2000:
-        st.write("📍 **Current Location:** Eastern Canada")
-        st.write("🎯 **Next Milestone:** Québec City (2,000 km)")
+        st.write("**Current Location:** Eastern Canada")
+        st.write("**Next Milestone:** Québec City (2,000 km)")
     elif total_logged < 4000:
-        st.write("📍 **Current Location:** Central Canada")
-        st.write("🎯 **Next Milestone:** Sault Ste. Marie (4,000 km)")
+        st.write("**Current Location:** Central Canada")
+        st.write("**Next Milestone:** Sault Ste. Marie (4,000 km)")
     elif total_logged < 6000:
-        st.write("📍 **Current Location:** Prairies & Rockies")
-        st.write("🎯 **Next Milestone:** Calgary (6,000 km)")
+        st.write("**Current Location:** Prairies & Rockies")
+        st.write("**Next Milestone:** Calgary (6,000 km)")
     elif total_logged < 7800:
-        st.write("📍 **Current Location:** British Columbia")
-        st.write("🎯 **Next Milestone:** Victoria (7,800 km)")
+        st.write("**Current Location:** British Columbia")
+        st.write("**Next Milestone:** Victoria (7,800 km)")
     else:
-        st.write("🏆 **Congratulations!** You've completed the coast-to-coast journey!")
+        st.write("**Congratulations!** You've completed the coast-to-coast journey!")
 
 # Challenge Tiers as Achievements
-st.markdown("### 🏅 Challenge Achievements")
+st.markdown("### Challenge Achievements")
 
 for tier_name, tier_info in CHALLENGE_CHECKPOINTS.items():
     tier_completed = total_logged >= tier_info['total_km']
     
     if tier_completed:
-        st.success(f"✅ **{tier_name}** - {tier_info['total_km']:,} km - COMPLETED!")
+        st.success(f"**{tier_name}** - {tier_info['total_km']:,} km - COMPLETED!")
         if 'badge' in tier_info['checkpoints'][-1]:
-            st.write(f"🏆 **Badge Unlocked:** {tier_info['checkpoints'][-1]['badge']}")
+            st.write(f"**Badge Unlocked:** {tier_info['checkpoints'][-1]['badge']}")
     else:
         remaining = tier_info['total_km'] - total_logged
-        st.info(f"🎯 **{tier_name}** - {tier_info['total_km']:,} km - {remaining:,.0f} km to go")
+        st.info(f"**{tier_name}** - {tier_info['total_km']:,} km - {remaining:,.0f} km to go")
 
 # Detailed Checkpoints
-st.markdown("### 🗺️ Journey Checkpoints")
+st.markdown("### Journey Checkpoints")
 
 for tier_name, tier_info in CHALLENGE_CHECKPOINTS.items():
     with st.expander(f"**{tier_name}** ({tier_info['total_km']:,} km)", expanded=False):
@@ -195,17 +195,17 @@ for tier_name, tier_info in CHALLENGE_CHECKPOINTS.items():
         st.write("**Checkpoints:**")
         for checkpoint in tier_info['checkpoints']:
             if total_logged >= checkpoint['km']:
-                st.write(f"✅ {checkpoint['km']:,} km - {checkpoint['location']}")
+                st.write(f"{checkpoint['km']:,} km - {checkpoint['location']}")
                 if 'description' in checkpoint:
                     st.write(f"   *{checkpoint['description']}*")
                 if 'badge' in checkpoint:
-                    st.write(f"   🏆 **Badge:** {checkpoint['badge']}")
+                    st.write(f"   **Badge:** {checkpoint['badge']}")
             else:
                 remaining = checkpoint['km'] - total_logged
-                st.write(f"⏳ {checkpoint['km']:,} km - {checkpoint['location']} ({remaining:,.0f} km to go)")
+                st.write(f"{checkpoint['km']:,} km - {checkpoint['location']} ({remaining:,.0f} km to go)")
 
 # Motivation & Rewards Section
-st.markdown("### 🎉 Motivation & Rewards")
+st.markdown("### Motivation & Rewards")
 
 # Show unlocked badges
 unlocked_badges = []
@@ -215,21 +215,21 @@ for tier_name, tier_info in CHALLENGE_CHECKPOINTS.items():
             unlocked_badges.append(tier_info['checkpoints'][-1]['badge'])
 
 if unlocked_badges:
-    st.write("**🏆 Your Badges:**")
+    st.write("**Your Badges:**")
     for badge in unlocked_badges:
         st.write(f"  {badge}")
 else:
-    st.write("Keep running to unlock your first badge! 🏃‍♂️")
+    st.write("Keep running to unlock your first badge!")
 
 
 # Recent runs
 if not st.session_state.challenge_data.empty:
-    st.markdown("### 📊 Recent Runs")
+    st.markdown("### Recent Runs")
     st.dataframe(st.session_state.challenge_data.tail(10), use_container_width=True)
 
 # Challenge completion celebration
 if total_logged >= 7800:
     st.balloons()
-    st.success("🎉 Congratulations! You've completed The Great Canadian Run!")
-    st.markdown("### 🏆 Coast-to-Coast Finisher!")
+    st.success("Congratulations! You've completed The Great Canadian Run!")
+    st.markdown("### Coast-to-Coast Finisher!")
     st.write("You've successfully journeyed from St. John's to Victoria across Canada!")
