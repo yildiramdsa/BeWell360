@@ -189,7 +189,6 @@ with col1:
             # Route only
             st.markdown(f"**Route:** {tier_info['route']}")
             
-            st.markdown("---")
             st.markdown("**Checkpoints:**")
             
             # Checkpoints in a more organized format
