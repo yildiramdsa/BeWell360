@@ -31,7 +31,7 @@ CHALLENGE_CHECKPOINTS = {
             {"km": 200, "location": "Gander, NL"},
             {"km": 300, "location": "Grand Falls-Windsor, NL"},
             {"km": 400, "location": "Corner Brook, NL"},
-            {"km": 500, "location": "Port aux Basques, NL", "description": "Tier 1 Complete – Ferry to Nova Scotia", "badge": "🥇 Atlantic Finisher"}
+            {"km": 500, "location": "Port aux Basques, NL", "description": "Tier 1 Complete – Ferry to Nova Scotia", "badge": "🍁 Atlantic Explorer"}
         ]
     },
     "Tier 2 - Eastern Challenge": {
@@ -48,7 +48,7 @@ CHALLENGE_CHECKPOINTS = {
             {"km": 1500, "location": "Moncton, NB"},
             {"km": 1650, "location": "Fredericton, NB"},
             {"km": 1800, "location": "Cross into Quebec"},
-            {"km": 2000, "location": "Québec City, QC", "description": "Tier 2 Complete", "badge": "🥇 Eastern Explorer"}
+            {"km": 2000, "location": "Québec City, QC", "description": "Tier 2 Complete", "badge": "🍁 Eastern Adventurer"}
         ]
     },
     "Tier 3 - Central Challenge": {
@@ -62,7 +62,7 @@ CHALLENGE_CHECKPOINTS = {
             {"km": 2650, "location": "Cross into Ontario"},
             {"km": 3000, "location": "Ottawa, ON"},
             {"km": 3250, "location": "Kingston, ON"},
-            {"km": 3500, "location": "Toronto, ON", "description": "Tier 3 Complete"},
+            {"km": 3500, "location": "Toronto, ON", "description": "Tier 3 Complete", "badge": "🍁 Central Trailblazer"},
             {"km": 4000, "location": "Sault Ste. Marie, ON"}
         ]
     },
@@ -78,7 +78,7 @@ CHALLENGE_CHECKPOINTS = {
             {"km": 5250, "location": "Brandon, MB"},
             {"km": 5500, "location": "Regina, SK"},
             {"km": 5750, "location": "Moose Jaw, SK"},
-            {"km": 6000, "location": "Calgary, AB", "description": "Tier 4 Complete", "badge": "🥇 Prairie & Rockies Runner"}
+            {"km": 6000, "location": "Calgary, AB", "description": "Tier 4 Complete", "badge": "🍁 Prairies & Rockies Runner"}
         ]
     },
     "Tier 5 - Full Coast-to-Coast": {
@@ -93,7 +93,7 @@ CHALLENGE_CHECKPOINTS = {
             {"km": 7000, "location": "Kamloops, BC"},
             {"km": 7250, "location": "Hope, BC"},
             {"km": 7500, "location": "Vancouver, BC"},
-            {"km": 7800, "location": "Victoria, BC", "description": "Tier 5 Complete – Finish Line", "badge": "🏆 Coast-to-Coast Finisher"}
+            {"km": 7800, "location": "Victoria, BC", "description": "Tier 5 Complete – Finish Line", "badge": "🍁 Coast-to-Coast Champion"}
         ]
     }
 }
