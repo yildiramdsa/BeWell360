@@ -35,8 +35,8 @@ CHALLENGE_TIERS = {
         "route": "St. John's → Québec City",
         "description": "Great for walkers, casual runners, or first-time big challenge",
         "milestones": [
-            {"km": 1000, "location": "Halifax, NS"},
-            {"km": 1500, "location": "Moncton, NB"},
+            {"km": 1000, "location": "Halifax"},
+            {"km": 1500, "location": "Moncton"},
             {"km": 2000, "location": "Québec City"}
         ]
     },
@@ -47,8 +47,8 @@ CHALLENGE_TIERS = {
         "milestones": [
             {"km": 2500, "location": "Montréal"},
             {"km": 3000, "location": "Ottawa"},
-            {"km": 3500, "location": "Sault Ste. Marie"},
-            {"km": 4000, "location": "Toronto"}
+            {"km": 3500, "location": "Toronto"},
+            {"km": 4000, "location": "Sault Ste. Marie"}
         ]
     },
     "The Prairies & Rockies": {
