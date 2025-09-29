@@ -23,7 +23,7 @@ ws = client.open("the_great_canadian_run").sheet1
 CHALLENGE_TIERS = {
     "The Atlantic Challenge": {
         "total_km": 500,
-        "route": "St. John's → Port aux Basques",
+        "route": "🍁 St. John's → Port aux Basques",
         "description": "Perfect for beginners — achievable at ~10 km/week",
         "milestones": [
             {"km": 200, "location": "Gander"},
@@ -32,7 +32,7 @@ CHALLENGE_TIERS = {
     },
     "The Eastern Challenge": {
         "total_km": 2000,
-        "route": "St. John's → Québec City",
+        "route": "🍁 St. John's → Québec City",
         "description": "Great for walkers, casual runners, or first-time big challenge",
         "milestones": [
             {"km": 1000, "location": "Halifax"},
@@ -42,7 +42,7 @@ CHALLENGE_TIERS = {
     },
     "The Central Challenge": {
         "total_km": 4000,
-        "route": "St. John's → Toronto",
+        "route": "🍁 St. John's → Toronto",
         "description": "Ambitious but doable in a year at ~80 km/week",
         "milestones": [
             {"km": 2500, "location": "Montréal"},
@@ -53,7 +53,7 @@ CHALLENGE_TIERS = {
     },
     "The Prairies & Rockies": {
         "total_km": 6000,
-        "route": "St. John's → Calgary",
+        "route": "🍁 St. John's → Calgary",
         "description": "Ideal for advanced runners aiming for long-term consistency",
         "milestones": [
             {"km": 5000, "location": "Winnipeg"},
@@ -63,7 +63,7 @@ CHALLENGE_TIERS = {
     },
     "The Full Coast-to-Coast": {
         "total_km": 7800,
-        "route": "St. John's → Victoria",
+        "route": "🍁 St. John's → Victoria",
         "description": "The ultimate Canadian journey — ~150 km/week, elite-level dedication",
         "milestones": [
             {"km": 7000, "location": "Kamloops"},
