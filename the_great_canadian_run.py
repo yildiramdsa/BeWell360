@@ -200,7 +200,7 @@ with col1:
                     if 'description' in checkpoint:
                         st.markdown(f"   *{checkpoint['description']}*")
                     if 'badge' in checkpoint:
-                        st.markdown(f"   🏆 **Badge:** {checkpoint['badge']}")
+                        st.markdown(f"   **Badge:** {checkpoint['badge']}")
                 else:
                     remaining = checkpoint['km'] - total_logged
                     st.markdown(f"⏳ **{checkpoint['km']:,} km** - {checkpoint['location']} (*{remaining:,.0f} km to go*)")
