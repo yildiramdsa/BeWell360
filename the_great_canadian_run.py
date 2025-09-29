@@ -176,17 +176,16 @@ with col1:
     for tier_name, tier_info in CHALLENGE_CHECKPOINTS.items():
         tier_completed = total_logged >= tier_info['total_km']
         
-        # Show achievement status
+        # Combined achievement status and checkpoints in one expander
         if tier_completed:
-            st.success(f"**{tier_name}** - {tier_info['total_km']:,} km - COMPLETED!")
+            status_text = f"**{tier_name}** - {tier_info['total_km']:,} km - COMPLETED!"
             if 'badge' in tier_info['checkpoints'][-1]:
-                st.write(f"**Badge Unlocked:** {tier_info['checkpoints'][-1]['badge']}")
+                status_text += f" | **Badge:** {tier_info['checkpoints'][-1]['badge']}"
         else:
             remaining = tier_info['total_km'] - total_logged
-            st.info(f"**{tier_name}** - {tier_info['total_km']:,} km - {remaining:,.0f} km to go")
+            status_text = f"**{tier_name}** - {tier_info['total_km']:,} km - {remaining:,.0f} km to go"
         
-        # Show detailed checkpoints in expander
-        with st.expander(f"View {tier_name} checkpoints", expanded=False):
+        with st.expander(status_text, expanded=False):
             st.write(f"**Route:** {tier_info['route']}")
             st.write(f"**Description:** {tier_info['description']}")
             
