@@ -28,7 +28,7 @@ CATEGORIES = [
 
 CATEGORY_ICONS = {
     "Health & Vitality": "⚽",
-    "Fun, Free Time & Family": "🗓",
+    "Fun, Free Time & Family": "🎈",
     "Relationships": "❤️",
     "Career & Business": "💼",
     "Financial": "💰",
@@ -104,12 +104,12 @@ if not st.session_state.yearly_goals_df.empty:
                     # Create display text with better formatting
                     display_parts = [f"**{goal_name}**"]
                     if category:
-                        category_icon = CATEGORY_ICONS.get(category, "📋")
+                        category_icon = CATEGORY_ICONS.get(category, "📎")
                         display_parts.append(f"{category_icon} *{category}*")
                     if deadline:
-                        display_parts.append(f"📅 {deadline}")
+                        display_parts.append(f"🗓 {deadline}")
                     if why:
-                        display_parts.append(f"💭 {why}")
+                        display_parts.append(f"🎁 {why}")
                     
                     display_text = " | ".join(display_parts)
                     
