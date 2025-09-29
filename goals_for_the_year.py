@@ -38,14 +38,14 @@ CATEGORY_ICONS = {
 }
 
 CATEGORY_EXAMPLES = {
-    "Health & Vitality": "exercising regularly, eating balanced meals, maintaining a healthy weight, improving sleep quality, scheduling routine checkups, managing stress",
-    "Fun, Free Time & Family": "planning family vacations, enjoying weekend getaways, practicing hobbies, starting creative projects, hosting game nights, celebrating special moments",
-    "Relationships": "having weekly date nights, reconnecting with old friends, building new friendships, honouring family traditions, expanding professional networks, offering mentorship",
-    "Career & Business": "earning a promotion, launching a side business, achieving key performance goals, strengthening leadership skills, building meaningful collaborations",
-    "Financial": "growing savings, paying down debt, investing consistently, creating an emergency fund, increasing net worth",
-    "Personal Growth & Learning": "completing courses or certifications, setting reading challenges, attending workshops, journaling regularly, working with a coach or therapist, developing new skills",
-    "Spiritual & Emotional Well-Being": "practicing meditation, keeping a gratitude habit, engaging in prayer or reflection, volunteering time, donating to causes, attending mindfulness retreats, showing kindness daily",
-    "Lifestyle & Environment": "decluttering living spaces, making home upgrades, creating supportive routines, taking digital detoxes, adopting sustainable habits, designing a calming workspace"
+    "Health & Vitality": "exercising regularly, eating well, improving sleep, managing stress",
+    "Fun, Free Time & Family": "planning trips, enjoying hobbies, celebrating special moments",
+    "Relationships": "weekly date nights, reconnecting with friends, expanding networks",
+    "Career & Business": "earning a promotion, launching a project, building collaborations",
+    "Financial": "saving consistently, reducing debt, growing investments",
+    "Personal Growth & Learning": "completing courses, reading more, developing new skills",
+    "Spiritual & Emotional Well-Being": "meditating daily, practicing gratitude, volunteering",
+    "Lifestyle & Environment": "decluttering spaces, upgrading home, creating healthy routines"
 }
 
 if "yearly_goals_df" not in st.session_state:
