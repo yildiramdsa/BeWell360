@@ -27,14 +27,25 @@ CATEGORIES = [
 ]
 
 CATEGORY_ICONS = {
-    "Health & Vitality": "💪",
-    "Fun, Free Time & Family": "🎉",
+    "Health & Vitality": "⚽",
+    "Fun, Free Time & Family": "🗓",
     "Relationships": "❤️",
     "Career & Business": "💼",
     "Financial": "💰",
     "Personal Growth & Learning": "📚",
-    "Spiritual & Emotional Well-Being": "🧘",
+    "Spiritual & Emotional Well-Being": "🌱",
     "Lifestyle & Environment": "🏠"
+}
+
+CATEGORY_EXAMPLES = {
+    "Health & Vitality": "Exercise routine, healthy eating, weight goal, better sleep, medical checkups",
+    "Fun, Free Time & Family": "Vacations, family trips, hobbies, celebrations, quality downtime",
+    "Relationships": "Date nights, new friendships, family traditions, networking, mentoring",
+    "Career & Business": "New role, launch side project, sales targets, leadership skills",
+    "Financial": "Savings goal, debt reduction, investing, emergency fund, net worth target",
+    "Personal Growth & Learning": "Reading list, online courses, certifications, therapy, coaching",
+    "Spiritual & Emotional Well-Being": "Meditation, journaling, gratitude practice, volunteering, charity",
+    "Lifestyle & Environment": "Decluttering, home upgrades, daily routines, digital detox"
 }
 
 if "yearly_goals_df" not in st.session_state:
@@ -144,13 +155,13 @@ if not st.session_state.yearly_goals_df.empty:
             
             if st.session_state.get(f"editing_{idx}", False):
                 with st.expander(f"Edit: {goal_name}", expanded=True):
-                    # Create category options with icons for edit form
-                    edit_category_options = [f"{CATEGORY_ICONS.get(cat, '📋')} {cat}" for cat in CATEGORIES]
+                    # Create category options with icons and examples for edit form
+                    edit_category_options = [f"{CATEGORY_ICONS.get(cat, '📋')} {cat} ({CATEGORY_EXAMPLES.get(cat, '')})" for cat in CATEGORIES]
                     edit_selected_category = st.selectbox("Category", edit_category_options, 
                                                         index=CATEGORIES.index(category) if category in CATEGORIES else 0, 
                                                         key=f"edit_category_{idx}")
-                    # Extract the actual category name (remove icon and space)
-                    edit_category = edit_selected_category.split(" ", 1)[1] if " " in edit_selected_category else edit_selected_category
+                    # Extract the actual category name (remove icon, space, and examples)
+                    edit_category = edit_selected_category.split(" (")[0].split(" ", 1)[1] if " " in edit_selected_category else edit_selected_category
                     edit_goal = st.text_input("What I Want (Specific Goal)", value=goal_name, key=f"edit_goal_{idx}")
                     edit_deadline = st.text_input("By When", value=deadline, key=f"edit_deadline_{idx}")
                     edit_why = st.text_area("Why I Want It", value=why, key=f"edit_why_{idx}")
@@ -183,11 +194,11 @@ if not st.session_state.yearly_goals_df.empty:
         if st.session_state.get("show_management", False):
             st.subheader("Add New Goal")
             
-            # Create category options with icons
-            category_options = [f"{CATEGORY_ICONS.get(cat, '📋')} {cat}" for cat in CATEGORIES]
+            # Create category options with icons and examples
+            category_options = [f"{CATEGORY_ICONS.get(cat, '📋')} {cat} ({CATEGORY_EXAMPLES.get(cat, '')})" for cat in CATEGORIES]
             selected_category = st.selectbox("Category", category_options, key="new_category_input")
-            # Extract the actual category name (remove icon and space)
-            new_category = selected_category.split(" ", 1)[1] if " " in selected_category else selected_category
+            # Extract the actual category name (remove icon, space, and examples)
+            new_category = selected_category.split(" (")[0].split(" ", 1)[1] if " " in selected_category else selected_category
             new_goal = st.text_input("What I Want (Specific Goal)", key="new_goal_input")
             new_deadline = st.text_input("By When", key="new_deadline_input")
             new_why = st.text_area("Why I Want It", key="new_why_input")
