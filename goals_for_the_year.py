@@ -101,15 +101,14 @@ if not st.session_state.yearly_goals_df.empty:
                 col1, col2, col3 = st.columns([4, 1, 1])
                 
                 with col1:
-                    # Create display text with better formatting
+                    # Create display text with improved formatting
                     display_parts = [f"**{goal_name}**"]
                     if category:
-                        category_icon = CATEGORY_ICONS.get(category, "📎")
-                        display_parts.append(f"{category_icon} *{category}*")
+                        display_parts.append(f"*{category}*")
                     if deadline:
-                        display_parts.append(f"🗓 {deadline}")
+                        display_parts.append(f"🗓 **{deadline}**")
                     if why:
-                        display_parts.append(f"🎁 {why}")
+                        display_parts.append(f"💭 {why}")
                     
                     display_text = " | ".join(display_parts)
                     
@@ -134,13 +133,12 @@ if not st.session_state.yearly_goals_df.empty:
                         except Exception as e:
                             st.error(f"Error deleting goal: {str(e)}")
             else:
-                # Create display text with better formatting
+                # Create display text with improved formatting
                 display_parts = [f"**{goal_name}**"]
                 if category:
-                    category_icon = CATEGORY_ICONS.get(category, "📋")
-                    display_parts.append(f"{category_icon} *{category}*")
+                    display_parts.append(f"*{category}*")
                 if deadline:
-                    display_parts.append(f"📅 {deadline}")
+                    display_parts.append(f"🗓 **{deadline}**")
                 if why:
                     display_parts.append(f"💭 {why}")
                 
@@ -155,13 +153,13 @@ if not st.session_state.yearly_goals_df.empty:
             
             if st.session_state.get(f"editing_{idx}", False):
                 with st.expander(f"Edit: {goal_name}", expanded=True):
-                    # Create category options with icons and examples for edit form
-                    edit_category_options = [f"{CATEGORY_ICONS.get(cat, '📋')} {cat} ({CATEGORY_EXAMPLES.get(cat, '')})" for cat in CATEGORIES]
+                    # Create category options with examples for edit form
+                    edit_category_options = [f"{cat} ({CATEGORY_EXAMPLES.get(cat, '')})" for cat in CATEGORIES]
                     edit_selected_category = st.selectbox("Category", edit_category_options, 
                                                         index=CATEGORIES.index(category) if category in CATEGORIES else 0, 
                                                         key=f"edit_category_{idx}")
-                    # Extract the actual category name (remove icon, space, and examples)
-                    edit_category = edit_selected_category.split(" (")[0].split(" ", 1)[1] if " " in edit_selected_category else edit_selected_category
+                    # Extract the actual category name (remove examples)
+                    edit_category = edit_selected_category.split(" (")[0] if " (" in edit_selected_category else edit_selected_category
                     edit_goal = st.text_input("What I Want (Specific Goal)", value=goal_name, key=f"edit_goal_{idx}")
                     edit_deadline = st.text_input("By When", value=deadline, key=f"edit_deadline_{idx}")
                     edit_why = st.text_area("Why I Want It", value=why, key=f"edit_why_{idx}")
@@ -194,11 +192,11 @@ if not st.session_state.yearly_goals_df.empty:
         if st.session_state.get("show_management", False):
             st.subheader("Add New Goal")
             
-            # Create category options with icons and examples
-            category_options = [f"{CATEGORY_ICONS.get(cat, '📋')} {cat} ({CATEGORY_EXAMPLES.get(cat, '')})" for cat in CATEGORIES]
+            # Create category options with examples
+            category_options = [f"{cat} ({CATEGORY_EXAMPLES.get(cat, '')})" for cat in CATEGORIES]
             selected_category = st.selectbox("Category", category_options, key="new_category_input")
-            # Extract the actual category name (remove icon, space, and examples)
-            new_category = selected_category.split(" (")[0].split(" ", 1)[1] if " " in selected_category else selected_category
+            # Extract the actual category name (remove examples)
+            new_category = selected_category.split(" (")[0] if " (" in selected_category else selected_category
             new_goal = st.text_input("What I Want (Specific Goal)", key="new_goal_input")
             new_deadline = st.text_input("By When", key="new_deadline_input")
             new_why = st.text_area("Why I Want It", key="new_why_input")
