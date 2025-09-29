@@ -154,7 +154,7 @@ if not st.session_state.yearly_goals_df.empty:
             if st.session_state.get(f"editing_{idx}", False):
                 with st.expander(f"Edit: {goal_name}", expanded=True):
                     # Create category options with examples for edit form
-                    edit_category_options = [f"{cat} ({CATEGORY_EXAMPLES.get(cat, '')})" for cat in CATEGORIES]
+                    edit_category_options = [f"{cat} <span style='color: grey; font-style: italic;'>({CATEGORY_EXAMPLES.get(cat, '')})</span>" for cat in CATEGORIES]
                     edit_selected_category = st.selectbox("Category", edit_category_options, 
                                                         index=CATEGORIES.index(category) if category in CATEGORIES else 0, 
                                                         key=f"edit_category_{idx}")
@@ -193,7 +193,7 @@ if not st.session_state.yearly_goals_df.empty:
             st.subheader("Add New Goal")
             
             # Create category options with examples
-            category_options = [f"{cat} ({CATEGORY_EXAMPLES.get(cat, '')})" for cat in CATEGORIES]
+            category_options = [f"{cat} <span style='color: grey; font-style: italic;'>({CATEGORY_EXAMPLES.get(cat, '')})</span>" for cat in CATEGORIES]
             selected_category = st.selectbox("Category", category_options, key="new_category_input")
             # Extract the actual category name (remove examples)
             new_category = selected_category.split(" (")[0] if " (" in selected_category else selected_category
