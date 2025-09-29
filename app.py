@@ -45,6 +45,7 @@ life_mastery_pages = create_pages([
     ("goals_for_the_year.py", "Goals for the Year", "🎯"),
     ("long_term_life_goals.py", "Long-Term Life Goals", "📌"),
     ("vision_board.py", "Vision Board", "🎨"),
+    ("the_great_canadian_run.py", "The Great Canadian Run", "🏃‍♂️"),
 ])
 
 pages = {
