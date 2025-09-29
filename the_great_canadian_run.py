@@ -204,24 +204,6 @@ for tier_name, tier_info in CHALLENGE_CHECKPOINTS.items():
                 remaining = checkpoint['km'] - total_logged
                 st.write(f"{checkpoint['km']:,} km - {checkpoint['location']} ({remaining:,.0f} km to go)")
 
-# Motivation & Rewards Section
-st.markdown("### Motivation & Rewards")
-
-# Show unlocked badges
-unlocked_badges = []
-for tier_name, tier_info in CHALLENGE_CHECKPOINTS.items():
-    if total_logged >= tier_info['total_km']:
-        if 'badge' in tier_info['checkpoints'][-1]:
-            unlocked_badges.append(tier_info['checkpoints'][-1]['badge'])
-
-if unlocked_badges:
-    st.write("**Your Badges:**")
-    for badge in unlocked_badges:
-        st.write(f"  {badge}")
-else:
-    st.write("Keep running to unlock your first badge!")
-
-
 # Recent runs
 if not st.session_state.challenge_data.empty:
     st.markdown("### Recent Runs")
