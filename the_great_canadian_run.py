@@ -36,7 +36,7 @@ CHALLENGE_CHECKPOINTS = {
     },
     "Tier 2 - Eastern Challenge": {
         "total_km": 2000,
-        "route": "St. John's → Québec City",
+        "route": "Port aux Basques → Québec City",
         "description": "Travel through Nova Scotia, New Brunswick, and into Québec. City checkpoints, such as Halifax, Moncton, and Québec City, keep your progress visible and motivating.",
         "checkpoints": [
             {"km": 500, "location": "Newfoundland complete"},
@@ -53,7 +53,7 @@ CHALLENGE_CHECKPOINTS = {
     },
     "Tier 3 - Central Challenge": {
         "total_km": 4000,
-        "route": "St. John's → Sault Ste. Marie",
+        "route": "Québec City → Sault Ste. Marie",
         "description": "Cross Québec into Ontario. Major milestones in Montréal, Ottawa, and Toronto mark steady growth and endurance.",
         "checkpoints": [
             {"km": 2000, "location": "Québec City, QC"},
@@ -68,7 +68,7 @@ CHALLENGE_CHECKPOINTS = {
     },
     "Tier 4 - Prairies & Rockies": {
         "total_km": 6000,
-        "route": "St. John's → Calgary",
+        "route": "Sault Ste. Marie → Calgary",
         "description": "Move across the Prairies into the Rocky Mountains. Celebrate key milestones in Winnipeg, Regina, and Calgary as you head west to the western provinces.",
         "checkpoints": [
             {"km": 4000, "location": "Sault Ste. Marie, ON"},
@@ -83,7 +83,7 @@ CHALLENGE_CHECKPOINTS = {
     },
     "Tier 5 - Full Coast-to-Coast": {
         "total_km": 7800,
-        "route": "St. John's → Victoria",
+        "route": "Calgary → Victoria",
         "description": "Enter British Columbia and the Rockies' final stretch. Complete the journey in Kamloops, Vancouver, and Victoria, achieving coast-to-coast success.",
         "checkpoints": [
             {"km": 6000, "location": "Calgary, AB"},
