@@ -186,20 +186,33 @@ with col1:
             status_text = f"**{tier_name}** - {tier_info['total_km']:,} km - {remaining:,.0f} km to go"
         
         with st.expander(status_text, expanded=False):
-            st.write(f"**Route:** {tier_info['route']}")
-            st.write(f"**Description:** {tier_info['description']}")
+            # Route and description in a clean format
+            col_route, col_desc = st.columns([1, 1])
+            with col_route:
+                st.markdown(f"**Route:** {tier_info['route']}")
+            with col_desc:
+                st.markdown(f"**Description:** {tier_info['description']}")
             
-            st.write("**Checkpoints:**")
-            for checkpoint in tier_info['checkpoints']:
-                if total_logged >= checkpoint['km']:
-                    st.write(f"{checkpoint['km']:,} km - {checkpoint['location']}")
+            st.markdown("---")
+            st.markdown("**Checkpoints:**")
+            
+            # Checkpoints in a more organized format
+            for i, checkpoint in enumerate(tier_info['checkpoints']):
+                checkpoint_reached = total_logged >= checkpoint['km']
+                
+                if checkpoint_reached:
+                    st.markdown(f"✅ **{checkpoint['km']:,} km** - {checkpoint['location']}")
                     if 'description' in checkpoint:
-                        st.write(f"   *{checkpoint['description']}*")
+                        st.markdown(f"   *{checkpoint['description']}*")
                     if 'badge' in checkpoint:
-                        st.write(f"   **Badge:** {checkpoint['badge']}")
+                        st.markdown(f"   🏆 **Badge:** {checkpoint['badge']}")
                 else:
                     remaining = checkpoint['km'] - total_logged
-                    st.write(f"{checkpoint['km']:,} km - {checkpoint['location']} ({remaining:,.0f} km to go)")
+                    st.markdown(f"⏳ **{checkpoint['km']:,} km** - {checkpoint['location']} (*{remaining:,.0f} km to go*)")
+                
+                # Add spacing between checkpoints (except for the last one)
+                if i < len(tier_info['checkpoints']) - 1:
+                    st.markdown("")
 
 with col2:
     if not st.session_state.challenge_data.empty:
