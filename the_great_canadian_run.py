@@ -78,7 +78,7 @@ CHALLENGE_TIERS = {
     }
 }
 
-st.title("🏃‍♂️ The Great Canadian Run")
+st.title("🍁 The Great Canadian Run")
 st.write("Join The Great Canadian Run—a year-long journey from coast to coast. Track your kilometres, celebrate milestones, and explore Canada one step at a time.")
 
 # Initialize session state
