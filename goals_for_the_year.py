@@ -49,7 +49,7 @@ CATEGORY_EXAMPLES = {
 }
 
 if "yearly_goals_df" not in st.session_state:
-    st.session_state.yearly_goals_df = pd.DataFrame(ws.get_all_records(expected_headers=["category", "goal", "why_i_want_it"]))
+    st.session_state.yearly_goals_df = pd.DataFrame(ws.get_all_records(expected_headers=["life_area", "what_i_want", "why_i_want_it"]))
 
 if "yearly_goals_completed" not in st.session_state:
     st.session_state.yearly_goals_completed = {}
@@ -65,9 +65,9 @@ if not st.session_state.yearly_goals_df.empty:
     
     for col in df.columns:
         col_lower = col.lower()
-        if col_lower in ['category']:
+        if col_lower in ['category', 'life_area']:
             category_col = col
-        elif col_lower in ['goal']:
+        elif col_lower in ['goal', 'what_i_want']:
             goal_col = col
         elif col_lower in ['why_i_want_it', 'why i want it']:
             why_col = col
@@ -120,7 +120,7 @@ if not st.session_state.yearly_goals_df.empty:
                         try:
                             ws.delete_rows(idx + 2)
                             st.success("Goal deleted successfully!")
-                            st.session_state.yearly_goals_df = pd.DataFrame(ws.get_all_records(expected_headers=["category", "goal", "why_i_want_it"]))
+                            st.session_state.yearly_goals_df = pd.DataFrame(ws.get_all_records(expected_headers=["life_area", "what_i_want", "why_i_want_it"]))
                             st.rerun()
                         except Exception as e:
                             st.error(f"Error deleting goal: {str(e)}")
@@ -150,7 +150,7 @@ if not st.session_state.yearly_goals_df.empty:
                                                         key=f"edit_category_{idx}")
                     # Extract the actual category name (remove examples)
                     edit_category = edit_selected_category.split(" (")[0] if " (" in edit_selected_category else edit_selected_category
-                    edit_goal = st.text_input("What I Want (Specific Goal)", value=goal_name, key=f"edit_goal_{idx}")
+                    edit_goal = st.text_input("What I Want", value=goal_name, key=f"edit_goal_{idx}")
                     edit_why = st.text_area("Why I Want It", value=why, key=f"edit_why_{idx}")
                     
                     edit_save_col, edit_cancel_col = st.columns([1, 1])
@@ -161,7 +161,7 @@ if not st.session_state.yearly_goals_df.empty:
                                          range_name=f"A{idx+2}:C{idx+2}")
                                 st.success("Goal updated successfully!")
                                 st.session_state[f"editing_{idx}"] = False
-                                st.session_state.yearly_goals_df = pd.DataFrame(ws.get_all_records(expected_headers=["category", "goal", "why_i_want_it"]))
+                                st.session_state.yearly_goals_df = pd.DataFrame(ws.get_all_records(expected_headers=["life_area", "what_i_want", "why_i_want_it"]))
                                 st.rerun()
                             except Exception as e:
                                 st.error(f"Error updating goal: {str(e)}")
@@ -186,7 +186,7 @@ if not st.session_state.yearly_goals_df.empty:
             selected_category = st.selectbox("Life Area", category_options, key="new_category_input")
             # Extract the actual category name (remove examples)
             new_category = selected_category.split(" (")[0] if " (" in selected_category else selected_category
-            new_goal = st.text_input("What I Want (Specific Goal)", key="new_goal_input")
+            new_goal = st.text_input("What I Want", key="new_goal_input")
             new_why = st.text_area("Why I Want It", key="new_why_input")
             
             if new_goal.strip():
@@ -206,7 +206,7 @@ if not st.session_state.yearly_goals_df.empty:
                         try:
                             ws.append_row(st.session_state["pending_goal"])
                             st.success(f"Added '{st.session_state['pending_goal'][1]}' to your yearly goals!")
-                            st.session_state.yearly_goals_df = pd.DataFrame(ws.get_all_records(expected_headers=["category", "goal", "why_i_want_it"]))
+                            st.session_state.yearly_goals_df = pd.DataFrame(ws.get_all_records(expected_headers=["life_area", "what_i_want", "why_i_want_it"]))
                             st.session_state["pending_goal"] = []
                         except Exception as e:
                             st.error(f"Error adding goal: {str(e)}")
@@ -233,7 +233,7 @@ else:
         st.subheader("Add New Goal")
         
         new_category = st.selectbox("Life Area", CATEGORIES, key="new_category_input_empty")
-        new_goal = st.text_input("What I Want (Specific Goal)", key="new_goal_input_empty")
+        new_goal = st.text_input("What I Want", key="new_goal_input_empty")
         new_why = st.text_area("Why I Want It", key="new_why_input_empty")
         
         if new_goal.strip():
@@ -244,7 +244,7 @@ else:
                 try:
                     ws.append_row(st.session_state["pending_goal"])
                     st.success(f"Added '{st.session_state['pending_goal'][1]}' to your yearly goals!")
-                    st.session_state.yearly_goals_df = pd.DataFrame(ws.get_all_records(expected_headers=["category", "goal", "why_i_want_it"]))
+                    st.session_state.yearly_goals_df = pd.DataFrame(ws.get_all_records(expected_headers=["life_area", "what_i_want", "why_i_want_it"]))
                     st.session_state["pending_goal"] = []
                 except Exception as e:
                     st.error(f"Error adding goal: {str(e)}")
