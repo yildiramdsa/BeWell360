@@ -26,9 +26,8 @@ CHALLENGE_TIERS = {
         "route": "St. John's → Port aux Basques",
         "description": "Perfect for beginners — achievable at ~10 km/week",
         "milestones": [
-            {"km": 0, "location": "St. John's", "icon": "🏁"},
-            {"km": 200, "location": "Gander", "icon": "📍"},
-            {"km": 500, "location": "Port aux Basques", "icon": "🏁"}
+            {"km": 200, "location": "Gander"},
+            {"km": 500, "location": "Port aux Basques"}
         ]
     },
     "Tier 2 - The Eastern Challenge": {
@@ -36,10 +35,9 @@ CHALLENGE_TIERS = {
         "route": "St. John's → Québec City",
         "description": "Great for walkers, casual runners, or first-time big challenge",
         "milestones": [
-            {"km": 500, "location": "Port aux Basques", "icon": "🚢"},
-            {"km": 1000, "location": "Halifax, NS", "icon": "⚓"},
-            {"km": 1500, "location": "Moncton, NB", "icon": "📍"},
-            {"km": 2000, "location": "Québec City", "icon": "🏰"}
+            {"km": 1000, "location": "Halifax, NS"},
+            {"km": 1500, "location": "Moncton, NB"},
+            {"km": 2000, "location": "Québec City"}
         ]
     },
     "Tier 3 - The Central Challenge": {
@@ -47,11 +45,10 @@ CHALLENGE_TIERS = {
         "route": "St. John's → Toronto",
         "description": "Ambitious but doable in a year at ~80 km/week",
         "milestones": [
-            {"km": 2000, "location": "Québec City", "icon": "🏰"},
-            {"km": 2500, "location": "Montréal", "icon": "🎶"},
-            {"km": 3000, "location": "Ottawa", "icon": "🇨🇦"},
-            {"km": 3500, "location": "Sault Ste. Marie", "icon": "📍"},
-            {"km": 4000, "location": "Toronto", "icon": "🏙️"}
+            {"km": 2500, "location": "Montréal"},
+            {"km": 3000, "location": "Ottawa"},
+            {"km": 3500, "location": "Sault Ste. Marie"},
+            {"km": 4000, "location": "Toronto"}
         ]
     },
     "Tier 4 - The Prairies & Rockies": {
@@ -59,10 +56,9 @@ CHALLENGE_TIERS = {
         "route": "St. John's → Calgary",
         "description": "Ideal for advanced runners aiming for long-term consistency",
         "milestones": [
-            {"km": 4500, "location": "Thunder Bay", "icon": "📍"},
-            {"km": 5000, "location": "Winnipeg", "icon": "🌾"},
-            {"km": 5500, "location": "Regina", "icon": "🌻"},
-            {"km": 6000, "location": "Calgary", "icon": "🏔️"}
+            {"km": 5000, "location": "Winnipeg"},
+            {"km": 5500, "location": "Regina"},
+            {"km": 6000, "location": "Calgary"}
         ]
     },
     "Tier 5 - The Full Coast-to-Coast": {
@@ -70,10 +66,9 @@ CHALLENGE_TIERS = {
         "route": "St. John's → Victoria",
         "description": "The ultimate Canadian journey — ~150 km/week, elite-level dedication",
         "milestones": [
-            {"km": 6500, "location": "Banff", "icon": "🌲"},
-            {"km": 7000, "location": "Kamloops", "icon": "📍"},
-            {"km": 7500, "location": "Vancouver", "icon": "🌊"},
-            {"km": 7800, "location": "Victoria", "icon": "🏆"}
+            {"km": 7000, "location": "Kamloops"},
+            {"km": 7500, "location": "Vancouver"},
+            {"km": 7800, "location": "Victoria"}
         ]
     }
 }
