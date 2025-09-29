@@ -145,7 +145,7 @@ if not st.session_state.yearly_goals_df.empty:
                 with st.expander(f"Edit: {goal_name}", expanded=True):
                     # Create category options with examples for edit form
                     edit_category_options = [f"{cat} ({CATEGORY_EXAMPLES.get(cat, '')})" for cat in CATEGORIES]
-                    edit_selected_category = st.selectbox("Category", edit_category_options, 
+                    edit_selected_category = st.selectbox("Life Area", edit_category_options, 
                                                         index=CATEGORIES.index(category) if category in CATEGORIES else 0, 
                                                         key=f"edit_category_{idx}")
                     # Extract the actual category name (remove examples)
@@ -183,7 +183,7 @@ if not st.session_state.yearly_goals_df.empty:
             
             # Create category options with examples
             category_options = [f"{cat} ({CATEGORY_EXAMPLES.get(cat, '')})" for cat in CATEGORIES]
-            selected_category = st.selectbox("Category", category_options, key="new_category_input")
+            selected_category = st.selectbox("Life Area", category_options, key="new_category_input")
             # Extract the actual category name (remove examples)
             new_category = selected_category.split(" (")[0] if " (" in selected_category else selected_category
             new_goal = st.text_input("What I Want (Specific Goal)", key="new_goal_input")
@@ -232,13 +232,12 @@ else:
     if st.session_state.get("show_management", False):
         st.subheader("Add New Goal")
         
-        new_category = st.selectbox("Category", CATEGORIES, key="new_category_input_empty")
+        new_category = st.selectbox("Life Area", CATEGORIES, key="new_category_input_empty")
         new_goal = st.text_input("What I Want (Specific Goal)", key="new_goal_input_empty")
-        new_deadline = st.text_input("By When", key="new_deadline_input_empty")
         new_why = st.text_area("Why I Want It", key="new_why_input_empty")
         
         if new_goal.strip():
-            st.session_state["pending_goal"] = [new_category, new_goal.strip(), new_deadline.strip(), new_why.strip()]
+            st.session_state["pending_goal"] = [new_category, new_goal.strip(), new_why.strip()]
         
         if st.button("☁️ Save", help="Save and close management section"):
             if st.session_state.get("pending_goal"):
