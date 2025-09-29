@@ -93,7 +93,7 @@ CHALLENGE_CHECKPOINTS = {
             {"km": 7000, "location": "Kamloops, BC"},
             {"km": 7250, "location": "Hope, BC"},
             {"km": 7500, "location": "Vancouver, BC"},
-            {"km": 7800, "location": "Victoria, BC", "description": "Tier 5 Complete – Finish Line", "badge": "🍁 Coast-to-Coast Champion"}
+            {"km": 7800, "location": "Victoria, BC", "description": "Full Coast-to-Coast Complete – Finish Line", "badge": "🍁 Coast-to-Coast Champion"}
         ]
     }
 }
