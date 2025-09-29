@@ -165,6 +165,11 @@ with st.form("log_run"):
             except Exception as e:
                 st.error(f"Error logging run: {str(e)}")
 
+# Recent Runs
+if not st.session_state.challenge_data.empty:
+    with st.expander("Recent Runs", expanded=False):
+        st.dataframe(st.session_state.challenge_data.tail(10), use_container_width=True)
+
 # Challenge Progress
 st.markdown("### Challenge Progress")
 for tier_name, tier_info in CHALLENGE_CHECKPOINTS.items():
@@ -202,11 +207,6 @@ for tier_name, tier_info in CHALLENGE_CHECKPOINTS.items():
             # Add spacing between checkpoints (except for the last one)
             if i < len(tier_info['checkpoints']) - 1:
                 st.markdown("")
-
-# Recent Runs
-if not st.session_state.challenge_data.empty:
-    with st.expander("Recent Runs", expanded=False):
-        st.dataframe(st.session_state.challenge_data.tail(10), use_container_width=True)
 
 # Challenge completion celebration
 if total_logged >= 7800:
