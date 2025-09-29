@@ -100,7 +100,7 @@ if not st.session_state.yearly_goals_df.empty:
                     if category:
                         display_parts.append(f"*{category}*")
                     if why:
-                        display_parts.append(f"💭 {why}")
+                        display_parts.append(f"{why}")
                     
                     display_text = " | ".join(display_parts)
                     
@@ -143,13 +143,13 @@ if not st.session_state.yearly_goals_df.empty:
             
             if st.session_state.get(f"editing_{idx}", False):
                 with st.expander(f"Edit: {goal_name}", expanded=True):
-                    # Create category options with examples for edit form
-                    edit_category_options = [f"{cat} ({CATEGORY_EXAMPLES.get(cat, '')})" for cat in CATEGORIES]
+                    # Create category options with icons and examples for edit form
+                    edit_category_options = [f"{CATEGORY_ICONS.get(cat, '📋')} {cat} ({CATEGORY_EXAMPLES.get(cat, '')})" for cat in CATEGORIES]
                     edit_selected_category = st.selectbox("Life Area", edit_category_options, 
                                                         index=CATEGORIES.index(category) if category in CATEGORIES else 0, 
                                                         key=f"edit_category_{idx}")
-                    # Extract the actual category name (remove examples)
-                    edit_category = edit_selected_category.split(" (")[0] if " (" in edit_selected_category else edit_selected_category
+                    # Extract the actual category name (remove icon, space, and examples)
+                    edit_category = edit_selected_category.split(" (")[0].split(" ", 1)[1] if " " in edit_selected_category.split(" (")[0] else edit_selected_category.split(" (")[0]
                     edit_goal = st.text_input("What I Want", value=goal_name, key=f"edit_goal_{idx}")
                     edit_why = st.text_area("Why I Want It", value=why, key=f"edit_why_{idx}")
                     
@@ -181,11 +181,11 @@ if not st.session_state.yearly_goals_df.empty:
         if st.session_state.get("show_management", False):
             st.subheader("Add New Goal")
             
-            # Create category options with examples
-            category_options = [f"{cat} ({CATEGORY_EXAMPLES.get(cat, '')})" for cat in CATEGORIES]
+            # Create category options with icons and examples
+            category_options = [f"{CATEGORY_ICONS.get(cat, '📋')} {cat} ({CATEGORY_EXAMPLES.get(cat, '')})" for cat in CATEGORIES]
             selected_category = st.selectbox("Life Area", category_options, key="new_category_input")
-            # Extract the actual category name (remove examples)
-            new_category = selected_category.split(" (")[0] if " (" in selected_category else selected_category
+            # Extract the actual category name (remove icon, space, and examples)
+            new_category = selected_category.split(" (")[0].split(" ", 1)[1] if " " in selected_category.split(" (")[0] else selected_category.split(" (")[0]
             new_goal = st.text_input("What I Want", key="new_goal_input")
             new_why = st.text_area("Why I Want It", key="new_why_input")
             
@@ -232,7 +232,11 @@ else:
     if st.session_state.get("show_management", False):
         st.subheader("Add New Goal")
         
-        new_category = st.selectbox("Life Area", CATEGORIES, key="new_category_input_empty")
+        # Create category options with icons for empty state
+        category_options_empty = [f"{CATEGORY_ICONS.get(cat, '📋')} {cat}" for cat in CATEGORIES]
+        selected_category_empty = st.selectbox("Life Area", category_options_empty, key="new_category_input_empty")
+        # Extract the actual category name (remove icon and space)
+        new_category = selected_category_empty.split(" ", 1)[1] if " " in selected_category_empty else selected_category_empty
         new_goal = st.text_input("What I Want", key="new_goal_input_empty")
         new_why = st.text_area("Why I Want It", key="new_why_input_empty")
         
