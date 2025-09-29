@@ -98,7 +98,8 @@ if not st.session_state.yearly_goals_df.empty:
                     # Create display text with improved formatting
                     display_parts = [f"**{goal_name}**"]
                     if category:
-                        display_parts.append(f"*{category}*")
+                        category_icon = CATEGORY_ICONS.get(category, "📋")
+                        display_parts.append(f"{category_icon} *{category}*")
                     if why:
                         display_parts.append(f"{why}")
                     
@@ -128,9 +129,10 @@ if not st.session_state.yearly_goals_df.empty:
                 # Create display text with improved formatting
                 display_parts = [f"**{goal_name}**"]
                 if category:
-                    display_parts.append(f"*{category}*")
+                    category_icon = CATEGORY_ICONS.get(category, "📋")
+                    display_parts.append(f"{category_icon} *{category}*")
                 if why:
-                    display_parts.append(f"💭 {why}")
+                    display_parts.append(f"{why}")
                 
                 display_text = " | ".join(display_parts)
                 
