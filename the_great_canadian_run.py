@@ -21,7 +21,7 @@ ws = client.open("the_great_canadian_run").sheet1
 
 # Challenge configuration with detailed checkpoints
 CHALLENGE_CHECKPOINTS = {
-    "Tier 1 - Atlantic Challenge": {
+    "Atlantic Challenge": {
         "total_km": 500,
         "route": "St. John's → Port aux Basques",
         "description": "Perfect for beginners — ~10 km/week",
@@ -31,10 +31,10 @@ CHALLENGE_CHECKPOINTS = {
             {"km": 200, "location": "Gander, NL"},
             {"km": 300, "location": "Grand Falls-Windsor, NL"},
             {"km": 400, "location": "Corner Brook, NL"},
-            {"km": 500, "location": "Port aux Basques, NL", "description": "Tier 1 Complete – Ferry to Nova Scotia", "badge": "🍁 Atlantic Explorer"}
+            {"km": 500, "location": "Port aux Basques, NL", "description": "Atlantic Challenge Complete – Ferry to Nova Scotia", "badge": "🍁 Atlantic Explorer"}
         ]
     },
-    "Tier 2 - Eastern Challenge": {
+    "Eastern Challenge": {
         "total_km": 2000,
         "route": "Port aux Basques → Québec City",
         "description": "Travel through Nova Scotia, New Brunswick, and into Québec. City checkpoints, such as Halifax, Moncton, and Québec City, keep your progress visible and motivating.",
@@ -48,10 +48,10 @@ CHALLENGE_CHECKPOINTS = {
             {"km": 1500, "location": "Moncton, NB"},
             {"km": 1650, "location": "Fredericton, NB"},
             {"km": 1800, "location": "Cross into Quebec"},
-            {"km": 2000, "location": "Québec City, QC", "description": "Tier 2 Complete", "badge": "🍁 Eastern Adventurer"}
+            {"km": 2000, "location": "Québec City, QC", "description": "Eastern Challenge Complete", "badge": "🍁 Eastern Adventurer"}
         ]
     },
-    "Tier 3 - Central Challenge": {
+    "Central Challenge": {
         "total_km": 4000,
         "route": "Québec City → Sault Ste. Marie",
         "description": "Cross Québec into Ontario. Major milestones in Montréal, Ottawa, and Toronto mark steady growth and endurance.",
@@ -62,11 +62,11 @@ CHALLENGE_CHECKPOINTS = {
             {"km": 2650, "location": "Cross into Ontario"},
             {"km": 3000, "location": "Ottawa, ON"},
             {"km": 3250, "location": "Kingston, ON"},
-            {"km": 3500, "location": "Toronto, ON", "description": "Tier 3 Complete", "badge": "🍁 Central Trailblazer"},
+            {"km": 3500, "location": "Toronto, ON", "description": "Central Challenge Complete", "badge": "🍁 Central Trailblazer"},
             {"km": 4000, "location": "Sault Ste. Marie, ON"}
         ]
     },
-    "Tier 4 - Prairies & Rockies": {
+    "Prairies & Rockies": {
         "total_km": 6000,
         "route": "Sault Ste. Marie → Calgary",
         "description": "Move across the Prairies into the Rocky Mountains. Celebrate key milestones in Winnipeg, Regina, and Calgary as you head west to the western provinces.",
@@ -78,10 +78,10 @@ CHALLENGE_CHECKPOINTS = {
             {"km": 5250, "location": "Brandon, MB"},
             {"km": 5500, "location": "Regina, SK"},
             {"km": 5750, "location": "Moose Jaw, SK"},
-            {"km": 6000, "location": "Calgary, AB", "description": "Tier 4 Complete", "badge": "🍁 Prairies & Rockies Runner"}
+            {"km": 6000, "location": "Calgary, AB", "description": "Prairies & Rockies Complete", "badge": "🍁 Prairies & Rockies Runner"}
         ]
     },
-    "Tier 5 - Full Coast-to-Coast": {
+    "Full Coast-to-Coast": {
         "total_km": 7800,
         "route": "Calgary → Victoria",
         "description": "Enter British Columbia and the Rockies' final stretch. Complete the journey in Kamloops, Vancouver, and Victoria, achieving coast-to-coast success.",
