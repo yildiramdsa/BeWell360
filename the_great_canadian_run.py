@@ -31,7 +31,7 @@ CHALLENGE_CHECKPOINTS = {
             {"km": 200, "location": "Gander, NL"},
             {"km": 300, "location": "Grand Falls-Windsor, NL"},
             {"km": 400, "location": "Corner Brook, NL"},
-            {"km": 500, "location": "Port aux Basques, NL", "description": "Atlantic Challenge Complete – Ferry to Nova Scotia", "badge": "🍁 Atlantic Explorer"}
+            {"km": 500, "location": "Port aux Basques, NL", "description": "Ferry to Nova Scotia", "badge": "🍁 Atlantic Explorer"}
         ]
     },
     "Eastern Challenge": {
@@ -39,7 +39,7 @@ CHALLENGE_CHECKPOINTS = {
         "route": "Port aux Basques → Québec City",
         "description": "Travel through Nova Scotia, New Brunswick, and into Québec. City checkpoints, such as Halifax, Moncton, and Québec City, keep your progress visible and motivating.",
         "checkpoints": [
-            {"km": 500, "location": "Newfoundland complete"},
+            {"km": 500, "location": "Newfoundland"},
             {"km": 600, "location": "Enter Nova Scotia"},
             {"km": 700, "location": "Yarmouth, NS"},
             {"km": 1000, "location": "Halifax, NS"},
@@ -48,7 +48,7 @@ CHALLENGE_CHECKPOINTS = {
             {"km": 1500, "location": "Moncton, NB"},
             {"km": 1650, "location": "Fredericton, NB"},
             {"km": 1800, "location": "Cross into Quebec"},
-            {"km": 2000, "location": "Québec City, QC", "description": "Eastern Challenge Complete", "badge": "🍁 Eastern Adventurer"}
+            {"km": 2000, "location": "Québec City, QC", "description": "Eastern Challenge", "badge": "🍁 Eastern Adventurer"}
         ]
     },
     "Central Challenge": {
@@ -62,7 +62,7 @@ CHALLENGE_CHECKPOINTS = {
             {"km": 2650, "location": "Cross into Ontario"},
             {"km": 3000, "location": "Ottawa, ON"},
             {"km": 3250, "location": "Kingston, ON"},
-            {"km": 3500, "location": "Toronto, ON", "description": "Central Challenge Complete", "badge": "🍁 Central Trailblazer"},
+            {"km": 3500, "location": "Toronto, ON", "description": "Central Challenge", "badge": "🍁 Central Trailblazer"},
             {"km": 4000, "location": "Sault Ste. Marie, ON"}
         ]
     },
@@ -78,7 +78,7 @@ CHALLENGE_CHECKPOINTS = {
             {"km": 5250, "location": "Brandon, MB"},
             {"km": 5500, "location": "Regina, SK"},
             {"km": 5750, "location": "Moose Jaw, SK"},
-            {"km": 6000, "location": "Calgary, AB", "description": "Prairies & Rockies Complete", "badge": "🍁 Prairies & Rockies Runner"}
+            {"km": 6000, "location": "Calgary, AB", "description": "Prairies & Rockies", "badge": "🍁 Prairies & Rockies Runner"}
         ]
     },
     "Full Coast-to-Coast": {
@@ -93,7 +93,7 @@ CHALLENGE_CHECKPOINTS = {
             {"km": 7000, "location": "Kamloops, BC"},
             {"km": 7250, "location": "Hope, BC"},
             {"km": 7500, "location": "Vancouver, BC"},
-            {"km": 7800, "location": "Victoria, BC", "description": "Full Coast-to-Coast Complete – Finish Line", "badge": "🍁 Coast-to-Coast Champion"}
+            {"km": 7800, "location": "Victoria, BC", "description": "Finish Line", "badge": "🍁 Coast-to-Coast Champion"}
         ]
     }
 }
@@ -177,12 +177,12 @@ for tier_name, tier_info in CHALLENGE_CHECKPOINTS.items():
     
     # Combined achievement status and checkpoints in one expander
     if tier_completed:
-        status_text = f"✅ {tier_name} • {tier_info['total_km']:,} km COMPLETED!"
+        status_text = f"✅ **{tier_name} {tier_info['total_km']:,} km**"
         if 'badge' in tier_info['checkpoints'][-1]:
             status_text += f" | Badge: {tier_info['checkpoints'][-1]['badge']}"
     else:
         remaining = tier_info['total_km'] - total_logged
-        status_text = f"⏳ {tier_name} • {tier_info['total_km']:,} km *({remaining:,.0f} km to go)*"
+        status_text = f"⏳ **{tier_name} {tier_info['total_km']:,} km** *({remaining:,.0f} km to go)*"
     
     with st.expander(status_text, expanded=False):
         # Route only
