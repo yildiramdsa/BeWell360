@@ -121,10 +121,8 @@ with col1:
     st.write(f"**Total Distance:** {total_logged:,.0f} km")
 
 with col2:
-    if total_logged < 100:
+    if total_logged < 200:
         st.write("**Current Location:** St. John's, NL")
-    elif total_logged < 200:
-        st.write("**Current Location:** Bishop's Falls, NL")
     elif total_logged < 300:
         st.write("**Current Location:** Gander, NL")
     elif total_logged < 400:
@@ -133,22 +131,18 @@ with col2:
         st.write("**Current Location:** Corner Brook, NL")
     elif total_logged < 600:
         st.write("**Current Location:** Port aux Basques, NL")
-    elif total_logged < 700:
-        st.write("**Current Location:** Enter Nova Scotia")
     elif total_logged < 1000:
-        st.write("**Current Location:** Yarmouth, NS")
-    elif total_logged < 1150:
-        st.write("**Current Location:** Halifax, NS")
+        st.write("**Current Location:** Sydney, NS")
     elif total_logged < 1300:
-        st.write("**Current Location:** Truro, NS")
+        st.write("**Current Location:** Halifax, NS")
     elif total_logged < 1500:
-        st.write("**Current Location:** Cross into New Brunswick")
+        st.write("**Current Location:** Enter New Brunswick")
     elif total_logged < 1650:
         st.write("**Current Location:** Moncton, NB")
     elif total_logged < 1800:
         st.write("**Current Location:** Fredericton, NB")
     elif total_logged < 2000:
-        st.write("**Current Location:** Cross into Quebec")
+        st.write("**Current Location:** Enter Quebec")
     elif total_logged < 2250:
         st.write("**Current Location:** Québec City, QC")
     elif total_logged < 2500:
@@ -156,7 +150,7 @@ with col2:
     elif total_logged < 2650:
         st.write("**Current Location:** Montréal, QC")
     elif total_logged < 3000:
-        st.write("**Current Location:** Cross into Ontario")
+        st.write("**Current Location:** Enter Ontario")
     elif total_logged < 3250:
         st.write("**Current Location:** Ottawa, ON")
     elif total_logged < 3500:
@@ -181,10 +175,8 @@ with col2:
         st.write("**Current Location:** Calgary, AB")
     elif total_logged < 6500:
         st.write("**Current Location:** Banff, AB")
-    elif total_logged < 6700:
-        st.write("**Current Location:** Kicking Horse Pass, AB")
     elif total_logged < 7000:
-        st.write("**Current Location:** Enter British Columbia")
+        st.write("**Current Location:** Kicking Horse Pass (AB/BC border)")
     elif total_logged < 7250:
         st.write("**Current Location:** Kamloops, BC")
     elif total_logged < 7500:
@@ -195,9 +187,7 @@ with col2:
         st.write("**Current Location:** Victoria, BC")
 
 with col3:
-    if total_logged < 100:
-        st.write("**Next Milestone:** Bishop's Falls, NL (100 km)")
-    elif total_logged < 200:
+    if total_logged < 200:
         st.write("**Next Milestone:** Gander, NL (200 km)")
     elif total_logged < 300:
         st.write("**Next Milestone:** Grand Falls-Windsor, NL (300 km)")
@@ -206,21 +196,17 @@ with col3:
     elif total_logged < 500:
         st.write("**Next Milestone:** Port aux Basques, NL (500 km)")
     elif total_logged < 600:
-        st.write("**Next Milestone:** Enter Nova Scotia (600 km)")
-    elif total_logged < 700:
-        st.write("**Next Milestone:** Yarmouth, NS (700 km)")
+        st.write("**Next Milestone:** Sydney, NS (600 km)")
     elif total_logged < 1000:
         st.write("**Next Milestone:** Halifax, NS (1,000 km)")
-    elif total_logged < 1150:
-        st.write("**Next Milestone:** Truro, NS (1,150 km)")
     elif total_logged < 1300:
-        st.write("**Next Milestone:** Cross into New Brunswick (1,300 km)")
+        st.write("**Next Milestone:** Enter New Brunswick (1,300 km)")
     elif total_logged < 1500:
         st.write("**Next Milestone:** Moncton, NB (1,500 km)")
     elif total_logged < 1650:
         st.write("**Next Milestone:** Fredericton, NB (1,650 km)")
     elif total_logged < 1800:
-        st.write("**Next Milestone:** Cross into Quebec (1,800 km)")
+        st.write("**Next Milestone:** Enter Quebec (1,800 km)")
     elif total_logged < 2000:
         st.write("**Next Milestone:** Québec City, QC (2,000 km)")
     elif total_logged < 2250:
@@ -228,7 +214,7 @@ with col3:
     elif total_logged < 2500:
         st.write("**Next Milestone:** Montréal, QC (2,500 km)")
     elif total_logged < 2650:
-        st.write("**Next Milestone:** Cross into Ontario (2,650 km)")
+        st.write("**Next Milestone:** Enter Ontario (2,650 km)")
     elif total_logged < 3000:
         st.write("**Next Milestone:** Ottawa, ON (3,000 km)")
     elif total_logged < 3250:
@@ -254,9 +240,7 @@ with col3:
     elif total_logged < 6250:
         st.write("**Next Milestone:** Banff, AB (6,250 km)")
     elif total_logged < 6500:
-        st.write("**Next Milestone:** Kicking Horse Pass, AB (6,500 km)")
-    elif total_logged < 6700:
-        st.write("**Next Milestone:** Enter British Columbia (6,700 km)")
+        st.write("**Next Milestone:** Kicking Horse Pass (AB/BC border) (6,500 km)")
     elif total_logged < 7000:
         st.write("**Next Milestone:** Kamloops, BC (7,000 km)")
     elif total_logged < 7250:
