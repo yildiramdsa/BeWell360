@@ -323,9 +323,9 @@ for tier_name, tier_info in CHALLENGE_CHECKPOINTS.items():
     
     with st.expander(status_text, expanded=False):
         # Route only
-        st.markdown(f"**Route:** {tier_info['route']}")
+        st.markdown(f"Route: **{tier_info['route']}**")
         
-        st.markdown("**Checkpoints:**")
+        st.markdown("Checkpoints:")
         
         # Checkpoints in a more organized format
         for i, checkpoint in enumerate(tier_info['checkpoints']):
