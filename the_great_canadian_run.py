@@ -127,7 +127,7 @@ st.markdown("### Your Journey Progress")
 col1, col2, col3 = st.columns(3)
 
 with col1:
-    st.write(f"**Total Distance:** {total_logged:,.0f} km / 7,800 km")
+    st.write(f"**Total Distance:** {total_logged:,.0f} km")
 
 with col2:
     if total_logged < 100:
