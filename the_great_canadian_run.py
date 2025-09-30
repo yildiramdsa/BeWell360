@@ -133,70 +133,72 @@ with col2:
     if total_logged < 100:
         st.write("**Current Location:** St. John's, NL")
     elif total_logged < 200:
-        st.write("**Current Location:** Gander, NL")
+        st.write("**Current Location:** Bishop's Falls, NL")
     elif total_logged < 300:
-        st.write("**Current Location:** Grand Falls-Windsor, NL")
+        st.write("**Current Location:** Gander, NL")
     elif total_logged < 400:
-        st.write("**Current Location:** Corner Brook, NL")
+        st.write("**Current Location:** Grand Falls-Windsor, NL")
     elif total_logged < 500:
-        st.write("**Current Location:** Port aux Basques, NL")
+        st.write("**Current Location:** Corner Brook, NL")
     elif total_logged < 600:
-        st.write("**Current Location:** Enter Nova Scotia")
+        st.write("**Current Location:** Port aux Basques, NL")
     elif total_logged < 700:
-        st.write("**Current Location:** Yarmouth, NS")
+        st.write("**Current Location:** Enter Nova Scotia")
     elif total_logged < 1000:
-        st.write("**Current Location:** Halifax, NS")
+        st.write("**Current Location:** Yarmouth, NS")
     elif total_logged < 1150:
-        st.write("**Current Location:** Truro, NS")
+        st.write("**Current Location:** Halifax, NS")
     elif total_logged < 1300:
-        st.write("**Current Location:** Cross into New Brunswick")
+        st.write("**Current Location:** Truro, NS")
     elif total_logged < 1500:
-        st.write("**Current Location:** Moncton, NB")
+        st.write("**Current Location:** Cross into New Brunswick")
     elif total_logged < 1650:
-        st.write("**Current Location:** Fredericton, NB")
+        st.write("**Current Location:** Moncton, NB")
     elif total_logged < 1800:
-        st.write("**Current Location:** Cross into Quebec")
+        st.write("**Current Location:** Fredericton, NB")
     elif total_logged < 2000:
-        st.write("**Current Location:** Québec City, QC")
+        st.write("**Current Location:** Cross into Quebec")
     elif total_logged < 2250:
-        st.write("**Current Location:** Trois-Rivières, QC")
+        st.write("**Current Location:** Québec City, QC")
     elif total_logged < 2500:
-        st.write("**Current Location:** Montréal, QC")
+        st.write("**Current Location:** Trois-Rivières, QC")
     elif total_logged < 2650:
-        st.write("**Current Location:** Cross into Ontario")
+        st.write("**Current Location:** Montréal, QC")
     elif total_logged < 3000:
-        st.write("**Current Location:** Ottawa, ON")
+        st.write("**Current Location:** Cross into Ontario")
     elif total_logged < 3250:
-        st.write("**Current Location:** Kingston, ON")
+        st.write("**Current Location:** Ottawa, ON")
     elif total_logged < 3500:
-        st.write("**Current Location:** Toronto, ON")
+        st.write("**Current Location:** Kingston, ON")
     elif total_logged < 4000:
-        st.write("**Current Location:** Sault Ste. Marie, ON")
+        st.write("**Current Location:** Toronto, ON")
     elif total_logged < 4250:
-        st.write("**Current Location:** Thunder Bay, ON")
+        st.write("**Current Location:** Sault Ste. Marie, ON")
     elif total_logged < 4500:
-        st.write("**Current Location:** Enter Manitoba")
+        st.write("**Current Location:** Thunder Bay, ON")
     elif total_logged < 5000:
-        st.write("**Current Location:** Winnipeg, MB")
+        st.write("**Current Location:** Enter Manitoba")
     elif total_logged < 5250:
-        st.write("**Current Location:** Brandon, MB")
+        st.write("**Current Location:** Winnipeg, MB")
     elif total_logged < 5500:
-        st.write("**Current Location:** Regina, SK")
+        st.write("**Current Location:** Brandon, MB")
     elif total_logged < 5750:
-        st.write("**Current Location:** Moose Jaw, SK")
+        st.write("**Current Location:** Regina, SK")
     elif total_logged < 6000:
-        st.write("**Current Location:** Calgary, AB")
+        st.write("**Current Location:** Moose Jaw, SK")
     elif total_logged < 6250:
-        st.write("**Current Location:** Banff, AB")
+        st.write("**Current Location:** Calgary, AB")
     elif total_logged < 6500:
-        st.write("**Current Location:** Kicking Horse Pass, AB")
+        st.write("**Current Location:** Banff, AB")
     elif total_logged < 6700:
-        st.write("**Current Location:** Enter British Columbia")
+        st.write("**Current Location:** Kicking Horse Pass, AB")
     elif total_logged < 7000:
-        st.write("**Current Location:** Kamloops, BC")
+        st.write("**Current Location:** Enter British Columbia")
     elif total_logged < 7250:
-        st.write("**Current Location:** Hope, BC")
+        st.write("**Current Location:** Kamloops, BC")
     elif total_logged < 7500:
+        st.write("**Current Location:** Hope, BC")
+    elif total_logged < 7800:
         st.write("**Current Location:** Vancouver, BC")
     else:
         st.write("**Current Location:** Victoria, BC")
