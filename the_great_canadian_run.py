@@ -276,7 +276,6 @@ with col3:
     else:
         st.write("**Status:** Journey Complete!")
 
-st.write("*Every kilometer takes you further across Canada.*")
 
 # Progress bar
 progress_percentage = min((total_logged / 7800) * 100, 100)
