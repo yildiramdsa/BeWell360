@@ -332,14 +332,14 @@ for tier_name, tier_info in CHALLENGE_CHECKPOINTS.items():
             checkpoint_reached = total_logged >= checkpoint['km']
             
             if checkpoint_reached:
-                st.markdown(f"✅ **{checkpoint['km']:,} km** - {checkpoint['location']}")
+                st.markdown(f"✅ **{checkpoint['location']} {checkpoint['km']:,} km**")
                 if 'description' in checkpoint:
                     st.markdown(f"   *{checkpoint['description']}*")
                 if 'badge' in checkpoint:
-                    st.markdown(f"   **Badge:** {checkpoint['badge']}")
+                    st.markdown(f"   {checkpoint['badge']}")
             else:
                 remaining = checkpoint['km'] - total_logged
-                st.markdown(f"⏳ **{checkpoint['km']:,} km** - {checkpoint['location']} *{remaining:,.0f} km to go*")
+                st.markdown(f"⏳ **{checkpoint['location']} {checkpoint['km']:,} km** | *{remaining:,.0f} km to go*")
             
             # Add spacing between checkpoints (except for the last one)
             if i < len(tier_info['checkpoints']) - 1:
