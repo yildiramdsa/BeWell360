@@ -207,71 +207,71 @@ with col3:
     if total_logged < 100:
         st.write("**Next Milestone:** Bishop's Falls, NL (100 km)")
     elif total_logged < 200:
-        st.write("**Next Milestone:** Grand Falls-Windsor, NL (300 km)")
+        st.write("**Next Milestone:** Gander, NL (200 km)")
     elif total_logged < 300:
-        st.write("**Next Milestone:** Corner Brook, NL (400 km)")
+        st.write("**Next Milestone:** Grand Falls-Windsor, NL (300 km)")
     elif total_logged < 400:
-        st.write("**Next Milestone:** Port aux Basques, NL (500 km)")
+        st.write("**Next Milestone:** Corner Brook, NL (400 km)")
     elif total_logged < 500:
-        st.write("**Next Milestone:** Enter Nova Scotia (600 km)")
+        st.write("**Next Milestone:** Port aux Basques, NL (500 km)")
     elif total_logged < 600:
-        st.write("**Next Milestone:** Yarmouth, NS (700 km)")
+        st.write("**Next Milestone:** Enter Nova Scotia (600 km)")
     elif total_logged < 700:
-        st.write("**Next Milestone:** Halifax, NS (1,000 km)")
+        st.write("**Next Milestone:** Yarmouth, NS (700 km)")
     elif total_logged < 1000:
-        st.write("**Next Milestone:** Truro, NS (1,150 km)")
+        st.write("**Next Milestone:** Halifax, NS (1,000 km)")
     elif total_logged < 1150:
-        st.write("**Next Milestone:** Cross into New Brunswick (1,300 km)")
+        st.write("**Next Milestone:** Truro, NS (1,150 km)")
     elif total_logged < 1300:
-        st.write("**Next Milestone:** Moncton, NB (1,500 km)")
+        st.write("**Next Milestone:** Cross into New Brunswick (1,300 km)")
     elif total_logged < 1500:
-        st.write("**Next Milestone:** Fredericton, NB (1,650 km)")
+        st.write("**Next Milestone:** Moncton, NB (1,500 km)")
     elif total_logged < 1650:
-        st.write("**Next Milestone:** Cross into Quebec (1,800 km)")
+        st.write("**Next Milestone:** Fredericton, NB (1,650 km)")
     elif total_logged < 1800:
-        st.write("**Next Milestone:** Québec City, QC (2,000 km)")
+        st.write("**Next Milestone:** Cross into Quebec (1,800 km)")
     elif total_logged < 2000:
-        st.write("**Next Milestone:** Trois-Rivières, QC (2,250 km)")
+        st.write("**Next Milestone:** Québec City, QC (2,000 km)")
     elif total_logged < 2250:
-        st.write("**Next Milestone:** Montréal, QC (2,500 km)")
+        st.write("**Next Milestone:** Trois-Rivières, QC (2,250 km)")
     elif total_logged < 2500:
-        st.write("**Next Milestone:** Cross into Ontario (2,650 km)")
+        st.write("**Next Milestone:** Montréal, QC (2,500 km)")
     elif total_logged < 2650:
-        st.write("**Next Milestone:** Ottawa, ON (3,000 km)")
+        st.write("**Next Milestone:** Cross into Ontario (2,650 km)")
     elif total_logged < 3000:
-        st.write("**Next Milestone:** Kingston, ON (3,250 km)")
+        st.write("**Next Milestone:** Ottawa, ON (3,000 km)")
     elif total_logged < 3250:
-        st.write("**Next Milestone:** Toronto, ON (3,500 km)")
+        st.write("**Next Milestone:** Kingston, ON (3,250 km)")
     elif total_logged < 3500:
-        st.write("**Next Milestone:** Sault Ste. Marie, ON (4,000 km)")
+        st.write("**Next Milestone:** Toronto, ON (3,500 km)")
     elif total_logged < 4000:
-        st.write("**Next Milestone:** Thunder Bay, ON (4,250 km)")
+        st.write("**Next Milestone:** Sault Ste. Marie, ON (4,000 km)")
     elif total_logged < 4250:
-        st.write("**Next Milestone:** Enter Manitoba (4,500 km)")
+        st.write("**Next Milestone:** Thunder Bay, ON (4,250 km)")
     elif total_logged < 4500:
-        st.write("**Next Milestone:** Winnipeg, MB (5,000 km)")
+        st.write("**Next Milestone:** Enter Manitoba (4,500 km)")
     elif total_logged < 5000:
-        st.write("**Next Milestone:** Brandon, MB (5,250 km)")
+        st.write("**Next Milestone:** Winnipeg, MB (5,000 km)")
     elif total_logged < 5250:
-        st.write("**Next Milestone:** Regina, SK (5,500 km)")
+        st.write("**Next Milestone:** Brandon, MB (5,250 km)")
     elif total_logged < 5500:
-        st.write("**Next Milestone:** Moose Jaw, SK (5,750 km)")
+        st.write("**Next Milestone:** Regina, SK (5,500 km)")
     elif total_logged < 5750:
-        st.write("**Next Milestone:** Calgary, AB (6,000 km)")
+        st.write("**Next Milestone:** Moose Jaw, SK (5,750 km)")
     elif total_logged < 6000:
-        st.write("**Next Milestone:** Banff, AB (6,250 km)")
+        st.write("**Next Milestone:** Calgary, AB (6,000 km)")
     elif total_logged < 6250:
-        st.write("**Next Milestone:** Kicking Horse Pass, AB (6,500 km)")
+        st.write("**Next Milestone:** Banff, AB (6,250 km)")
     elif total_logged < 6500:
-        st.write("**Next Milestone:** Enter British Columbia (6,700 km)")
+        st.write("**Next Milestone:** Kicking Horse Pass, AB (6,500 km)")
     elif total_logged < 6700:
-        st.write("**Next Milestone:** Kamloops, BC (7,000 km)")
+        st.write("**Next Milestone:** Enter British Columbia (6,700 km)")
     elif total_logged < 7000:
-        st.write("**Next Milestone:** Hope, BC (7,250 km)")
+        st.write("**Next Milestone:** Kamloops, BC (7,000 km)")
     elif total_logged < 7250:
-        st.write("**Next Milestone:** Vancouver, BC (7,500 km)")
+        st.write("**Next Milestone:** Hope, BC (7,250 km)")
     elif total_logged < 7500:
-        st.write("**Next Milestone:** Victoria, BC (7,800 km)")
+        st.write("**Next Milestone:** Vancouver, BC (7,500 km)")
     elif total_logged < 7800:
         st.write("**Next Milestone:** Victoria, BC (7,800 km)")
     else:
