@@ -314,32 +314,33 @@ for tier_name, tier_info in CHALLENGE_CHECKPOINTS.items():
     
     # Combined achievement status and checkpoints in one expander
     if tier_completed:
-        status_text = f"✅ **{tier_name} {tier_info['total_km']:,} km**"
-        if 'badge' in tier_info['checkpoints'][-1]:
-            status_text += f" | {tier_info['checkpoints'][-1]['badge']}"
+        status_text = f"✅ {tier_name} | {tier_info['total_km']:,} km"
     else:
         remaining = tier_info['total_km'] - total_logged
-        status_text = f"⏳ **{tier_name} {tier_info['total_km']:,} km** | *{remaining:,.0f} km to go*"
+        status_text = f"⏳ {tier_name} | {tier_info['total_km']:,} km"
     
     with st.expander(status_text, expanded=False):
-        # Route only
-        st.markdown(f"Route: **{tier_info['route']}**")
+        # Route
+        st.markdown(f"Route: {tier_info['route']}")
+        
+        # Badge
+        if 'badge' in tier_info['checkpoints'][-1]:
+            st.markdown(f"Badge: {tier_info['checkpoints'][-1]['badge']}")
         
         st.markdown("Checkpoints:")
         
         # Checkpoints in a more organized format
         for i, checkpoint in enumerate(tier_info['checkpoints']):
             checkpoint_reached = total_logged >= checkpoint['km']
+            remaining_to_tier = tier_info['total_km'] - checkpoint['km']
             
             if checkpoint_reached:
-                st.markdown(f"✅ **{checkpoint['location']} {checkpoint['km']:,} km**")
-                if 'description' in checkpoint:
-                    st.markdown(f"   *{checkpoint['description']}*")
                 if 'badge' in checkpoint:
-                    st.markdown(f"   {checkpoint['badge']}")
+                    st.markdown(f"{checkpoint['km']:,} km – {checkpoint['location']} 🎖 Badge Earned: {checkpoint['badge']}")
+                else:
+                    st.markdown(f"{checkpoint['km']:,} km – {checkpoint['location']}")
             else:
-                remaining = checkpoint['km'] - total_logged
-                st.markdown(f"⏳ **{checkpoint['location']} {checkpoint['km']:,} km** | *{remaining:,.0f} km to go*")
+                st.markdown(f"{checkpoint['km']:,} km – {checkpoint['location']} | {remaining_to_tier:,} km to go")
             
             # Add spacing between checkpoints (except for the last one)
             if i < len(tier_info['checkpoints']) - 1:
