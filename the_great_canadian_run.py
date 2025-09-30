@@ -331,14 +331,10 @@ for tier_name, tier_info in CHALLENGE_CHECKPOINTS.items():
         
         # Checkpoints in a more organized format
         for i, checkpoint in enumerate(tier_info['checkpoints']):
-            checkpoint_reached = total_logged >= checkpoint['km']
             remaining_to_tier = tier_info['total_km'] - checkpoint['km']
             
-            if checkpoint_reached:
-                if 'badge' in checkpoint:
-                    st.markdown(f"{checkpoint['km']:,} km – {checkpoint['location']} 🎖 Badge Earned: {checkpoint['badge']}")
-                else:
-                    st.markdown(f"{checkpoint['km']:,} km – {checkpoint['location']}")
+            if 'badge' in checkpoint:
+                st.markdown(f"{checkpoint['km']:,} km – {checkpoint['location']} | 🎖 Badge Earned: {checkpoint['badge']}")
             else:
                 st.markdown(f"{checkpoint['km']:,} km – {checkpoint['location']} | {remaining_to_tier:,} km to go")
             
