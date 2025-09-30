@@ -318,7 +318,7 @@ for tier_name, tier_info in CHALLENGE_CHECKPOINTS.items():
     if tier_completed:
         status_text = f"✅ **{tier_name} {tier_info['total_km']:,} km**"
         if 'badge' in tier_info['checkpoints'][-1]:
-            status_text += f" | Badge: {tier_info['checkpoints'][-1]['badge']}"
+            status_text += f" | {tier_info['checkpoints'][-1]['badge']}"
     else:
         remaining = tier_info['total_km'] - total_logged
         status_text = f"⏳ **{tier_name} {tier_info['total_km']:,} km** *({remaining:,.0f} km to go)*"
