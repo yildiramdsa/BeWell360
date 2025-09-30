@@ -318,10 +318,6 @@ for tier_name, tier_info in CHALLENGE_CHECKPOINTS.items():
         # Route
         st.markdown(f"Route: {tier_info['route']}")
         
-        # Badge
-        if 'badge' in tier_info['checkpoints'][-1]:
-            st.markdown(f"Badge: {tier_info['checkpoints'][-1]['badge']}")
-        
         st.markdown("Checkpoints:")
         
         # Checkpoints in a more organized format
