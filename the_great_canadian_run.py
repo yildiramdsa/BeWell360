@@ -122,7 +122,41 @@ if not st.session_state.challenge_data.empty:
 
 # Main Progress Section
 st.markdown("### Your Journey Progress")
-st.write(f"**Total Distance:** {total_logged:,.0f} km / 7,800 km")
+
+# Progress information grouped together
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    st.write(f"**Total Distance:** {total_logged:,.0f} km / 7,800 km")
+
+with col2:
+    if total_logged < 500:
+        st.write("**Current Location:** Newfoundland")
+    elif total_logged < 2000:
+        st.write("**Current Location:** Eastern Canada")
+    elif total_logged < 4000:
+        st.write("**Current Location:** Central Canada")
+    elif total_logged < 6000:
+        st.write("**Current Location:** Prairies & Rockies")
+    elif total_logged < 7800:
+        st.write("**Current Location:** British Columbia")
+    else:
+        st.write("**Current Location:** Victoria, BC")
+
+with col3:
+    if total_logged < 500:
+        st.write("**Next Milestone:** Port aux Basques (500 km)")
+    elif total_logged < 2000:
+        st.write("**Next Milestone:** Québec City (2,000 km)")
+    elif total_logged < 4000:
+        st.write("**Next Milestone:** Sault Ste. Marie (4,000 km)")
+    elif total_logged < 6000:
+        st.write("**Next Milestone:** Calgary (6,000 km)")
+    elif total_logged < 7800:
+        st.write("**Next Milestone:** Victoria (7,800 km)")
+    else:
+        st.write("**Status:** Journey Complete!")
+
 st.write("*Every kilometer takes you further across Canada.*")
 
 # Progress bar
@@ -130,23 +164,8 @@ progress_percentage = min((total_logged / 7800) * 100, 100)
 st.progress(progress_percentage / 100)
 st.caption(f"Progress: {progress_percentage:.1f}%")
 
-# Current location
-if total_logged < 500:
-    st.write("**Current Location:** Newfoundland")
-    st.write("**Next Milestone:** Port aux Basques (500 km)")
-elif total_logged < 2000:
-    st.write("**Current Location:** Eastern Canada")
-    st.write("**Next Milestone:** Québec City (2,000 km)")
-elif total_logged < 4000:
-    st.write("**Current Location:** Central Canada")
-    st.write("**Next Milestone:** Sault Ste. Marie (4,000 km)")
-elif total_logged < 6000:
-    st.write("**Current Location:** Prairies & Rockies")
-    st.write("**Next Milestone:** Calgary (6,000 km)")
-elif total_logged < 7800:
-    st.write("**Current Location:** British Columbia")
-    st.write("**Next Milestone:** Victoria (7,800 km)")
-else:
+# Completion celebration
+if total_logged >= 7800:
     st.write("**Congratulations!** You've completed the coast-to-coast journey!")
 
 # Log Your Kilometers
@@ -202,7 +221,7 @@ for tier_name, tier_info in CHALLENGE_CHECKPOINTS.items():
                     st.markdown(f"   **Badge:** {checkpoint['badge']}")
             else:
                 remaining = checkpoint['km'] - total_logged
-                st.markdown(f"⏳ **{checkpoint['km']:,} km** - {checkpoint['location']} (*{remaining:,.0f} km to go*)")
+                st.markdown(f"⏳ **{checkpoint['km']:,} km** - {checkpoint['location']} *{remaining:,.0f} km to go*")
             
             # Add spacing between checkpoints (except for the last one)
             if i < len(tier_info['checkpoints']) - 1:
