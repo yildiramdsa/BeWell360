@@ -27,11 +27,10 @@ CHALLENGE_CHECKPOINTS = {
         "description": "Perfect for beginners — ~10 km/week",
         "checkpoints": [
             {"km": 0, "location": "St. John's, NL"},
-            {"km": 100, "location": "Bishop's Falls, NL"},
             {"km": 200, "location": "Gander, NL"},
             {"km": 300, "location": "Grand Falls-Windsor, NL"},
             {"km": 400, "location": "Corner Brook, NL"},
-            {"km": 500, "location": "Port aux Basques, NL", "description": "Ferry to Nova Scotia", "badge": "🍁 Atlantic Explorer"}
+            {"km": 500, "location": "Port aux Basques, NL", "badge": "Atlantic Explorer"}
         ]
     },
     "Eastern Challenge": {
@@ -39,16 +38,13 @@ CHALLENGE_CHECKPOINTS = {
         "route": "Port aux Basques → Québec City",
         "description": "Travel through Nova Scotia, New Brunswick, and into Québec. City checkpoints, such as Halifax, Moncton, and Québec City, keep your progress visible and motivating.",
         "checkpoints": [
-            {"km": 500, "location": "Newfoundland"},
-            {"km": 600, "location": "Enter Nova Scotia"},
-            {"km": 700, "location": "Yarmouth, NS"},
+            {"km": 600, "location": "Sydney, NS"},
             {"km": 1000, "location": "Halifax, NS"},
-            {"km": 1150, "location": "Truro, NS"},
-            {"km": 1300, "location": "Cross into New Brunswick"},
+            {"km": 1300, "location": "Enter New Brunswick"},
             {"km": 1500, "location": "Moncton, NB"},
             {"km": 1650, "location": "Fredericton, NB"},
-            {"km": 1800, "location": "Cross into Quebec"},
-            {"km": 2000, "location": "Québec City, QC", "description": "Eastern Challenge", "badge": "🍁 Eastern Adventurer"}
+            {"km": 1800, "location": "Enter Quebec"},
+            {"km": 2000, "location": "Québec City, QC", "badge": "Eastern Adventurer"}
         ]
     },
     "Central Challenge": {
@@ -56,14 +52,13 @@ CHALLENGE_CHECKPOINTS = {
         "route": "Québec City → Sault Ste. Marie",
         "description": "Cross Québec into Ontario. Major milestones in Montréal, Ottawa, and Toronto mark steady growth and endurance.",
         "checkpoints": [
-            {"km": 2000, "location": "Québec City, QC"},
             {"km": 2250, "location": "Trois-Rivières, QC"},
             {"km": 2500, "location": "Montréal, QC"},
-            {"km": 2650, "location": "Cross into Ontario"},
+            {"km": 2650, "location": "Enter Ontario"},
             {"km": 3000, "location": "Ottawa, ON"},
             {"km": 3250, "location": "Kingston, ON"},
-            {"km": 3500, "location": "Toronto, ON", "description": "Central Challenge", "badge": "🍁 Central Trailblazer"},
-            {"km": 4000, "location": "Sault Ste. Marie, ON"}
+            {"km": 3500, "location": "Toronto, ON"},
+            {"km": 4000, "location": "Sault Ste. Marie, ON", "badge": "Central Challenger"}
         ]
     },
     "Prairies & Rockies": {
@@ -71,14 +66,13 @@ CHALLENGE_CHECKPOINTS = {
         "route": "Sault Ste. Marie → Calgary",
         "description": "Move across the Prairies into the Rocky Mountains. Celebrate key milestones in Winnipeg, Regina, and Calgary as you head west to the western provinces.",
         "checkpoints": [
-            {"km": 4000, "location": "Sault Ste. Marie, ON"},
             {"km": 4250, "location": "Thunder Bay, ON"},
             {"km": 4500, "location": "Enter Manitoba"},
             {"km": 5000, "location": "Winnipeg, MB"},
             {"km": 5250, "location": "Brandon, MB"},
             {"km": 5500, "location": "Regina, SK"},
             {"km": 5750, "location": "Moose Jaw, SK"},
-            {"km": 6000, "location": "Calgary, AB", "description": "Prairies & Rockies", "badge": "🍁 Prairies & Rockies Runner"}
+            {"km": 6000, "location": "Calgary, AB", "badge": "Prairie Voyager"}
         ]
     },
     "Full Coast-to-Coast": {
@@ -86,14 +80,12 @@ CHALLENGE_CHECKPOINTS = {
         "route": "Calgary → Victoria",
         "description": "Enter British Columbia and the Rockies' final stretch. Complete the journey in Kamloops, Vancouver, and Victoria, achieving coast-to-coast success.",
         "checkpoints": [
-            {"km": 6000, "location": "Calgary, AB"},
             {"km": 6250, "location": "Banff, AB"},
-            {"km": 6500, "location": "Kicking Horse Pass, AB"},
-            {"km": 6700, "location": "Enter British Columbia"},
+            {"km": 6500, "location": "Kicking Horse Pass (AB/BC border)"},
             {"km": 7000, "location": "Kamloops, BC"},
             {"km": 7250, "location": "Hope, BC"},
             {"km": 7500, "location": "Vancouver, BC"},
-            {"km": 7800, "location": "Victoria, BC", "description": "Finish Line", "badge": "🍁 Coast-to-Coast Champion"}
+            {"km": 7800, "location": "Victoria, BC", "badge": "True North Finisher"}
         ]
     }
 }
@@ -337,10 +329,16 @@ for tier_name, tier_info in CHALLENGE_CHECKPOINTS.items():
             checkpoint_reached = total_logged >= checkpoint['km']
             remaining_to_tier = tier_info['total_km'] - checkpoint['km']
             
-            if checkpoint_reached:
-                st.markdown(f"✅ {checkpoint['km']:,} km – {checkpoint['location']} | {remaining_to_tier:,} km to go")
+            if 'badge' in checkpoint:
+                if checkpoint_reached:
+                    st.markdown(f"✅ {checkpoint['km']:,} km – {checkpoint['location']} | 🎖 {checkpoint['badge']}")
+                else:
+                    st.markdown(f"⏳ {checkpoint['km']:,} km – {checkpoint['location']} | 🎖 {checkpoint['badge']}")
             else:
-                st.markdown(f"⏳ {checkpoint['km']:,} km – {checkpoint['location']} | {remaining_to_tier:,} km to go")
+                if checkpoint_reached:
+                    st.markdown(f"✅ {checkpoint['km']:,} km – {checkpoint['location']} | {remaining_to_tier:,} km to go")
+                else:
+                    st.markdown(f"⏳ {checkpoint['km']:,} km – {checkpoint['location']} | {remaining_to_tier:,} km to go")
             
             # Add spacing between checkpoints (except for the last one)
             if i < len(tier_info['checkpoints']) - 1:
