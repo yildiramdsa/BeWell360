@@ -315,12 +315,12 @@ for tier_name, tier_info in CHALLENGE_CHECKPOINTS.items():
     # Combined achievement status and checkpoints in one expander
     if tier_completed:
         if 'badge' in tier_info['checkpoints'][-1]:
-            status_text = f"✅ {tier_name} | {tier_info['total_km']:,} km | {tier_info['checkpoints'][-1]['badge']}"
+            status_text = f"✅ **{tier_name} {tier_info['total_km']:,} km** | {tier_info['checkpoints'][-1]['badge']}"
         else:
-            status_text = f"✅ {tier_name} | {tier_info['total_km']:,} km"
+            status_text = f"✅ **{tier_name} {tier_info['total_km']:,} km**"
     else:
         remaining = tier_info['total_km'] - total_logged
-        status_text = f"⏳ {tier_name} | {tier_info['total_km']:,} km"
+        status_text = f"⏳ **{tier_name} {tier_info['total_km']:,} km**"
     
     with st.expander(status_text, expanded=False):
         # Route
