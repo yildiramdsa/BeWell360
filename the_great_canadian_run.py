@@ -100,7 +100,6 @@ CHALLENGE_CHECKPOINTS = {
 
 
 st.title("🍁 The Great Canadian Run")
-st.subheader("A virtual journey across Canada — one step at a time.")
 
 # Initialize session state
 if "challenge_data" not in st.session_state:
