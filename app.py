@@ -5,7 +5,7 @@ import base64
 # ---------------- Constants ----------------
 DATA_DIR = "data"
 HEADER_SVG = "images/BeWell360-lg.svg"
-FOOTER_SVG = "images/Oranlytix-lg.svg"
+FOOTER_SVG = "images/SnowyOwlDataTextLogo.svg"
 
 # ---------------- Page Config ----------------
 st.set_page_config(page_title="BeWell360", layout="wide")
