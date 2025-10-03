@@ -280,19 +280,37 @@ def get_existing_distance(selected_date):
                 return float(row.iloc[1]) if len(row) > 1 and pd.notna(row.iloc[1]) else 0.0
     return 0.0
 
+# Use session state to track form values and update when date changes
+if "selected_date" not in st.session_state:
+    st.session_state.selected_date = date.today()
+
+if "form_distance" not in st.session_state:
+    st.session_state.form_distance = 0.0
+
 with st.form("log_run"):
-    activity_date = st.date_input("Date", value=date.today())
+    activity_date = st.date_input("Date", value=st.session_state.selected_date)
+    
+    # Update form distance when date changes
+    if activity_date != st.session_state.selected_date:
+        st.session_state.selected_date = activity_date
+        st.session_state.form_distance = get_existing_distance(activity_date)
+        st.rerun()
     
     # Get existing distance for the selected date
     existing_distance = get_existing_distance(activity_date)
     
     # Show existing distance in the input
     if existing_distance > 0:
-        distance = st.number_input("Distance (km)", min_value=0.0, step=0.1, value=existing_distance, 
+        distance = st.number_input("Distance (km)", min_value=0.0, step=0.1, 
+                                 value=st.session_state.form_distance,
                                  help=f"Currently logged: {existing_distance} km for {activity_date}")
     else:
         distance = st.number_input("Distance (km)", min_value=0.0, step=0.1, 
+                                 value=st.session_state.form_distance,
                                  help=f"No run logged for {activity_date}")
+    
+    # Update session state with current distance value
+    st.session_state.form_distance = distance
     
     if st.form_submit_button("Log Run"):
         if distance > 0:
@@ -330,7 +348,7 @@ with st.form("log_run"):
 # Recent Runs
 if not st.session_state.challenge_data.empty:
     with st.expander("Recent Runs", expanded=False):
-        # Convert to DataFrame for editing
+        # Convert to DataFrame for display
         df_display = st.session_state.challenge_data.copy()
         
         # Ensure we have the right column names
@@ -343,104 +361,8 @@ if not st.session_state.challenge_data.empty:
             df_display = df_display.sort_values('date', ascending=False)
             df_display['date'] = df_display['date'].dt.strftime('%Y-%m-%d')
         
-        # Display editable dataframe
-        edited_df = st.data_editor(
-            df_display,
-            use_container_width=True,
-            num_rows="dynamic",
-            column_config={
-                "date": st.column_config.TextColumn(
-                    "Date",
-                    help="Date of the run (YYYY-MM-DD)",
-                    width="medium"
-                ),
-                "distance_km": st.column_config.NumberColumn(
-                    "Distance (km)",
-                    help="Distance in kilometers",
-                    min_value=0.0,
-                    step=0.1,
-                    width="medium"
-                )
-            }
-        )
-        
-        # Save changes button
-        if st.button("💾 Save Changes", help="Save all changes to the log"):
-            try:
-                # Clear existing data
-                ws.clear()
-                
-                # Add headers
-                if not edited_df.empty:
-                    headers = list(edited_df.columns)
-                    ws.append_row(headers)
-                    
-                    # Add data rows
-                    for _, row in edited_df.iterrows():
-                        ws.append_row(row.tolist())
-                
-                st.success("Changes saved successfully!")
-                st.session_state.challenge_data = pd.DataFrame(ws.get_all_records())
-                st.rerun()
-            except Exception as e:
-                st.error(f"Error saving changes: {str(e)}")
-        
-        # Add new run button
-        if st.button("➕ Add New Run", help="Add a new run entry"):
-            st.session_state["adding_new_run"] = True
-            st.rerun()
-
-# Add new run form (when triggered)
-if st.session_state.get("adding_new_run", False):
-    st.markdown("### Add New Run")
-    
-    col1, col2, col3 = st.columns([2, 1, 1])
-    
-    with col1:
-        new_date = st.date_input("Date", value=date.today(), key="new_run_date")
-        new_distance = st.number_input("Distance (km)", min_value=0.0, step=0.1, key="new_run_distance")
-    
-    with col2:
-        if st.button("✅ Add", help="Add this run"):
-            if new_distance > 0:
-                try:
-                    # Check if date already exists
-                    date_str = str(new_date)
-                    existing_data = st.session_state.challenge_data
-                    
-                    if not existing_data.empty and 'date' in existing_data.columns:
-                        # Check if date already exists
-                        date_exists = existing_data['date'].astype(str).str.contains(date_str).any()
-                        
-                        if date_exists:
-                            # Update existing row
-                            row_index = existing_data[existing_data['date'].astype(str) == date_str].index[0]
-                            if 'distance_km' in existing_data.columns:
-                                ws.update(f"B{row_index + 2}", [[new_distance]])
-                            else:
-                                ws.update(f"A{row_index + 2}:B{row_index + 2}", [[date_str, new_distance]])
-                            st.success(f"Updated run for {new_date}!")
-                        else:
-                            # Add new row
-                            ws.append_row([date_str, new_distance])
-                            st.success("Run added successfully!")
-                    else:
-                        # First entry
-                        ws.append_row([date_str, new_distance])
-                        st.success("Run added successfully!")
-                    
-                    st.session_state.challenge_data = pd.DataFrame(ws.get_all_records())
-                    st.session_state["adding_new_run"] = False
-                    st.rerun()
-                except Exception as e:
-                    st.error(f"Error adding run: {str(e)}")
-            else:
-                st.error("Please enter a distance greater than 0.")
-    
-    with col3:
-        if st.button("❌ Cancel", help="Cancel adding new run"):
-            st.session_state["adding_new_run"] = False
-            st.rerun()
+        # Display read-only dataframe
+        st.dataframe(df_display, use_container_width=True)
 
 # Your Badges
 st.markdown("### Your Badges")
