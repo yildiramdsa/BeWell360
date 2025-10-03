@@ -373,7 +373,10 @@ for tier_name, tier_info in CHALLENGE_CHECKPOINTS.items():
     
     # Combined achievement status and checkpoints in one expander
     if tier_completed:
-        status_text = f"✅ **{tier_name} {tier_info['total_km']:,} km**"
+        if 'badge' in tier_info['checkpoints'][-1]:
+            status_text = f"✅ **{tier_name} {tier_info['total_km']:,} km** | 🍁 {tier_info['checkpoints'][-1]['badge']}"
+        else:
+            status_text = f"✅ **{tier_name} {tier_info['total_km']:,} km**"
     else:
         remaining = tier_info['total_km'] - total_logged
         status_text = f"⏳ **{tier_name} {tier_info['total_km']:,} km**"
@@ -391,9 +394,9 @@ for tier_name, tier_info in CHALLENGE_CHECKPOINTS.items():
             
             if 'badge' in checkpoint:
                 if checkpoint_reached:
-                    st.markdown(f"✅ {checkpoint['km']:,} km – {checkpoint['location']} | 🏆 {checkpoint['badge']}")
+                    st.markdown(f"✅ {checkpoint['km']:,} km – {checkpoint['location']}")
                 else:
-                    st.markdown(f"⏳ {checkpoint['km']:,} km – {checkpoint['location']} | 🏆 {checkpoint['badge']}")
+                    st.markdown(f"⏳ {checkpoint['km']:,} km – {checkpoint['location']}")
             else:
                 if checkpoint_reached:
                     st.markdown(f"✅ {checkpoint['km']:,} km – {checkpoint['location']} | {remaining_to_tier:,} km to go")
