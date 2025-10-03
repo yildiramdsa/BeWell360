@@ -64,7 +64,7 @@ os.makedirs(DATA_DIR, exist_ok=True)
 footer_html = f"""
 <div style="text-align:center;">
     <span style="font-size:12px; color:gray;">Powered by</span>
-    <img src="data:image/svg+xml;base64,{load_svg(FOOTER_SVG)}" width="165">
+    <img src="data:image/svg+xml;base64,{load_svg(FOOTER_SVG)}" width="150">
     <div style="font-size:12px; color:gray;">© 2025 BeWell360. All rights reserved.</div>
 </div>
 """
