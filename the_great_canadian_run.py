@@ -321,7 +321,7 @@ def load_badge_image(badge_name, is_earned=True):
                 svg_content = svg_content.replace('<svg', '<svg style="filter: grayscale(100%); opacity: 0.5;"')
             
             # Ensure SVG has proper size
-            svg_content = svg_content.replace('<svg', '<svg width="80" height="80"')
+            svg_content = svg_content.replace('<svg', '<svg width="125" height="125"')
             
             st.markdown(svg_content, unsafe_allow_html=True)
         else:
