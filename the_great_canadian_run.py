@@ -280,54 +280,53 @@ def get_existing_distance(selected_date):
                 return float(row.iloc[1]) if len(row) > 1 and pd.notna(row.iloc[1]) else 0.0
     return 0.0
 
-with st.form("log_run"):
-    activity_date = st.date_input("Date", value=date.today())
-    
-    # Get existing distance for the selected date
-    existing_distance = get_existing_distance(activity_date)
-    
-    # Show existing distance in the input
-    if existing_distance > 0:
-        distance = st.number_input("Distance (km)", min_value=0.0, step=0.1, 
-                                 value=existing_distance,
-                                 help=f"Currently logged: {existing_distance} km for {activity_date}")
-    else:
-        distance = st.number_input("Distance (km)", min_value=0.0, step=0.1, 
-                                 value=0.0,
-                                 help=f"No run logged for {activity_date}")
-    
-    if st.form_submit_button("Log Run"):
-        if distance > 0:
-            try:
+activity_date = st.date_input("Date", value=date.today())
+
+# Get existing distance for the selected date
+existing_distance = get_existing_distance(activity_date)
+
+# Show existing distance in the input
+if existing_distance > 0:
+    distance = st.number_input("Distance (km)", min_value=0.0, step=0.1, 
+                             value=existing_distance,
+                             help=f"Currently logged: {existing_distance} km for {activity_date}")
+else:
+    distance = st.number_input("Distance (km)", min_value=0.0, step=0.1, 
+                             value=0.0,
+                             help=f"No run logged for {activity_date}")
+
+if st.button("Log Run"):
+    if distance > 0:
+        try:
+            # Check if date already exists
+            date_str = str(activity_date)
+            existing_data = st.session_state.challenge_data
+            
+            if not existing_data.empty and 'date' in existing_data.columns:
                 # Check if date already exists
-                date_str = str(activity_date)
-                existing_data = st.session_state.challenge_data
+                date_exists = existing_data['date'].astype(str).str.contains(date_str).any()
                 
-                if not existing_data.empty and 'date' in existing_data.columns:
-                    # Check if date already exists
-                    date_exists = existing_data['date'].astype(str).str.contains(date_str).any()
-                    
-                    if date_exists:
-                        # Update existing row
-                        row_index = existing_data[existing_data['date'].astype(str) == date_str].index[0]
-                        if 'distance_km' in existing_data.columns:
-                            ws.update(f"B{row_index + 2}", [[distance]])
-                        else:
-                            ws.update(f"A{row_index + 2}:B{row_index + 2}", [[date_str, distance]])
-                        st.success(f"Updated run for {activity_date}!")
+                if date_exists:
+                    # Update existing row
+                    row_index = existing_data[existing_data['date'].astype(str) == date_str].index[0]
+                    if 'distance_km' in existing_data.columns:
+                        ws.update(f"B{row_index + 2}", [[distance]])
                     else:
-                        # Add new row
-                        ws.append_row([date_str, distance])
-                        st.success("Run logged successfully!")
+                        ws.update(f"A{row_index + 2}:B{row_index + 2}", [[date_str, distance]])
+                    st.success(f"Updated run for {activity_date}!")
                 else:
-                    # First entry
+                    # Add new row
                     ws.append_row([date_str, distance])
                     st.success("Run logged successfully!")
-                
-                st.session_state.challenge_data = pd.DataFrame(ws.get_all_records())
-                st.rerun()
-            except Exception as e:
-                st.error(f"Error logging run: {str(e)}")
+            else:
+                # First entry
+                ws.append_row([date_str, distance])
+                st.success("Run logged successfully!")
+            
+            st.session_state.challenge_data = pd.DataFrame(ws.get_all_records())
+            st.rerun()
+        except Exception as e:
+            st.error(f"Error logging run: {str(e)}")
 
 # Recent Runs
 if not st.session_state.challenge_data.empty:
