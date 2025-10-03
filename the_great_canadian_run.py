@@ -355,7 +355,6 @@ for tier_name, tier_info in CHALLENGE_CHECKPOINTS.items():
 
 # Display earned badges only
 if earned_badges:
-    st.markdown("#### 🏆 Earned Badges")
     # Display badges in a horizontal row to save space
     cols = st.columns(len(earned_badges))
     for i, badge in enumerate(earned_badges):
