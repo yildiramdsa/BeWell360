@@ -360,7 +360,6 @@ if earned_badges:
     for i, badge in enumerate(earned_badges):
         with cols[i]:
             load_badge_image(badge['name'], is_earned=True)
-            st.markdown(f"**{badge['name']}**", help=f"Challenge: {badge['challenge']} ({badge['km']:,} km)\nRoute: {badge['route']}")
 elif locked_badges:
     st.info("Complete challenges to earn badges!")
 else:
