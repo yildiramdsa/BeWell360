@@ -311,8 +311,7 @@ for tier_name, tier_info in CHALLENGE_CHECKPOINTS.items():
             
             if 'badge' in checkpoint:
                 if checkpoint_reached:
-                    if st.button(f"✅ {checkpoint['km']:,} km – {checkpoint['location']} | 🎖 {checkpoint['badge']}", key=f"badge_{checkpoint['badge']}", help="Click to view awards"):
-                        st.switch_page("awards.py")
+                    st.markdown(f"✅ {checkpoint['km']:,} km – {checkpoint['location']} | [🎖 {checkpoint['badge']}](awards.py)")
                 else:
                     st.markdown(f"⏳ {checkpoint['km']:,} km – {checkpoint['location']} | 🎖 {checkpoint['badge']}")
             else:
