@@ -25,7 +25,7 @@ today_str = today.strftime("%Y-%m-%d")
 if f"daily_checklist_{today_str}" not in st.session_state:
     st.session_state[f"daily_checklist_{today_str}"] = {}
 
-st.title("🌟 Daily Empowering Habits")
+st.title("⭐ Daily Empowering Habits")
 
 st.subheader(f"Today's Checklist - {today.strftime('%B %d, %Y')}")
 
