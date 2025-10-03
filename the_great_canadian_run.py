@@ -264,9 +264,35 @@ if total_logged >= 7800:
 
 # Log Your Kilometers
 st.markdown("### Log Your Kilometers")
+
+# Function to get existing distance for a date
+def get_existing_distance(selected_date):
+    date_str = str(selected_date)
+    existing_data = st.session_state.challenge_data
+    
+    if not existing_data.empty and 'date' in existing_data.columns:
+        date_exists = existing_data['date'].astype(str).str.contains(date_str).any()
+        if date_exists:
+            row = existing_data[existing_data['date'].astype(str) == date_str].iloc[0]
+            if 'distance_km' in existing_data.columns:
+                return float(row['distance_km']) if pd.notna(row['distance_km']) else 0.0
+            else:
+                return float(row.iloc[1]) if len(row) > 1 and pd.notna(row.iloc[1]) else 0.0
+    return 0.0
+
 with st.form("log_run"):
     activity_date = st.date_input("Date", value=date.today())
-    distance = st.number_input("Distance (km)", min_value=0.0, step=0.1)
+    
+    # Get existing distance for the selected date
+    existing_distance = get_existing_distance(activity_date)
+    
+    # Show existing distance in the input
+    if existing_distance > 0:
+        distance = st.number_input("Distance (km)", min_value=0.0, step=0.1, value=existing_distance, 
+                                 help=f"Currently logged: {existing_distance} km for {activity_date}")
+    else:
+        distance = st.number_input("Distance (km)", min_value=0.0, step=0.1, 
+                                 help=f"No run logged for {activity_date}")
     
     if st.form_submit_button("Log Run"):
         if distance > 0:
