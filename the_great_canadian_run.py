@@ -285,6 +285,35 @@ if not st.session_state.challenge_data.empty:
 
 # Your Badges
 st.markdown("### Your Badges")
+
+# Badge images mapping (replace with your actual SVG file paths)
+BADGE_IMAGES = {
+    "Atlantic Explorer": "images/badges/atlantic_explorer.svg",
+    "Eastern Adventurer": "images/badges/eastern_adventurer.svg", 
+    "Central Trailblazer": "images/badges/central_trailblazer.svg",
+    "Prairies & Rockies Runner": "images/badges/prairies_rockies_runner.svg",
+    "Coast-to-Coast Champion": "images/badges/coast_to_coast_champion.svg"
+}
+
+def load_badge_image(badge_name, is_earned=True):
+    """Load and display badge image, with fallback to emoji if file not found."""
+    try:
+        if badge_name in BADGE_IMAGES:
+            with open(BADGE_IMAGES[badge_name], "r") as f:
+                svg_content = f.read()
+            
+            # Add grayscale filter for locked badges
+            if not is_earned:
+                svg_content = svg_content.replace('<svg', '<svg style="filter: grayscale(100%); opacity: 0.5;"')
+            
+            st.markdown(svg_content, unsafe_allow_html=True)
+        else:
+            # Fallback to emoji if no image file found
+            st.markdown("🏆" if is_earned else "🔒")
+    except FileNotFoundError:
+        # Fallback to emoji if file doesn't exist
+        st.markdown("🏆" if is_earned else "🔒")
+
 earned_badges = []
 locked_badges = []
 
@@ -313,7 +342,7 @@ if earned_badges:
     for badge in earned_badges:
         col1, col2 = st.columns([1, 3])
         with col1:
-            st.markdown("🏆")  # Badge image placeholder
+            load_badge_image(badge['name'], is_earned=True)
         with col2:
             st.markdown(f"**{badge['name']}**")
             st.caption(f"Challenge: {badge['challenge']} ({badge['km']:,} km)")
@@ -325,7 +354,7 @@ if locked_badges:
     for badge in locked_badges:
         col1, col2 = st.columns([1, 3])
         with col1:
-            st.markdown("🔒")  # Locked badge placeholder
+            load_badge_image(badge['name'], is_earned=False)
         with col2:
             st.markdown(f"**{badge['name']}**")
             st.caption(f"Challenge: {badge['challenge']} ({badge['km']:,} km)")
