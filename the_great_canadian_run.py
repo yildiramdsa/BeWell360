@@ -281,7 +281,115 @@ with st.form("log_run"):
 # Recent Runs
 if not st.session_state.challenge_data.empty:
     with st.expander("Recent Runs", expanded=False):
-        st.dataframe(st.session_state.challenge_data.tail(10), use_container_width=True)
+        # Convert to DataFrame for editing
+        df_display = st.session_state.challenge_data.copy()
+        
+        # Ensure we have the right column names
+        if 'date' not in df_display.columns and len(df_display.columns) > 0:
+            df_display.columns = ['date', 'distance_km'] if len(df_display.columns) == 2 else ['date'] + list(df_display.columns[1:])
+        
+        # Convert date column to datetime for proper sorting and display
+        if 'date' in df_display.columns:
+            df_display['date'] = pd.to_datetime(df_display['date'], errors='coerce')
+            df_display = df_display.sort_values('date', ascending=False)
+            df_display['date'] = df_display['date'].dt.strftime('%Y-%m-%d')
+        
+        # Display editable dataframe
+        edited_df = st.data_editor(
+            df_display,
+            use_container_width=True,
+            num_rows="dynamic",
+            column_config={
+                "date": st.column_config.DateColumn(
+                    "Date",
+                    help="Date of the run",
+                    width="medium"
+                ),
+                "distance_km": st.column_config.NumberColumn(
+                    "Distance (km)",
+                    help="Distance in kilometers",
+                    min_value=0.0,
+                    step=0.1,
+                    width="medium"
+                )
+            }
+        )
+        
+        # Save changes button
+        if st.button("💾 Save Changes", help="Save all changes to the log"):
+            try:
+                # Clear existing data
+                ws.clear()
+                
+                # Add headers
+                if not edited_df.empty:
+                    headers = list(edited_df.columns)
+                    ws.append_row(headers)
+                    
+                    # Add data rows
+                    for _, row in edited_df.iterrows():
+                        ws.append_row(row.tolist())
+                
+                st.success("Changes saved successfully!")
+                st.session_state.challenge_data = pd.DataFrame(ws.get_all_records())
+                st.rerun()
+            except Exception as e:
+                st.error(f"Error saving changes: {str(e)}")
+        
+        # Add new run button
+        if st.button("➕ Add New Run", help="Add a new run entry"):
+            st.session_state["adding_new_run"] = True
+            st.rerun()
+
+# Add new run form (when triggered)
+if st.session_state.get("adding_new_run", False):
+    st.markdown("### Add New Run")
+    
+    col1, col2, col3 = st.columns([2, 1, 1])
+    
+    with col1:
+        new_date = st.date_input("Date", value=date.today(), key="new_run_date")
+        new_distance = st.number_input("Distance (km)", min_value=0.0, step=0.1, key="new_run_distance")
+    
+    with col2:
+        if st.button("✅ Add", help="Add this run"):
+            if new_distance > 0:
+                try:
+                    # Add to existing data
+                    current_df = st.session_state.challenge_data.copy()
+                    if current_df.empty:
+                        current_df = pd.DataFrame(columns=['date', 'distance_km'])
+                    
+                    new_row = pd.DataFrame({
+                        'date': [str(new_date)],
+                        'distance_km': [new_distance]
+                    })
+                    
+                    # Combine and sort by date
+                    updated_df = pd.concat([current_df, new_row], ignore_index=True)
+                    updated_df = updated_df.sort_values('date')
+                    
+                    # Clear and update Google Sheet
+                    ws.clear()
+                    headers = list(updated_df.columns)
+                    ws.append_row(headers)
+                    
+                    for _, row in updated_df.iterrows():
+                        ws.append_row(row.tolist())
+                    
+                    st.success("Run added successfully!")
+                    st.session_state.challenge_data = pd.DataFrame(ws.get_all_records())
+                    st.session_state["adding_new_run"] = False
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"Error adding run: {str(e)}")
+            else:
+                st.error("Please enter a distance greater than 0.")
+    
+    with col3:
+        if st.button("❌ Cancel", help="Cancel adding new run"):
+            st.session_state["adding_new_run"] = False
+            st.rerun()
 
 # Your Badges
 st.markdown("### Your Badges")
