@@ -306,6 +306,16 @@ def load_badge_image(badge_name, is_earned=True):
             import re
             svg_content = re.sub(r'<style.*?</style>', '', svg_content, flags=re.DOTALL)
             
+            # Convert CSS classes to inline styles to preserve colors
+            # Replace common fill colors
+            svg_content = svg_content.replace('class="cls-3"', 'style="fill: #6c1b14;"')
+            svg_content = svg_content.replace('class="cls-4"', 'style="fill: #c83d2d;"')
+            svg_content = svg_content.replace('class="cls-5"', 'style="fill: #b6291b;"')
+            svg_content = svg_content.replace('class="cls-7"', 'style="fill: #fff;"')
+            svg_content = svg_content.replace('class="cls-8"', 'style="fill: #b6291b;"')
+            svg_content = svg_content.replace('class="cls-6"', 'style="fill: none; stroke: #23262e; stroke-dasharray: .89 .89 .89 .89 .89 .89; stroke-miterlimit: 10; stroke-width: .89px;"')
+            svg_content = svg_content.replace('class="cls-2"', 'style="font-family: Montserrat-SemiBoldItalic, \'Montserrat SemiBoldItalic\'; font-size: 11.06px; font-style: italic; font-weight: 600; letter-spacing: .1em;"')
+            
             # Add inline styling for locked badges
             if not is_earned:
                 svg_content = svg_content.replace('<svg', '<svg style="filter: grayscale(100%); opacity: 0.5;"')
