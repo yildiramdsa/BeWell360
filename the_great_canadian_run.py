@@ -290,9 +290,9 @@ st.markdown("### Your Badges")
 BADGE_IMAGES = {
     "Atlantic Explorer": "images/badges/atlantic_explorer.svg",
     "Eastern Adventurer": "images/badges/eastern_adventurer.svg", 
-    "Central Trailblazer": "images/badges/central_trailblazer.svg",
-    "Prairies & Rockies Runner": "images/badges/prairies_rockies_runner.svg",
-    "Coast-to-Coast Champion": "images/badges/coast_to_coast_champion.svg"
+    "Central Challenger": "images/badges/central_challenger.svg",
+    "Prairie Voyager": "images/badges/prairie_voyager.svg",
+    "True North Finisher": "images/badges/true_north_finisher.svg"
 }
 
 def load_badge_image(badge_name, is_earned=True):
