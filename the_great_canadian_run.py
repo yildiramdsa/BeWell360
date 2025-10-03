@@ -300,9 +300,9 @@ if not st.session_state.challenge_data.empty:
             use_container_width=True,
             num_rows="dynamic",
             column_config={
-                "date": st.column_config.DateColumn(
+                "date": st.column_config.TextColumn(
                     "Date",
-                    help="Date of the run",
+                    help="Date of the run (YYYY-MM-DD)",
                     width="medium"
                 ),
                 "distance_km": st.column_config.NumberColumn(
