@@ -280,21 +280,8 @@ def get_existing_distance(selected_date):
                 return float(row.iloc[1]) if len(row) > 1 and pd.notna(row.iloc[1]) else 0.0
     return 0.0
 
-# Use session state to track form values and update when date changes
-if "selected_date" not in st.session_state:
-    st.session_state.selected_date = date.today()
-
-if "form_distance" not in st.session_state:
-    st.session_state.form_distance = 0.0
-
 with st.form("log_run"):
-    activity_date = st.date_input("Date", value=st.session_state.selected_date)
-    
-    # Update form distance when date changes
-    if activity_date != st.session_state.selected_date:
-        st.session_state.selected_date = activity_date
-        st.session_state.form_distance = get_existing_distance(activity_date)
-        st.rerun()
+    activity_date = st.date_input("Date", value=date.today())
     
     # Get existing distance for the selected date
     existing_distance = get_existing_distance(activity_date)
@@ -302,15 +289,12 @@ with st.form("log_run"):
     # Show existing distance in the input
     if existing_distance > 0:
         distance = st.number_input("Distance (km)", min_value=0.0, step=0.1, 
-                                 value=st.session_state.form_distance,
+                                 value=existing_distance,
                                  help=f"Currently logged: {existing_distance} km for {activity_date}")
     else:
         distance = st.number_input("Distance (km)", min_value=0.0, step=0.1, 
-                                 value=st.session_state.form_distance,
+                                 value=0.0,
                                  help=f"No run logged for {activity_date}")
-    
-    # Update session state with current distance value
-    st.session_state.form_distance = distance
     
     if st.form_submit_button("Log Run"):
         if distance > 0:
