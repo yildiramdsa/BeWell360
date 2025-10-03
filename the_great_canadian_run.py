@@ -302,9 +302,16 @@ def load_badge_image(badge_name, is_earned=True):
             with open(BADGE_IMAGES[badge_name], "r") as f:
                 svg_content = f.read()
             
-            # Add grayscale filter for locked badges
+            # Remove CSS styles that cause issues in Streamlit
+            import re
+            svg_content = re.sub(r'<style.*?</style>', '', svg_content, flags=re.DOTALL)
+            
+            # Add inline styling for locked badges
             if not is_earned:
                 svg_content = svg_content.replace('<svg', '<svg style="filter: grayscale(100%); opacity: 0.5;"')
+            
+            # Ensure SVG has proper size
+            svg_content = svg_content.replace('<svg', '<svg width="80" height="80"')
             
             st.markdown(svg_content, unsafe_allow_html=True)
         else:
