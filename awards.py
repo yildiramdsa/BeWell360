@@ -69,8 +69,6 @@ except:
     total_logged = 0
 
 # ---------------- Badge Display ----------------
-st.markdown("### Your Badges")
-
 col1, col2 = st.columns([3, 1])
 
 with col1:
