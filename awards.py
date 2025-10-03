@@ -69,18 +69,6 @@ except:
     total_logged = 0
 
 # ---------------- Badge Display ----------------
-col1, col2 = st.columns([3, 1])
-
-with col1:
-    st.write(f"**Total Distance Logged:** {total_logged:,.0f} km")
-    
-with col2:
-    # Calculate completion percentage
-    max_distance = 7800
-    completion_pct = min((total_logged / max_distance) * 100, 100)
-    st.metric("Journey Progress", f"{completion_pct:.1f}%")
-
-st.markdown("---")
 
 # Display badges
 for badge_name, badge_info in BADGES.items():
