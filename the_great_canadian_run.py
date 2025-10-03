@@ -271,8 +271,31 @@ with st.form("log_run"):
     if st.form_submit_button("Log Run"):
         if distance > 0:
             try:
-                ws.append_row([str(activity_date), distance])
-                st.success("Run logged successfully!")
+                # Check if date already exists
+                date_str = str(activity_date)
+                existing_data = st.session_state.challenge_data
+                
+                if not existing_data.empty and 'date' in existing_data.columns:
+                    # Check if date already exists
+                    date_exists = existing_data['date'].astype(str).str.contains(date_str).any()
+                    
+                    if date_exists:
+                        # Update existing row
+                        row_index = existing_data[existing_data['date'].astype(str) == date_str].index[0]
+                        if 'distance_km' in existing_data.columns:
+                            ws.update(f"B{row_index + 2}", [[distance]])
+                        else:
+                            ws.update(f"A{row_index + 2}:B{row_index + 2}", [[date_str, distance]])
+                        st.success(f"Updated run for {activity_date}!")
+                    else:
+                        # Add new row
+                        ws.append_row([date_str, distance])
+                        st.success("Run logged successfully!")
+                else:
+                    # First entry
+                    ws.append_row([date_str, distance])
+                    st.success("Run logged successfully!")
+                
                 st.session_state.challenge_data = pd.DataFrame(ws.get_all_records())
                 st.rerun()
             except Exception as e:
@@ -355,29 +378,31 @@ if st.session_state.get("adding_new_run", False):
         if st.button("✅ Add", help="Add this run"):
             if new_distance > 0:
                 try:
-                    # Add to existing data
-                    current_df = st.session_state.challenge_data.copy()
-                    if current_df.empty:
-                        current_df = pd.DataFrame(columns=['date', 'distance_km'])
+                    # Check if date already exists
+                    date_str = str(new_date)
+                    existing_data = st.session_state.challenge_data
                     
-                    new_row = pd.DataFrame({
-                        'date': [str(new_date)],
-                        'distance_km': [new_distance]
-                    })
+                    if not existing_data.empty and 'date' in existing_data.columns:
+                        # Check if date already exists
+                        date_exists = existing_data['date'].astype(str).str.contains(date_str).any()
+                        
+                        if date_exists:
+                            # Update existing row
+                            row_index = existing_data[existing_data['date'].astype(str) == date_str].index[0]
+                            if 'distance_km' in existing_data.columns:
+                                ws.update(f"B{row_index + 2}", [[new_distance]])
+                            else:
+                                ws.update(f"A{row_index + 2}:B{row_index + 2}", [[date_str, new_distance]])
+                            st.success(f"Updated run for {new_date}!")
+                        else:
+                            # Add new row
+                            ws.append_row([date_str, new_distance])
+                            st.success("Run added successfully!")
+                    else:
+                        # First entry
+                        ws.append_row([date_str, new_distance])
+                        st.success("Run added successfully!")
                     
-                    # Combine and sort by date
-                    updated_df = pd.concat([current_df, new_row], ignore_index=True)
-                    updated_df = updated_df.sort_values('date')
-                    
-                    # Clear and update Google Sheet
-                    ws.clear()
-                    headers = list(updated_df.columns)
-                    ws.append_row(headers)
-                    
-                    for _, row in updated_df.iterrows():
-                        ws.append_row(row.tolist())
-                    
-                    st.success("Run added successfully!")
                     st.session_state.challenge_data = pd.DataFrame(ws.get_all_records())
                     st.session_state["adding_new_run"] = False
                     st.rerun()
