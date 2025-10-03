@@ -49,7 +49,6 @@ life_mastery_pages = create_pages([
 
 challenges_pages = create_pages([
     ("the_great_canadian_run.py", "The Great Canadian Run", "🏃‍♂️"),
-    ("awards.py", "Awards & Badges", "🏆"),
 ])
 
 pages = {

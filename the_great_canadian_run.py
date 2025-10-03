@@ -283,6 +283,61 @@ if not st.session_state.challenge_data.empty:
     with st.expander("Recent Runs", expanded=False):
         st.dataframe(st.session_state.challenge_data.tail(10), use_container_width=True)
 
+# Your Badges
+st.markdown("### Your Badges")
+earned_badges = []
+locked_badges = []
+
+for tier_name, tier_info in CHALLENGE_CHECKPOINTS.items():
+    tier_completed = total_logged >= tier_info['total_km']
+    if 'badge' in tier_info['checkpoints'][-1]:
+        badge_name = tier_info['checkpoints'][-1]['badge']
+        if tier_completed:
+            earned_badges.append({
+                'name': badge_name,
+                'challenge': tier_name,
+                'km': tier_info['total_km'],
+                'route': tier_info['route']
+            })
+        else:
+            locked_badges.append({
+                'name': badge_name,
+                'challenge': tier_name,
+                'km': tier_info['total_km'],
+                'route': tier_info['route']
+            })
+
+# Display earned badges
+if earned_badges:
+    st.markdown("#### 🏆 Earned Badges")
+    for badge in earned_badges:
+        col1, col2 = st.columns([1, 3])
+        with col1:
+            st.markdown("🏆")  # Badge image placeholder
+        with col2:
+            st.markdown(f"**{badge['name']}**")
+            st.caption(f"Challenge: {badge['challenge']} ({badge['km']:,} km)")
+            st.caption(f"Route: {badge['route']}")
+
+# Display locked badges
+if locked_badges:
+    st.markdown("#### 🔒 Locked Badges")
+    for badge in locked_badges:
+        col1, col2 = st.columns([1, 3])
+        with col1:
+            st.markdown("🔒")  # Locked badge placeholder
+        with col2:
+            st.markdown(f"**{badge['name']}**")
+            st.caption(f"Challenge: {badge['challenge']} ({badge['km']:,} km)")
+            progress = min(total_logged / badge['km'], 1.0)
+            st.progress(progress)
+            st.caption(f"Progress: {total_logged:,.0f} km / {badge['km']:,} km ({progress:.1%})")
+
+if not earned_badges and not locked_badges:
+    st.info("Complete challenges to earn badges!")
+
+st.markdown("---")
+
 # Challenge Progress
 st.markdown("### Challenge Progress")
 for tier_name, tier_info in CHALLENGE_CHECKPOINTS.items():
@@ -311,14 +366,9 @@ for tier_name, tier_info in CHALLENGE_CHECKPOINTS.items():
             
             if 'badge' in checkpoint:
                 if checkpoint_reached:
-                    col1, col2 = st.columns([4, 1])
-                    with col1:
-                        st.markdown(f"✅ {checkpoint['km']:,} km – {checkpoint['location']} | 🎖 {checkpoint['badge']}")
-                    with col2:
-                        if st.button("View", key=f"badge_{checkpoint['badge']}", help="View awards"):
-                            st.switch_page("awards.py")
+                    st.markdown(f"✅ {checkpoint['km']:,} km – {checkpoint['location']} | 🏆 {checkpoint['badge']}")
                 else:
-                    st.markdown(f"⏳ {checkpoint['km']:,} km – {checkpoint['location']} | 🎖 {checkpoint['badge']}")
+                    st.markdown(f"⏳ {checkpoint['km']:,} km – {checkpoint['location']} | 🏆 {checkpoint['badge']}")
             else:
                 if checkpoint_reached:
                     st.markdown(f"✅ {checkpoint['km']:,} km – {checkpoint['location']} | {remaining_to_tier:,} km to go")
