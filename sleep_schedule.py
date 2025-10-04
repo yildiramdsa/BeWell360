@@ -4,6 +4,7 @@ import gspread
 from google.oauth2.service_account import Credentials
 from datetime import date, time, datetime, timedelta
 import plotly.express as px
+from ai_assistant import ai_assistant
 
 # Helper Functions
 def find_sleep_columns(df):
@@ -226,6 +227,12 @@ if not st.session_state.sleep_df.empty:
 
     # Results Section
     st.write("")
+    st.write("")
+    
+    # AI Insights Section
+    insights = ai_assistant.generate_insights("sleep", st.session_state.sleep_df)
+    ai_assistant.display_insights(insights)
+    
     st.write("")
     header_col, col1, col2 = st.columns([2, 1, 1])
     

@@ -3,6 +3,7 @@ import pandas as pd
 import gspread
 from google.oauth2.service_account import Credentials
 from datetime import date
+from ai_assistant import ai_assistant
 
 # Google Sheets Setup
 SCOPES = [
@@ -173,6 +174,12 @@ if not st.session_state.growth_df.empty:
 
     # Results Section
     st.write("")
+    st.write("")
+    
+    # AI Insights Section
+    insights = ai_assistant.generate_insights("growth", st.session_state.growth_df)
+    ai_assistant.display_insights(insights)
+    
     st.write("")
     header_col, filter_col1, filter_col2 = st.columns([2, 1, 1])
     
