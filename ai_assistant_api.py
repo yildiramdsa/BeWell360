@@ -7,9 +7,21 @@ import os
 
 class AIAssistantAPI:
     def __init__(self):
-        # Initialize OpenAI client
-        self.client = openai.OpenAI(api_key=st.secrets.get("openai_api_key"))
+        # Initialize cache, client will be created when needed
+        self.client = None
         self.insights_cache = {}
+    
+    def _get_client(self):
+        """Get OpenAI client, creating it if needed"""
+        if self.client is None:
+            try:
+                api_key = st.secrets.get("openai_api_key")
+                if not api_key:
+                    raise ValueError("OpenAI API key not found in secrets")
+                self.client = openai.OpenAI(api_key=api_key)
+            except Exception as e:
+                raise ValueError(f"Failed to initialize OpenAI client: {str(e)}")
+        return self.client
         
     def generate_insights(self, page_type, user_data, recent_data=None):
         """Generate AI insights using OpenAI API"""
@@ -27,7 +39,8 @@ class AIAssistantAPI:
             prompt = self._create_ai_prompt(page_type, data_summary)
             
             # Call OpenAI API
-            response = self.client.chat.completions.create(
+            client = self._get_client()
+            response = client.chat.completions.create(
                 model="gpt-3.5-turbo",
                 messages=[
                     {
@@ -252,7 +265,8 @@ Based on this {page_type} data, provide 3 specific, actionable suggestions:
 Return only 3 suggestions, each starting with an emoji and being 1-2 sentences. Be specific and actionable.
 """
             
-            response = self.client.chat.completions.create(
+            client = self._get_client()
+            response = client.chat.completions.create(
                 model="gpt-3.5-turbo",
                 messages=[
                     {"role": "system", "content": "You are a wellness coach. Provide specific, actionable suggestions."},
