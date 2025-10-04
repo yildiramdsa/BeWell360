@@ -220,37 +220,41 @@ if not st.session_state.nutrition_df.empty:
             else:
                 st.write("No image")
         
-        # Display meals with images
-        for _, row in filtered_df.sort_values("date", ascending=False).iterrows():
+        # Create a compact table display
+        df_display = filtered_df.copy()
+        
+        # Prepare display data
+        display_data = []
+        for _, row in df_display.sort_values("date", ascending=False).iterrows():
             meal_date = pd.to_datetime(row["date"]).strftime("%Y-%m-%d")
             
-            with st.expander(f"🍽️ {meal_date}", expanded=False):
-                col1, col2 = st.columns([1, 1])
-                
-                with col1:
-                    st.write("**Breakfast**")
-                    st.write(row.get("breakfast", ""))
-                    if "breakfast_image" in row and row["breakfast_image"]:
-                        display_base64_image(row["breakfast_image"])
-                    
-                    st.write("**Dinner**")
-                    st.write(row.get("dinner", ""))
-                    if "dinner_image" in row and row["dinner_image"]:
-                        display_base64_image(row["dinner_image"])
-                
-                with col2:
-                    st.write("**Lunch**")
-                    st.write(row.get("lunch", ""))
-                    if "lunch_image" in row and row["lunch_image"]:
-                        display_base64_image(row["lunch_image"])
-                    
-                    st.write("**Snacks**")
-                    st.write(row.get("snacks", ""))
-                    if "snacks_image" in row and row["snacks_image"]:
-                        display_base64_image(row["snacks_image"])
-                
-                st.write("**Supplements:**", row.get("supplements", ""))
-                st.write("**Water:**", row.get("water_ml", 0), "ml")
+            # Create compact entries with image indicators
+            breakfast_text = row.get("breakfast", "")
+            breakfast_img = "📷" if "breakfast_image" in row and row["breakfast_image"] else ""
+            
+            lunch_text = row.get("lunch", "")
+            lunch_img = "📷" if "lunch_image" in row and row["lunch_image"] else ""
+            
+            dinner_text = row.get("dinner", "")
+            dinner_img = "📷" if "dinner_image" in row and row["dinner_image"] else ""
+            
+            snacks_text = row.get("snacks", "")
+            snacks_img = "📷" if "snacks_image" in row and row["snacks_image"] else ""
+            
+            display_data.append({
+                "Date": meal_date,
+                "Breakfast": f"{breakfast_text} {breakfast_img}".strip(),
+                "Lunch": f"{lunch_text} {lunch_img}".strip(),
+                "Dinner": f"{dinner_text} {dinner_img}".strip(),
+                "Snacks": f"{snacks_text} {snacks_img}".strip(),
+                "Supplements": row.get("supplements", ""),
+                "Water (ml)": row.get("water_ml", 0)
+            })
+        
+        # Display compact table
+        compact_df = pd.DataFrame(display_data)
+        with st.expander("Log Entries", expanded=False):
+            st.dataframe(compact_df, use_container_width=True, height=400)
     else:
         st.info("No records in selected date range.")
 else:
