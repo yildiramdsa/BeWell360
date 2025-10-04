@@ -258,7 +258,7 @@ if not st.session_state.nutrition_df.empty:
             st.dataframe(compact_df, use_container_width=True, height=400)
         
         # Photo Gallery Section
-        st.markdown("### 📸 Photo Gallery")
+        st.markdown("### Photo Gallery")
         
         # Collect all photos with their metadata
         photo_gallery = []
