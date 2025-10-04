@@ -70,14 +70,10 @@ except:
 col1, col2 = st.columns(2)
 with col1:
     breakfast = st.text_input("Breakfast", value=prefill_breakfast)
-    breakfast_image = st.file_uploader("Breakfast Photo", type=['png', 'jpg', 'jpeg'], key="breakfast_img", help="Optional: Upload a photo of your breakfast")
     dinner = st.text_input("Dinner", value=prefill_dinner)
-    dinner_image = st.file_uploader("Dinner Photo", type=['png', 'jpg', 'jpeg'], key="dinner_img", help="Optional: Upload a photo of your dinner")
 with col2:
     lunch = st.text_input("Lunch", value=prefill_lunch)
-    lunch_image = st.file_uploader("Lunch Photo", type=['png', 'jpg', 'jpeg'], key="lunch_img", help="Optional: Upload a photo of your lunch")
     snacks = st.text_input("Snacks", value=prefill_snacks)
-    snacks_image = st.file_uploader("Snacks Photo", type=['png', 'jpg', 'jpeg'], key="snacks_img", help="Optional: Upload a photo of your snacks")
 
 col3, col4 = st.columns(2)
 with col3:
@@ -92,72 +88,14 @@ with col_save:
 with col_delete:
     delete_clicked = st.button("🗑️ Delete", disabled=(existing_row_idx is None))
 
-# Helper function to process image to base64
-import base64
-import io
-from PIL import Image
-
-def process_image_to_base64(image_file):
-    if image_file is None:
-        return ""
-    
-    try:
-        # Compress image to reduce size
-        img = Image.open(image_file)
-        
-        # Start with smaller size for Google Sheets compatibility
-        max_size = 300  # Reduced from 800
-        if img.width > max_size or img.height > max_size:
-            img.thumbnail((max_size, max_size), Image.Resampling.LANCZOS)
-        
-        # Convert to RGB if needed
-        if img.mode in ("RGBA", "P"):
-            img = img.convert("RGB")
-        
-        # Convert to base64 with lower quality
-        buffer = io.BytesIO()
-        img.save(buffer, format="JPEG", quality=60, optimize=True)  # Reduced from 85
-        img_base64 = base64.b64encode(buffer.getvalue()).decode()
-        
-        # Check if still too large and compress further if needed
-        max_chars = 45000  # Leave some buffer under 50k limit
-        if len(img_base64) > max_chars:
-            # Further reduce size
-            max_size = 200
-            img.thumbnail((max_size, max_size), Image.Resampling.LANCZOS)
-            buffer = io.BytesIO()
-            img.save(buffer, format="JPEG", quality=40, optimize=True)
-            img_base64 = base64.b64encode(buffer.getvalue()).decode()
-        
-        # If still too large, return empty string
-        if len(img_base64) > max_chars:
-            st.warning(f"Image too large to save. Please use a smaller image.")
-            return ""
-        
-        return img_base64
-    except Exception as e:
-        st.error(f"Error processing image: {str(e)}")
-        return ""
-
 # Handle Save/Delete
 if save_clicked:
     try:
-        # Process images to base64
-        breakfast_img_b64 = process_image_to_base64(breakfast_image)
-        lunch_img_b64 = process_image_to_base64(lunch_image)
-        dinner_img_b64 = process_image_to_base64(dinner_image)
-        snacks_img_b64 = process_image_to_base64(snacks_image)
-        
-        # Prepare data row
-        data_row = [str(entry_date), breakfast, lunch, dinner, snacks, supplements, int(water_ml),
-                   breakfast_img_b64, lunch_img_b64, dinner_img_b64, snacks_img_b64]
-        
         if existing_row_idx:
-            # Update existing row - need to handle variable number of columns
-            ws.update(values=[data_row[1:]], range_name=f"B{existing_row_idx}")
+            ws.update(values=[[breakfast, lunch, dinner, snacks, supplements, int(water_ml)]], range_name=f"B{existing_row_idx}:G{existing_row_idx}")
             st.success(f"Updated nutrition log for {entry_date}.")
         else:
-            ws.append_row(data_row)
+            ws.append_row([str(entry_date), breakfast, lunch, dinner, snacks, supplements, int(water_ml)])
             st.success(f"Added new nutrition log for {entry_date}.")
         st.session_state.nutrition_df = pd.DataFrame(ws.get_all_records())
     except Exception as e:
@@ -209,90 +147,28 @@ if not st.session_state.nutrition_df.empty:
         filtered_df = df[(df["date"].dt.date >= start_filter) & (df["date"].dt.date <= end_filter)].copy()
 
     if not filtered_df.empty:
-        # Helper function to display image from base64
-        def display_base64_image(base64_str, width=150, full_width=False):
-            if base64_str and str(base64_str).strip():
-                try:
-                    img_data = base64.b64decode(base64_str)
-                    if full_width:
-                        # Use full container width with fixed height for consistent sizing
-                        st.markdown(f'<div style="width: 100%; height: 200px; overflow: hidden; display: flex; align-items: center; justify-content: center; background-color: #f0f0f0; border-radius: 8px;"><img src="data:image/jpeg;base64,{base64_str}" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px;"></div>', unsafe_allow_html=True)
-                    else:
-                        # Use HTML to ensure consistent square sizing with proper cropping
-                        st.markdown(f'<div style="width: {width}px; height: {width}px; overflow: hidden; display: flex; align-items: center; justify-content: center; background-color: #f0f0f0; border-radius: 8px;"><img src="data:image/jpeg;base64,{base64_str}" style="width: {width}px; height: {width}px; object-fit: cover; border-radius: 8px;"></div>', unsafe_allow_html=True)
-                except:
-                    st.write("Invalid image")
-            else:
-                st.write("No image")
-        
-        # Create a compact table display
-        df_display = filtered_df.copy()
-        
-        # Prepare display data
-        display_data = []
-        for _, row in df_display.sort_values("date", ascending=False).iterrows():
-            meal_date = pd.to_datetime(row["date"]).strftime("%Y-%m-%d")
-            
-            # Create compact entries without image indicators
-            display_data.append({
-                "Date": meal_date,
-                "Breakfast": row.get("breakfast", ""),
-                "Lunch": row.get("lunch", ""),
-                "Dinner": row.get("dinner", ""),
-                "Snacks": row.get("snacks", ""),
-                "Supplements": row.get("supplements", ""),
-                "Water (ml)": row.get("water_ml", 0)
-            })
-        
-        # Display compact table
-        compact_df = pd.DataFrame(display_data)
+        # Interactive table
+        df_display = filtered_df.rename(columns={
+            "date": "Date",
+            "breakfast": "Breakfast",
+            "lunch": "Lunch",
+            "dinner": "Dinner",
+            "snacks": "Snacks",
+            "supplements": "Supplements",
+            "water_ml": "Water (ml)"
+        })
+
+        # Normalize display if original columns are differently named
+        for alt, std in [
+            ("water", "Water (ml)"),
+            ("supplement", "Supplements")
+        ]:
+            if alt in df_display.columns and std not in df_display.columns:
+                df_display = df_display.rename(columns={alt: std})
+
+        df_display["Date"] = pd.to_datetime(df_display["Date"]).dt.date
         with st.expander("Log Entries", expanded=False):
-            st.dataframe(compact_df, use_container_width=True, height=400)
-        
-        # Photo Gallery Section
-        st.markdown("### Photo Gallery")
-        
-        # Collect all photos with their metadata
-        photo_gallery = []
-        for _, row in df_display.sort_values("date", ascending=False).iterrows():
-            meal_date = pd.to_datetime(row["date"]).strftime("%Y-%m-%d")
-            
-            # Check each meal for photos
-            meals = [
-                ("breakfast", "Breakfast", row.get("breakfast", "")),
-                ("lunch", "Lunch", row.get("lunch", "")),
-                ("dinner", "Dinner", row.get("dinner", "")),
-                ("snacks", "Snacks", row.get("snacks", ""))
-            ]
-            
-            for meal_key, meal_name, meal_text in meals:
-                image_col = f"{meal_key}_image"
-                if image_col in row and row[image_col]:
-                    photo_gallery.append({
-                        "date": meal_date,
-                        "meal": meal_name,
-                        "description": meal_text,
-                        "image": row[image_col]
-                    })
-        
-        # Display photos in a responsive grid using Streamlit columns
-        if photo_gallery:
-            # Use Streamlit columns with responsive behavior
-            # For mobile, we'll use 2 columns; for desktop, 4 columns
-            # Note: Streamlit doesn't have built-in responsive columns, so we use 4 columns
-            # and let them naturally wrap on smaller screens
-            cols_per_row = 4  # Use 4 columns - they'll naturally wrap on mobile
-            
-            for i in range(0, len(photo_gallery), cols_per_row):
-                cols = st.columns(cols_per_row, gap="small")
-                for j, col in enumerate(cols):
-                    if i + j < len(photo_gallery):
-                        photo = photo_gallery[i + j]
-                        with col:
-                            st.write(f"{photo['date']} - {photo['meal']}")
-                            display_base64_image(photo['image'], full_width=True)
-        else:
-            st.info("No photos uploaded yet.")
+            st.dataframe(df_display.sort_values("Date", ascending=False), width="stretch")
     else:
         st.info("No records in selected date range.")
 else:
