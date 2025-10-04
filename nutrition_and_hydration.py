@@ -277,36 +277,18 @@ if not st.session_state.nutrition_df.empty:
         
         # Display photos in a responsive grid using Streamlit columns
         if photo_gallery:
-            # Use CSS to detect mobile and adjust columns
-            st.markdown("""
-            <style>
-            @media (max-width: 768px) {
-                .mobile-2col {
-                    grid-template-columns: repeat(2, 1fr) !important;
-                }
-            }
-            .photo-grid-responsive {
-                display: grid;
-                grid-template-columns: repeat(4, 1fr);
-                gap: 10px;
-            }
-            </style>
-            """, unsafe_allow_html=True)
+            # Use Streamlit columns with responsive behavior
+            # For mobile, we'll use 2 columns; for desktop, 4 columns
+            cols_per_row = 2  # Default to 2 columns for better mobile experience
             
-            # Create responsive grid with HTML/CSS
-            photos_html = '<div class="photo-grid-responsive mobile-2col">'
-            for photo in photo_gallery:
-                photos_html += f'''
-                <div style="text-align: center;">
-                    <div style="margin-bottom: 5px; font-size: 14px;">{photo['date']} - {photo['meal']}</div>
-                    <div style="width: 100%; height: 200px; overflow: hidden; display: flex; align-items: center; justify-content: center; background-color: #f0f0f0; border-radius: 8px;">
-                        <img src="data:image/jpeg;base64,{photo['image']}" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px;" alt="{photo['meal']}">
-                    </div>
-                </div>
-                '''
-            photos_html += '</div>'
-            
-            st.markdown(photos_html, unsafe_allow_html=True)
+            for i in range(0, len(photo_gallery), cols_per_row):
+                cols = st.columns(cols_per_row, gap="small")
+                for j, col in enumerate(cols):
+                    if i + j < len(photo_gallery):
+                        photo = photo_gallery[i + j]
+                        with col:
+                            st.write(f"{photo['date']} - {photo['meal']}")
+                            display_base64_image(photo['image'], full_width=True)
         else:
             st.info("No photos uploaded yet.")
     else:
