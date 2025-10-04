@@ -214,7 +214,8 @@ if not st.session_state.nutrition_df.empty:
             if base64_str and str(base64_str).strip():
                 try:
                     img_data = base64.b64decode(base64_str)
-                    st.image(img_data, width=width)
+                    # Use HTML to ensure consistent sizing
+                    st.markdown(f'<div style="width: {width}px; height: {width}px; overflow: hidden; display: flex; align-items: center; justify-content: center;"><img src="data:image/jpeg;base64,{base64_str}" style="max-width: {width}px; max-height: {width}px; object-fit: cover;"></div>', unsafe_allow_html=True)
                 except:
                     st.write("Invalid image")
             else:
