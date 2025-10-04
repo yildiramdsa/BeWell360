@@ -3,7 +3,7 @@ import pandas as pd
 import gspread
 from google.oauth2.service_account import Credentials
 from datetime import date
-from ai_assistant import ai_assistant
+from ai_assistant_api import ai_assistant
 
 # Google Sheets Setup
 SCOPES = [

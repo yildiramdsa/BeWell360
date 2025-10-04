@@ -4,7 +4,7 @@ import gspread
 from google.oauth2.service_account import Credentials
 from datetime import date, time, datetime, timedelta
 import plotly.express as px
-from ai_assistant import ai_assistant
+from ai_assistant_api import ai_assistant
 
 # Helper Functions
 def find_sleep_columns(df):
