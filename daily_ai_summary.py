@@ -39,6 +39,8 @@ def load_all_daily_data():
             if not df.empty:
                 df["date"] = pd.to_datetime(df["date"])
                 all_data[data_type] = df
+            else:
+                all_data[data_type] = pd.DataFrame()
         except Exception as e:
             st.warning(f"Could not load {data_type} data: {str(e)}")
             all_data[data_type] = pd.DataFrame()
@@ -73,6 +75,9 @@ for data_type, df in st.session_state.daily_summary_data.items():
     else:
         selected_data[data_type] = pd.DataFrame()
 
+# Debug: Show what data types we have (temporary)
+# st.write("Debug - Available data types:", list(selected_data.keys()))
+
 # Check if we have any data for the selected date
 has_data = any(not df.empty for df in selected_data.values())
 
@@ -83,12 +88,12 @@ if not has_data:
 # Generate comprehensive daily summary
 st.markdown("### 🎯 Daily AI Summary & Insights")
 
-# Debug: Check if method exists
-if hasattr(ai_assistant, 'generate_comprehensive_daily_insights'):
-    st.success("✅ Method exists")
-else:
-    st.error("❌ Method not found")
-    st.write("Available methods:", [m for m in dir(ai_assistant) if not m.startswith('_')])
+# Debug: Check if method exists (temporary)
+# if hasattr(ai_assistant, 'generate_comprehensive_daily_insights'):
+#     st.success("✅ Method exists")
+# else:
+#     st.error("❌ Method not found")
+#     st.write("Available methods:", [m for m in dir(ai_assistant) if not m.startswith('_')])
 
 try:
     # Create comprehensive data summary for AI
@@ -179,35 +184,35 @@ col1, col2, col3, col4, col5 = st.columns(5)
 with col1:
     st.metric(
         "Sleep", 
-        "✅" if not selected_data["sleep"].empty else "❌",
+        "✅" if "sleep" in selected_data and not selected_data["sleep"].empty else "❌",
         help="Sleep data logged"
     )
 
 with col2:
     st.metric(
         "Nutrition", 
-        "✅" if not selected_data["nutrition"].empty else "❌",
+        "✅" if "nutrition" in selected_data and not selected_data["nutrition"].empty else "❌",
         help="Nutrition data logged"
     )
 
 with col3:
     st.metric(
         "Fitness", 
-        "✅" if not selected_data["fitness"].empty else "❌",
+        "✅" if "fitness" in selected_data and not selected_data["fitness"].empty else "❌",
         help="Fitness data logged"
     )
 
 with col4:
     st.metric(
         "Growth", 
-        "✅" if not selected_data["growth"].empty else "❌",
+        "✅" if "growth" in selected_data and not selected_data["growth"].empty else "❌",
         help="Growth data logged"
     )
 
 with col5:
     st.metric(
         "Body Comp", 
-        "✅" if not selected_data["body_composition"].empty else "❌",
+        "✅" if "body_composition" in selected_data and not selected_data["body_composition"].empty else "❌",
         help="Body composition data logged"
     )
 
