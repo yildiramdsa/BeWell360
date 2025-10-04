@@ -271,41 +271,19 @@ if not st.session_state.nutrition_df.empty:
                         "image": row[image_col]
                     })
         
-        # Display photos in a responsive grid
+        # Display photos in a responsive grid using Streamlit columns
         if photo_gallery:
-            # Use CSS grid for better responsiveness
-            st.markdown("""
-            <style>
-            .photo-grid {
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-                gap: 10px;
-                padding: 10px 0;
-            }
-            .photo-item {
-                text-align: center;
-            }
-            .photo-item img {
-                width: 100%;
-                height: 200px;
-                object-fit: cover;
-                border-radius: 8px;
-            }
-            </style>
-            """, unsafe_allow_html=True)
+            # Calculate optimal number of columns based on available width
+            cols_per_row = min(4, len(photo_gallery))
             
-            # Create HTML grid
-            photos_html = '<div class="photo-grid">'
-            for photo in photo_gallery:
-                photos_html += f'''
-                <div class="photo-item">
-                    <div style="margin-bottom: 5px; font-size: 14px;">{photo['date']} - {photo['meal']}</div>
-                    <img src="data:image/jpeg;base64,{photo['image']}" alt="{photo['meal']}">
-                </div>
-                '''
-            photos_html += '</div>'
-            
-            st.markdown(photos_html, unsafe_allow_html=True)
+            for i in range(0, len(photo_gallery), cols_per_row):
+                cols = st.columns(cols_per_row, gap="small")
+                for j, col in enumerate(cols):
+                    if i + j < len(photo_gallery):
+                        photo = photo_gallery[i + j]
+                        with col:
+                            st.write(f"{photo['date']} - {photo['meal']}")
+                            display_base64_image(photo['image'], width=200)
         else:
             st.info("No photos uploaded yet.")
     else:
