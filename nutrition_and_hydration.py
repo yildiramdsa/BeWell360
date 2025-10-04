@@ -214,7 +214,7 @@ if not st.session_state.nutrition_df.empty:
             if base64_str and str(base64_str).strip():
                 try:
                     img_data = base64.b64decode(base64_str)
-                    st.image(img_data, width=width, use_column_width=False)
+                    st.image(img_data, width=width)
                 except:
                     st.write("Invalid image")
             else:
