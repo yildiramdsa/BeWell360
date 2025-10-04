@@ -32,6 +32,7 @@ st.markdown(
 
 # ---------------- Pages ----------------
 daily_log_pages = create_pages([
+    ("daily_ai_summary.py", "Daily AI Summary", "🤖"),
     ("nutrition_and_hydration.py", "Nutrition & Hydration", "🍎"),
     ("fitness_activities.py", "Fitness Activities", "⚽"),
     ("sleep_schedule.py", "Sleep Schedule", "🧸"),

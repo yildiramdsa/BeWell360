@@ -282,6 +282,138 @@ Return only 3 suggestions, each starting with an emoji and being 1-2 sentences. 
         except Exception as e:
             st.error(f"AI Suggestions Error: {str(e)}")
             return ["🤖 AI suggestions temporarily unavailable"]
+    
+    def generate_comprehensive_daily_insights(self, selected_data, daily_summary_text, selected_date):
+        """Generate comprehensive daily insights using OpenAI API"""
+        
+        # Check cache first
+        cache_key = f"daily_summary_{selected_date.strftime('%Y-%m-%d')}"
+        if cache_key in self.insights_cache:
+            return self.insights_cache[cache_key]
+        
+        try:
+            # Create comprehensive AI prompt
+            prompt = f"""
+Analyze this comprehensive daily wellness data and provide personalized insights:
+
+{daily_summary_text}
+
+Please provide insights in this JSON format:
+{{
+  "insights": [
+    {{
+      "type": "success|warning|info|motivation",
+      "icon": "appropriate emoji",
+      "title": "Brief title",
+      "message": "Detailed, actionable message"
+    }}
+  ]
+}}
+
+Focus on:
+- Overall wellness pattern for the day
+- Strengths and areas for improvement
+- Specific recommendations
+- Encouraging tone
+- Health and wellness best practices
+- How different activities complement each other
+
+Be personal, comprehensive, and motivating. Provide 3-4 key insights that help the user understand their daily wellness journey.
+"""
+            
+            # Call OpenAI API
+            client = self._get_client()
+            response = client.chat.completions.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {
+                        "role": "system", 
+                        "content": "You are an expert wellness coach AI. Analyze comprehensive daily wellness data and provide personalized, actionable insights. Be encouraging, specific, and helpful. Format responses as JSON with insights array."
+                    },
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ],
+                temperature=0.7,
+                max_tokens=1200
+            )
+            
+            # Parse AI response
+            ai_content = response.choices[0].message.content
+            
+            # Try to parse as JSON, fallback to structured format
+            try:
+                insights_data = json.loads(ai_content)
+                insights = insights_data.get('insights', [])
+            except json.JSONDecodeError:
+                # Fallback: create structured insight from text response
+                insights = [{
+                    "type": "info",
+                    "icon": "🤖",
+                    "title": "Daily AI Summary",
+                    "message": ai_content
+                }]
+            
+            # Cache the insights
+            self.insights_cache[cache_key] = insights
+            return insights
+            
+        except Exception as e:
+            return [{
+                "type": "warning",
+                "icon": "⚠️",
+                "title": "AI Summary Unavailable",
+                "message": f"Daily AI summary temporarily unavailable: {str(e)}"
+            }]
+    
+    def get_daily_suggestions(self, selected_data, selected_date):
+        """Get AI-powered suggestions for tomorrow"""
+        try:
+            # Create summary for suggestions
+            summary = f"Daily data for {selected_date.strftime('%B %d, %Y')}:\n"
+            
+            for data_type, df in selected_data.items():
+                if not df.empty:
+                    summary += f"\n{data_type.upper()}:\n"
+                    for _, row in df.iterrows():
+                        if data_type == "sleep":
+                            summary += f"- Sleep: {row.get('sleep_start', 'N/A')} to {row.get('sleep_end', 'N/A')}\n"
+                        elif data_type == "nutrition":
+                            summary += f"- Water: {row.get('water_ml', 0)}ml\n"
+                            if row.get('breakfast'):
+                                summary += f"- Breakfast: {row.get('breakfast')}\n"
+                        elif data_type == "fitness":
+                            if row.get('exercise'):
+                                summary += f"- Exercise: {row.get('exercise')}\n"
+                        elif data_type == "growth":
+                            if row.get('mood'):
+                                summary += f"- Mood: {row.get('mood')}\n"
+            
+            prompt = f"""
+Based on today's wellness data, provide 3 specific, actionable suggestions for tomorrow:
+
+{summary}
+
+Return only 3 suggestions, each starting with an emoji and being 1-2 sentences. Be specific and actionable.
+"""
+            
+            client = self._get_client()
+            response = client.chat.completions.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {"role": "system", "content": "You are a wellness coach. Provide specific, actionable suggestions for tomorrow based on today's data."},
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=0.7,
+                max_tokens=300
+            )
+            
+            suggestions = response.choices[0].message.content.strip().split('\n')
+            return [s.strip() for s in suggestions if s.strip()][:3]
+            
+        except Exception as e:
+            return ["🤖 AI suggestions temporarily unavailable"]
 
 # Global AI Assistant instance
 ai_assistant = AIAssistantAPI()
