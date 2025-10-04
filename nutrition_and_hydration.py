@@ -255,6 +255,48 @@ if not st.session_state.nutrition_df.empty:
         compact_df = pd.DataFrame(display_data)
         with st.expander("Log Entries", expanded=False):
             st.dataframe(compact_df, use_container_width=True, height=400)
+        
+        # Photo Gallery Section
+        st.markdown("### 📸 Photo Gallery")
+        
+        # Collect all photos with their metadata
+        photo_gallery = []
+        for _, row in df_display.sort_values("date", ascending=False).iterrows():
+            meal_date = pd.to_datetime(row["date"]).strftime("%Y-%m-%d")
+            
+            # Check each meal for photos
+            meals = [
+                ("breakfast", "Breakfast", row.get("breakfast", "")),
+                ("lunch", "Lunch", row.get("lunch", "")),
+                ("dinner", "Dinner", row.get("dinner", "")),
+                ("snacks", "Snacks", row.get("snacks", ""))
+            ]
+            
+            for meal_key, meal_name, meal_text in meals:
+                image_col = f"{meal_key}_image"
+                if image_col in row and row[image_col]:
+                    photo_gallery.append({
+                        "date": meal_date,
+                        "meal": meal_name,
+                        "description": meal_text,
+                        "image": row[image_col]
+                    })
+        
+        # Display photos in a grid
+        if photo_gallery:
+            cols_per_row = 3
+            for i in range(0, len(photo_gallery), cols_per_row):
+                cols = st.columns(cols_per_row)
+                for j, col in enumerate(cols):
+                    if i + j < len(photo_gallery):
+                        photo = photo_gallery[i + j]
+                        with col:
+                            st.markdown(f"**{photo['date']} - {photo['meal']}**")
+                            if photo['description']:
+                                st.caption(photo['description'])
+                            display_base64_image(photo['image'], width=200)
+        else:
+            st.info("No photos uploaded yet.")
     else:
         st.info("No records in selected date range.")
 else:
