@@ -229,25 +229,13 @@ if not st.session_state.nutrition_df.empty:
         for _, row in df_display.sort_values("date", ascending=False).iterrows():
             meal_date = pd.to_datetime(row["date"]).strftime("%Y-%m-%d")
             
-            # Create compact entries with image indicators
-            breakfast_text = row.get("breakfast", "")
-            breakfast_img = "📷" if "breakfast_image" in row and row["breakfast_image"] else ""
-            
-            lunch_text = row.get("lunch", "")
-            lunch_img = "📷" if "lunch_image" in row and row["lunch_image"] else ""
-            
-            dinner_text = row.get("dinner", "")
-            dinner_img = "📷" if "dinner_image" in row and row["dinner_image"] else ""
-            
-            snacks_text = row.get("snacks", "")
-            snacks_img = "📷" if "snacks_image" in row and row["snacks_image"] else ""
-            
+            # Create compact entries without image indicators
             display_data.append({
                 "Date": meal_date,
-                "Breakfast": f"{breakfast_text} {breakfast_img}".strip(),
-                "Lunch": f"{lunch_text} {lunch_img}".strip(),
-                "Dinner": f"{dinner_text} {dinner_img}".strip(),
-                "Snacks": f"{snacks_text} {snacks_img}".strip(),
+                "Breakfast": row.get("breakfast", ""),
+                "Lunch": row.get("lunch", ""),
+                "Dinner": row.get("dinner", ""),
+                "Snacks": row.get("snacks", ""),
                 "Supplements": row.get("supplements", ""),
                 "Water (ml)": row.get("water_ml", 0)
             })
@@ -283,17 +271,17 @@ if not st.session_state.nutrition_df.empty:
                         "image": row[image_col]
                     })
         
-        # Display photos in a grid
+        # Display photos in a grid with closer spacing
         if photo_gallery:
-            cols_per_row = 3
+            cols_per_row = 4  # More columns for tighter spacing
             for i in range(0, len(photo_gallery), cols_per_row):
-                cols = st.columns(cols_per_row)
+                cols = st.columns(cols_per_row, gap="small")
                 for j, col in enumerate(cols):
                     if i + j < len(photo_gallery):
                         photo = photo_gallery[i + j]
                         with col:
                             st.write(f"{photo['date']} - {photo['meal']}")
-                            display_base64_image(photo['image'], width=200)
+                            display_base64_image(photo['image'], width=180)  # Slightly smaller for 4 columns
         else:
             st.info("No photos uploaded yet.")
     else:
