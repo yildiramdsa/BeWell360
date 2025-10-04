@@ -83,6 +83,13 @@ if not has_data:
 # Generate comprehensive daily summary
 st.markdown("### 🎯 Daily AI Summary & Insights")
 
+# Debug: Check if method exists
+if hasattr(ai_assistant, 'generate_comprehensive_daily_insights'):
+    st.success("✅ Method exists")
+else:
+    st.error("❌ Method not found")
+    st.write("Available methods:", [m for m in dir(ai_assistant) if not m.startswith('_')])
+
 try:
     # Create comprehensive data summary for AI
     daily_summary_text = f"""
