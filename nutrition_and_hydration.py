@@ -210,20 +210,20 @@ if not st.session_state.nutrition_df.empty:
 
     if not filtered_df.empty:
         # Helper function to display image from base64
-def display_base64_image(base64_str, width=150, full_width=False):
-    if base64_str and str(base64_str).strip():
-        try:
-            img_data = base64.b64decode(base64_str)
-            if full_width:
-                # Use full container width with fixed height for consistent sizing
-                st.markdown(f'<div style="width: 100%; height: 200px; overflow: hidden; display: flex; align-items: center; justify-content: center; background-color: #f0f0f0; border-radius: 8px;"><img src="data:image/jpeg;base64,{base64_str}" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px;"></div>', unsafe_allow_html=True)
+        def display_base64_image(base64_str, width=150, full_width=False):
+            if base64_str and str(base64_str).strip():
+                try:
+                    img_data = base64.b64decode(base64_str)
+                    if full_width:
+                        # Use full container width with fixed height for consistent sizing
+                        st.markdown(f'<div style="width: 100%; height: 200px; overflow: hidden; display: flex; align-items: center; justify-content: center; background-color: #f0f0f0; border-radius: 8px;"><img src="data:image/jpeg;base64,{base64_str}" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px;"></div>', unsafe_allow_html=True)
+                    else:
+                        # Use HTML to ensure consistent square sizing with proper cropping
+                        st.markdown(f'<div style="width: {width}px; height: {width}px; overflow: hidden; display: flex; align-items: center; justify-content: center; background-color: #f0f0f0; border-radius: 8px;"><img src="data:image/jpeg;base64,{base64_str}" style="width: {width}px; height: {width}px; object-fit: cover; border-radius: 8px;"></div>', unsafe_allow_html=True)
+                except:
+                    st.write("Invalid image")
             else:
-                # Use HTML to ensure consistent square sizing with proper cropping
-                st.markdown(f'<div style="width: {width}px; height: {width}px; overflow: hidden; display: flex; align-items: center; justify-content: center; background-color: #f0f0f0; border-radius: 8px;"><img src="data:image/jpeg;base64,{base64_str}" style="width: {width}px; height: {width}px; object-fit: cover; border-radius: 8px;"></div>', unsafe_allow_html=True)
-        except:
-            st.write("Invalid image")
-    else:
-        st.write("No image")
+                st.write("No image")
         
         # Create a compact table display
         df_display = filtered_df.copy()
