@@ -293,8 +293,6 @@ if not st.session_state.nutrition_df.empty:
                         photo = photo_gallery[i + j]
                         with col:
                             st.markdown(f"**{photo['date']} - {photo['meal']}**")
-                            if photo['description']:
-                                st.caption(photo['description'])
                             display_base64_image(photo['image'], width=200)
         else:
             st.info("No photos uploaded yet.")
