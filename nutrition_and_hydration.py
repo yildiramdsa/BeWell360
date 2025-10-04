@@ -70,10 +70,14 @@ except:
 col1, col2 = st.columns(2)
 with col1:
     breakfast = st.text_input("Breakfast", value=prefill_breakfast)
+    breakfast_image = st.file_uploader("Breakfast Photo", type=['png', 'jpg', 'jpeg'], key="breakfast_img", help="Optional: Upload a photo of your breakfast")
     dinner = st.text_input("Dinner", value=prefill_dinner)
+    dinner_image = st.file_uploader("Dinner Photo", type=['png', 'jpg', 'jpeg'], key="dinner_img", help="Optional: Upload a photo of your dinner")
 with col2:
     lunch = st.text_input("Lunch", value=prefill_lunch)
+    lunch_image = st.file_uploader("Lunch Photo", type=['png', 'jpg', 'jpeg'], key="lunch_img", help="Optional: Upload a photo of your lunch")
     snacks = st.text_input("Snacks", value=prefill_snacks)
+    snacks_image = st.file_uploader("Snacks Photo", type=['png', 'jpg', 'jpeg'], key="snacks_img", help="Optional: Upload a photo of your snacks")
 
 col3, col4 = st.columns(2)
 with col3:
@@ -88,14 +92,57 @@ with col_save:
 with col_delete:
     delete_clicked = st.button("🗑️ Delete", disabled=(existing_row_idx is None))
 
+# Helper function to process image to base64
+import base64
+import io
+from PIL import Image
+
+def process_image_to_base64(image_file):
+    if image_file is None:
+        return ""
+    
+    try:
+        # Compress image to reduce size
+        img = Image.open(image_file)
+        
+        # Resize if too large (max 800px on longest side)
+        max_size = 800
+        if img.width > max_size or img.height > max_size:
+            img.thumbnail((max_size, max_size), Image.Resampling.LANCZOS)
+        
+        # Convert to RGB if needed
+        if img.mode in ("RGBA", "P"):
+            img = img.convert("RGB")
+        
+        # Convert to base64
+        buffer = io.BytesIO()
+        img.save(buffer, format="JPEG", quality=85, optimize=True)
+        img_base64 = base64.b64encode(buffer.getvalue()).decode()
+        
+        return img_base64
+    except Exception as e:
+        st.error(f"Error processing image: {str(e)}")
+        return ""
+
 # Handle Save/Delete
 if save_clicked:
     try:
+        # Process images to base64
+        breakfast_img_b64 = process_image_to_base64(breakfast_image)
+        lunch_img_b64 = process_image_to_base64(lunch_image)
+        dinner_img_b64 = process_image_to_base64(dinner_image)
+        snacks_img_b64 = process_image_to_base64(snacks_image)
+        
+        # Prepare data row
+        data_row = [str(entry_date), breakfast, lunch, dinner, snacks, supplements, int(water_ml),
+                   breakfast_img_b64, lunch_img_b64, dinner_img_b64, snacks_img_b64]
+        
         if existing_row_idx:
-            ws.update(values=[[breakfast, lunch, dinner, snacks, supplements, int(water_ml)]], range_name=f"B{existing_row_idx}:G{existing_row_idx}")
+            # Update existing row - need to handle variable number of columns
+            ws.update(values=[data_row[1:]], range_name=f"B{existing_row_idx}")
             st.success(f"Updated nutrition log for {entry_date}.")
         else:
-            ws.append_row([str(entry_date), breakfast, lunch, dinner, snacks, supplements, int(water_ml)])
+            ws.append_row(data_row)
             st.success(f"Added new nutrition log for {entry_date}.")
         st.session_state.nutrition_df = pd.DataFrame(ws.get_all_records())
     except Exception as e:
@@ -147,28 +194,48 @@ if not st.session_state.nutrition_df.empty:
         filtered_df = df[(df["date"].dt.date >= start_filter) & (df["date"].dt.date <= end_filter)].copy()
 
     if not filtered_df.empty:
-        # Interactive table
-        df_display = filtered_df.rename(columns={
-            "date": "Date",
-            "breakfast": "Breakfast",
-            "lunch": "Lunch",
-            "dinner": "Dinner",
-            "snacks": "Snacks",
-            "supplements": "Supplements",
-            "water_ml": "Water (ml)"
-        })
-
-        # Normalize display if original columns are differently named
-        for alt, std in [
-            ("water", "Water (ml)"),
-            ("supplement", "Supplements")
-        ]:
-            if alt in df_display.columns and std not in df_display.columns:
-                df_display = df_display.rename(columns={alt: std})
-
-        df_display["Date"] = pd.to_datetime(df_display["Date"]).dt.date
-        with st.expander("Log Entries", expanded=False):
-            st.dataframe(df_display.sort_values("Date", ascending=False), width="stretch")
+        # Helper function to display image from base64
+        def display_base64_image(base64_str, width=150):
+            if base64_str and str(base64_str).strip():
+                try:
+                    img_data = base64.b64decode(base64_str)
+                    st.image(img_data, width=width)
+                except:
+                    st.write("Invalid image")
+            else:
+                st.write("No image")
+        
+        # Display meals with images
+        for _, row in filtered_df.sort_values("date", ascending=False).iterrows():
+            meal_date = pd.to_datetime(row["date"]).strftime("%Y-%m-%d")
+            
+            with st.expander(f"🍽️ {meal_date}", expanded=False):
+                col1, col2 = st.columns([1, 1])
+                
+                with col1:
+                    st.write("**Breakfast**")
+                    st.write(row.get("breakfast", ""))
+                    if "breakfast_image" in row and row["breakfast_image"]:
+                        display_base64_image(row["breakfast_image"])
+                    
+                    st.write("**Dinner**")
+                    st.write(row.get("dinner", ""))
+                    if "dinner_image" in row and row["dinner_image"]:
+                        display_base64_image(row["dinner_image"])
+                
+                with col2:
+                    st.write("**Lunch**")
+                    st.write(row.get("lunch", ""))
+                    if "lunch_image" in row and row["lunch_image"]:
+                        display_base64_image(row["lunch_image"])
+                    
+                    st.write("**Snacks**")
+                    st.write(row.get("snacks", ""))
+                    if "snacks_image" in row and row["snacks_image"]:
+                        display_base64_image(row["snacks_image"])
+                
+                st.write("**Supplements:**", row.get("supplements", ""))
+                st.write("**Water:**", row.get("water_ml", 0), "ml")
     else:
         st.info("No records in selected date range.")
 else:
