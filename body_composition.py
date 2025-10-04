@@ -4,6 +4,7 @@ import gspread
 from google.oauth2.service_account import Credentials
 from datetime import date
 import plotly.express as px
+from ai_assistant import ai_assistant
 
 # Helper Functions
 def find_body_composition_columns(df):
@@ -234,6 +235,12 @@ if not st.session_state.body_comp_df.empty:
     
     # ---------------- Results Section ----------------
     st.write("")
+    st.write("")
+    
+    # AI Insights Section
+    insights = ai_assistant.generate_insights("body_composition", st.session_state.body_comp_df)
+    ai_assistant.display_insights(insights)
+    
     st.write("")
     # Header and date filters on the same line
     header_col, filter_col1, filter_col2 = st.columns([2, 1, 1])
