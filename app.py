@@ -32,12 +32,12 @@ st.markdown(
 
 # ---------------- Pages ----------------
 daily_log_pages = create_pages([
-    ("daily_ai_summary.py", "Daily AI Summary", "🤖"),
     ("nutrition_and_hydration.py", "Nutrition & Hydration", "🍎"),
     ("fitness_activities.py", "Fitness Activities", "⚽"),
     ("sleep_schedule.py", "Sleep Schedule", "🧸"),
     ("body_composition.py", "Body Composition", "💪"),
     ("growth_and_reflection.py", "Growth & Reflection", "🌱"),
+    ("daily_ai_summary.py", "Daily AI Summary", "🤖"),
 ])
 
 life_mastery_pages = create_pages([
