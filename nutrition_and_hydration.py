@@ -105,8 +105,8 @@ def process_image_to_base64(image_file):
         # Compress image to reduce size
         img = Image.open(image_file)
         
-        # Resize if too large (max 800px on longest side)
-        max_size = 800
+        # Start with smaller size for Google Sheets compatibility
+        max_size = 300  # Reduced from 800
         if img.width > max_size or img.height > max_size:
             img.thumbnail((max_size, max_size), Image.Resampling.LANCZOS)
         
@@ -114,10 +114,25 @@ def process_image_to_base64(image_file):
         if img.mode in ("RGBA", "P"):
             img = img.convert("RGB")
         
-        # Convert to base64
+        # Convert to base64 with lower quality
         buffer = io.BytesIO()
-        img.save(buffer, format="JPEG", quality=85, optimize=True)
+        img.save(buffer, format="JPEG", quality=60, optimize=True)  # Reduced from 85
         img_base64 = base64.b64encode(buffer.getvalue()).decode()
+        
+        # Check if still too large and compress further if needed
+        max_chars = 45000  # Leave some buffer under 50k limit
+        if len(img_base64) > max_chars:
+            # Further reduce size
+            max_size = 200
+            img.thumbnail((max_size, max_size), Image.Resampling.LANCZOS)
+            buffer = io.BytesIO()
+            img.save(buffer, format="JPEG", quality=40, optimize=True)
+            img_base64 = base64.b64encode(buffer.getvalue()).decode()
+        
+        # If still too large, return empty string
+        if len(img_base64) > max_chars:
+            st.warning(f"Image too large to save. Please use a smaller image.")
+            return ""
         
         return img_base64
     except Exception as e:
