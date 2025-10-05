@@ -28,6 +28,9 @@ def load_ai_insights():
         if not df.empty:
             df["date"] = pd.to_datetime(df["date"])
         return df
+    except gspread.SpreadsheetNotFound:
+        # Sheet doesn't exist yet - this is normal for first-time users
+        return pd.DataFrame()
     except Exception as e:
         st.warning(f"Could not load AI insights: {str(e)}")
         return pd.DataFrame()
@@ -35,7 +38,16 @@ def load_ai_insights():
 def save_ai_insights(date, section, insights):
     """Save AI insights to spreadsheet"""
     try:
-        ws = client.open("daily_ai_insights").sheet1
+        # Try to open existing sheet
+        try:
+            ws = client.open("daily_ai_insights").sheet1
+        except gspread.SpreadsheetNotFound:
+            # Create new sheet if it doesn't exist
+            sh = client.create("daily_ai_insights")
+            ws = sh.sheet1
+            # Add headers
+            ws.append_row(["date", "section", "insights"])
+        
         ws.append_row([date.strftime('%Y-%m-%d'), section, insights])
         return True
     except Exception as e:
@@ -109,10 +121,16 @@ for icon, section_name in sections.items():
 
 # Instructions for creating the Google Sheet
 if st.session_state.ai_insights_data.empty:
-    st.markdown("### 📋 Setup Instructions")
+    st.markdown("### 📋 Getting Started")
     st.info("""
-    To use AI insights storage, create a Google Sheet named "daily_ai_insights" with these columns:
+    **First time using AI insights?** 
+    
+    No setup needed! The Google Sheet will be created automatically when you generate your first insights.
+    
+    The sheet will include these columns:
     - **date** (format: YYYY-MM-DD)
-    - **section** (Nutrition & Hydration, Fitness Activities, Sleep Schedule, Growth & Reflection)
+    - **section** (Nutrition & Hydration, Fitness Activities, Sleep Schedule, Growth & Reflection)  
     - **insights** (the AI-generated insights text)
+    
+    Just click "Generate New" for any section to get started!
     """)
