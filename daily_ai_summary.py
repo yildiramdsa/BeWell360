@@ -93,15 +93,3 @@ for icon, section_name in sections.items():
                     
             except Exception as e:
                 st.error(f"Error generating insights: {str(e)}")
-    
-    st.markdown("---")
-
-if st.session_state.ai_insights_data.empty:
-    st.markdown("### 📋 Getting Started")
-    st.info("""
-    **First time using AI insights?** 
-    
-    No setup needed! The Google Sheet will be created automatically when you generate your first insights.
-    
-    Just click "Generate New" for any section to get started!
-    """)
