@@ -5,7 +5,6 @@ from google.oauth2.service_account import Credentials
 from datetime import date
 from ai_assistant_api import ai_assistant
 
-# Google Sheets Setup
 SCOPES = [
     "https://www.googleapis.com/auth/spreadsheets",
     "https://www.googleapis.com/auth/drive"
@@ -18,7 +17,6 @@ creds = Credentials.from_service_account_info(
 client = gspread.authorize(creds)
 ws = client.open("growth_and_reflection").sheet1
 
-# Load Data
 if "growth_df" not in st.session_state:
     st.session_state.growth_df = pd.DataFrame(ws.get_all_records())
 
@@ -26,7 +24,6 @@ st.title("🌱 Growth & Reflection")
 
 today = date.today()
 
-# Entry Form
 entry_date = st.date_input("Date", today)
 
 # Find existing record
@@ -126,14 +123,12 @@ with col4:
         placeholder="What are you grateful for today?"
     )
 
-# Action Buttons
 col_save, col_delete = st.columns([1, 1])
 with col_save:
     save_clicked = st.button("☁️ Save")
 with col_delete:
     delete_clicked = st.button("🗑️ Delete", disabled=(existing_row_idx is None))
 
-# Handle Save/Delete
 if save_clicked:
     try:
         if existing_row_idx:
@@ -154,7 +149,6 @@ if delete_clicked and existing_row_idx:
     except Exception as e:
         st.error(f"Error deleting data: {str(e)}")
 
-# Analytics
 if not st.session_state.growth_df.empty:
     df = st.session_state.growth_df.copy()
     df["date"] = pd.to_datetime(df["date"])

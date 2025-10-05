@@ -6,9 +6,7 @@ from datetime import date
 import plotly.express as px
 from ai_assistant_api import ai_assistant
 
-# Helper Functions
 def find_body_composition_columns(df):
-    """Find body composition columns in the dataframe."""
     weight_col = None
     body_fat_col = None
     muscle_col = None
@@ -48,12 +46,8 @@ def find_body_composition_columns(df):
 
 
 def clean_body_composition_data(df, weight_col, body_fat_col, muscle_col):
-    """Clean and parse body composition data from the dataframe."""
     try:
-        # Clean the data first - remove any empty or invalid values
         df_clean = df.dropna(subset=[weight_col, body_fat_col, muscle_col])
-        
-        # Convert to numeric with error handling
         df_clean[weight_col] = pd.to_numeric(df_clean[weight_col], errors='coerce')
         df_clean[body_fat_col] = pd.to_numeric(df_clean[body_fat_col], errors='coerce')
         df_clean[muscle_col] = pd.to_numeric(df_clean[muscle_col], errors='coerce')
@@ -103,7 +97,6 @@ def get_prefill_values(existing_row):
         return 0.0, 0.0, 0.0
 
 
-# Google Sheets Setup
 SCOPES = [
     "https://www.googleapis.com/auth/spreadsheets",
     "https://www.googleapis.com/auth/drive"
@@ -116,7 +109,6 @@ creds = Credentials.from_service_account_info(
 client = gspread.authorize(creds)
 ws = client.open("body_composition").sheet1
 
-# Load Data
 if "body_comp_df" not in st.session_state:
     st.session_state.body_comp_df = pd.DataFrame(ws.get_all_records())
 
@@ -124,7 +116,6 @@ st.title("💪 Body Composition")
 
 today = date.today()
 
-# Entry Form
 entry_date = st.date_input("Date", today)
 
 # Find existing record
@@ -167,14 +158,12 @@ with col3:
         value=float(prefill_muscle)
     )
 
-# Action Buttons
 col_save, col_delete = st.columns([1, 1])
 with col_save:
     save_clicked = st.button("☁️ Save")
 with col_delete:
     delete_clicked = st.button("🗑️ Delete", disabled=(existing_row_idx is None))
 
-# Handle Save/Delete
 if save_clicked:
     try:
         if weight_lb <= 0 or body_fat < 0 or body_fat > 100 or muscle < 0 or muscle > 100:
@@ -198,7 +187,6 @@ if delete_clicked and existing_row_idx:
     except Exception as e:
         st.error(f"Error deleting data: {str(e)}")
 
-# Analytics
 if not st.session_state.body_comp_df.empty:
     df = st.session_state.body_comp_df.copy()
     df["date"] = pd.to_datetime(df["date"])

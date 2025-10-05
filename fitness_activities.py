@@ -5,7 +5,6 @@ from google.oauth2.service_account import Credentials
 from datetime import date
 from ai_assistant_api import ai_assistant
 
-# Google Sheets Setup
 SCOPES = [
     "https://www.googleapis.com/auth/spreadsheets",
     "https://www.googleapis.com/auth/drive"
@@ -18,7 +17,6 @@ creds = Credentials.from_service_account_info(
 client = gspread.authorize(creds)
 ws = client.open("fitness_activities").sheet1
 
-# Load Data
 if "fitness_df" not in st.session_state:
     st.session_state.fitness_df = pd.DataFrame(ws.get_all_records())
 
@@ -26,10 +24,8 @@ st.title("⚽ Fitness Activities")
 
 today = date.today()
 
-# Entry Form
 entry_date = st.date_input("Date", today)
 
-# Find existing record by (date, exercise)
 df_records = st.session_state.fitness_df.to_dict(orient="records")
 existing_row_idx, existing_row = None, None
 
@@ -38,13 +34,12 @@ def match_row(row, d, ex):
     row_ex = str(row.get("exercise", "")).strip().lower()
     return row_date == str(d) and row_ex == ex.strip().lower()
 
-# Exercise name input first so we can search
 exercise = st.text_input("Exercise", value="")
 
 if exercise:
     for i, row in enumerate(df_records):
         if match_row(row, entry_date, exercise):
-            existing_row_idx = i + 2  # account for header row
+            existing_row_idx = i + 2
             existing_row = row
             break
 
@@ -64,7 +59,6 @@ def as_float(val, default=0.0):
     except:
         return default
 
-# Prefills
 prefill_sets = as_int(existing_row.get("sets")) if existing_row else 0
 prefill_reps = as_int(existing_row.get("reps")) if existing_row else 0
 prefill_weight = as_float(existing_row.get("weight_lb")) if existing_row else 0.0
@@ -85,14 +79,12 @@ with col4:
 with col5:
     distance_km = st.number_input("Distance (km)", min_value=0.0, step=0.1, value=float(prefill_distance))
 
-# Action Buttons
 col_save, col_delete = st.columns([1, 1])
 with col_save:
     save_clicked = st.button("☁️ Save")
 with col_delete:
     delete_clicked = st.button("🗑️ Delete", disabled=(existing_row_idx is None))
 
-# Handle Save/Delete
 if save_clicked:
     try:
         if not exercise.strip():
@@ -127,7 +119,6 @@ if delete_clicked and existing_row_idx:
     except Exception as e:
         st.error(f"Error deleting data: {str(e)}")
 
-# Analytics
 if not st.session_state.fitness_df.empty:
     df = st.session_state.fitness_df.copy()
     df["date"] = pd.to_datetime(df["date"])

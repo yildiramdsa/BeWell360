@@ -415,5 +415,4 @@ Return only 3 suggestions, each starting with an emoji and being 1-2 sentences. 
         except Exception as e:
             return ["🤖 AI suggestions temporarily unavailable"]
 
-# Global AI Assistant instance
 ai_assistant = AIAssistantAPI()

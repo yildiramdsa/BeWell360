@@ -5,10 +5,7 @@ from google.oauth2.service_account import Credentials
 from datetime import date, time, datetime, timedelta
 import plotly.express as px
 from ai_assistant_api import ai_assistant
-
-# Helper Functions
 def find_sleep_columns(df):
-    """Find sleep start and end columns in the dataframe."""
     sleep_start_col = None
     sleep_end_col = None
     
@@ -34,7 +31,6 @@ def find_sleep_columns(df):
 
 
 def parse_time_safe(time_series):
-    """Safely parse time values from a series with multiple format support."""
     parsed_times = []
     for time_val in time_series:
         if pd.isna(time_val) or str(time_val).strip() == '':
@@ -121,7 +117,6 @@ def get_prefill_times(existing_row):
     return default_start, default_end
 
 
-# Google Sheets Setup
 SCOPES = [
     "https://www.googleapis.com/auth/spreadsheets",
     "https://www.googleapis.com/auth/drive"
@@ -134,7 +129,6 @@ creds = Credentials.from_service_account_info(
 client = gspread.authorize(creds)
 ws = client.open("sleep_schedule").sheet1
 
-# Load Data
 if "sleep_df" not in st.session_state:
     st.session_state.sleep_df = pd.DataFrame(ws.get_all_records())
 
@@ -144,34 +138,29 @@ today = date.today()
 default_start = time(22, 0)
 default_end = time(6, 0)
 
-# Sleep Entry
 entry_date = st.date_input("Date", today)
 
-# Find existing record
 df_records = st.session_state.sleep_df.to_dict(orient="records")
 existing_row_idx = None
 existing_row = None
 for i, row in enumerate(df_records):
     if str(row.get("date")) == str(entry_date):
-        existing_row_idx = i + 2  # account for header row
+        existing_row_idx = i + 2
         existing_row = row
         break
 
-# Prefill values if record exists
 prefill_start, prefill_end = get_prefill_times(existing_row)
 
 col1, col2 = st.columns(2)
 sleep_start = col1.time_input("Sleep Start", prefill_start)
 sleep_end = col2.time_input("Sleep End", prefill_end)
 
-# Action Buttons
 col_save, col_delete = st.columns([1, 1])
 with col_save:
     save_clicked = st.button("☁️ Save")
 with col_delete:
     delete_clicked = st.button("🗑️ Delete", disabled=(existing_row_idx is None))
 
-# Handle Save/Delete
 if save_clicked:
     start_str, end_str = sleep_start.strftime("%H:%M"), sleep_end.strftime("%H:%M")
     if existing_row_idx:
@@ -187,7 +176,6 @@ if delete_clicked and existing_row_idx:
     st.success(f"Deleted sleep log for {entry_date}.")
     st.session_state.sleep_df = pd.DataFrame(ws.get_all_records())
 
-# Analytics
 if not st.session_state.sleep_df.empty:
     df = st.session_state.sleep_df.copy()
     df["date"] = pd.to_datetime(df["date"])

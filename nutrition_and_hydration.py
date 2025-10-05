@@ -5,7 +5,6 @@ from google.oauth2.service_account import Credentials
 from datetime import date
 from ai_assistant_api import ai_assistant
 
-# Google Sheets Setup
 SCOPES = [
     "https://www.googleapis.com/auth/spreadsheets",
     "https://www.googleapis.com/auth/drive"
@@ -18,7 +17,6 @@ creds = Credentials.from_service_account_info(
 client = gspread.authorize(creds)
 ws = client.open("nutrition_and_hydration").sheet1
 
-# Load Data
 if "nutrition_df" not in st.session_state:
     st.session_state.nutrition_df = pd.DataFrame(ws.get_all_records())
 
@@ -26,24 +24,19 @@ st.title("🍎 Nutrition & Hydration")
 
 today = date.today()
 
-# Entry Form
 entry_date = st.date_input("Date", today)
 
-# Find existing record
 df_records = st.session_state.nutrition_df.to_dict(orient="records")
 existing_row_idx, existing_row = None, None
 for i, row in enumerate(df_records):
     if str(row.get("date")) == str(entry_date):
-        existing_row_idx = i + 2  # account for header row
+        existing_row_idx = i + 2
         existing_row = row
         break
-
-# Helpers to resolve columns robustly
 def resolve_col(record_keys, candidates):
     for c in candidates:
         if c in record_keys:
             return c
-    # fuzzy contains
     for k in record_keys:
         kl = k.lower()
         if any(c in kl for c in candidates):
@@ -56,7 +49,6 @@ def prefill_value(record, candidates, default_val):
     col = resolve_col(record.keys(), candidates)
     return record.get(col, default_val) if col else default_val
 
-# Prefills
 prefill_breakfast = str(prefill_value(existing_row, ["breakfast"], ""))
 prefill_lunch = str(prefill_value(existing_row, ["lunch"], ""))
 prefill_dinner = str(prefill_value(existing_row, ["dinner"], ""))
@@ -82,14 +74,12 @@ with col3:
 with col4:
     water_ml = st.number_input("Water (ml)", min_value=0, step=100, value=int(prefill_water))
 
-# Action Buttons
 col_save, col_delete = st.columns([1, 1])
 with col_save:
     save_clicked = st.button("☁️ Save")
 with col_delete:
     delete_clicked = st.button("🗑️ Delete", disabled=(existing_row_idx is None))
 
-# Handle Save/Delete
 if save_clicked:
     try:
         if existing_row_idx:
@@ -110,7 +100,6 @@ if delete_clicked and existing_row_idx:
     except Exception as e:
         st.error(f"Error deleting data: {str(e)}")
 
-# Analytics
 if not st.session_state.nutrition_df.empty:
     df = st.session_state.nutrition_df.copy()
     df["date"] = pd.to_datetime(df["date"])

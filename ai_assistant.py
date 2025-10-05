@@ -276,5 +276,4 @@ class AIAssistant:
         
         return suggestions[:2]  # Return top 2 suggestions
 
-# Global AI Assistant instance
 ai_assistant = AIAssistant()

@@ -111,7 +111,6 @@ if not st.session_state.challenge_data.empty:
     elif len(st.session_state.challenge_data.columns) >= 2:
         total_logged = st.session_state.challenge_data.iloc[:, 1].fillna(0).astype(float).sum()
 
-# Main Progress Section
 st.markdown("### Your Journey Progress")
 
 # Progress information grouped together
@@ -262,7 +261,6 @@ st.caption(f"Progress: {progress_percentage:.1f}%")
 if total_logged >= 7800:
     st.write("**Congratulations!** You've completed the coast-to-coast journey!")
 
-# Log Your Kilometers
 st.markdown("### Log Your Kilometers")
 
 # Function to get existing distance for a date
@@ -328,7 +326,6 @@ if st.button("Log Run"):
         except Exception as e:
             st.error(f"Error logging run: {str(e)}")
 
-# Recent Runs
 if not st.session_state.challenge_data.empty:
     with st.expander("Recent Runs", expanded=False):
         # Convert to DataFrame for display
@@ -347,7 +344,6 @@ if not st.session_state.challenge_data.empty:
         # Display read-only dataframe
         st.dataframe(df_display, use_container_width=True)
 
-# Your Badges
 st.markdown("### Your Badges")
 
 # Badge images mapping (replace with your actual SVG file paths)
@@ -429,7 +425,6 @@ elif locked_badges:
 else:
     st.info("Complete challenges to earn badges!")
 
-# Challenge Progress
 st.markdown("### Challenge Progress")
 for tier_name, tier_info in CHALLENGE_CHECKPOINTS.items():
     tier_completed = total_logged >= tier_info['total_km']
