@@ -84,7 +84,17 @@ for icon, section_name in sections.items():
     with col2:
         if st.button(f"Generate New", key=f"generate_{section_name}"):
             try:
-                insights = ai_assistant.generate_insights(section_name.lower().replace(" & ", "_").replace(" ", "_"), {})
+                if section_name == "Nutrition & Hydration":
+                    insights = ai_assistant.generate_insights("nutrition", {})
+                elif section_name == "Fitness Activities":
+                    insights = ai_assistant.generate_insights("fitness", {})
+                elif section_name == "Sleep Schedule":
+                    insights = ai_assistant.generate_insights("sleep", {})
+                elif section_name == "Growth & Reflection":
+                    insights = ai_assistant.generate_insights("growth", {})
+                else:
+                    insights = ai_assistant.generate_insights("daily_summary", {})
+                
                 ai_assistant.display_insights(insights)
                 
                 if save_ai_insights(selected_date, section_name, str(insights)):
