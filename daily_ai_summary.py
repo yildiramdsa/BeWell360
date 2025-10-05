@@ -40,6 +40,33 @@ def save_ai_insights(date, section, insights):
     except:
         return False
 
+def get_user_data_for_date(selected_date):
+    """Load actual user data for the selected date from all sheets"""
+    user_data = {}
+    
+    sheets_data = {
+        "nutrition": "nutrition_and_hydration",
+        "fitness": "fitness_activities", 
+        "sleep": "sleep_schedule",
+        "growth": "growth_and_reflection",
+        "body_composition": "body_composition"
+    }
+    
+    for data_type, sheet_name in sheets_data.items():
+        try:
+            ws = client.open(sheet_name).sheet1
+            df = pd.DataFrame(ws.get_all_records())
+            if not df.empty and 'date' in df.columns:
+                df['date'] = pd.to_datetime(df['date'])
+                date_filtered = df[df['date'].dt.date == selected_date]
+                user_data[data_type] = date_filtered
+            else:
+                user_data[data_type] = pd.DataFrame()
+        except:
+            user_data[data_type] = pd.DataFrame()
+    
+    return user_data
+
 if "ai_insights_data" not in st.session_state:
     st.session_state.ai_insights_data = load_ai_insights()
 
@@ -61,6 +88,27 @@ sections = {
     "🧸": "Sleep Schedule",
     "🌱": "Growth & Reflection"
 }
+
+user_data = get_user_data_for_date(selected_date)
+
+has_data = any(not df.empty for df in user_data.values())
+if not has_data:
+    st.info(f"No data logged for {selected_date.strftime('%B %d, %Y')}. Please log some activities first!")
+    st.stop()
+
+st.markdown("### 📊 Data Available for Analysis")
+data_cols = st.columns(5)
+data_types = ["nutrition", "fitness", "sleep", "growth", "body_composition"]
+data_icons = ["🍎", "⚽", "🧸", "🌱", "💪"]
+
+for i, (data_type, icon) in enumerate(zip(data_types, data_icons)):
+    with data_cols[i]:
+        has_data_for_type = not user_data[data_type].empty
+        st.metric(
+            icon,
+            "✅" if has_data_for_type else "❌",
+            help=f"{data_type.title()} data logged" if has_data_for_type else f"No {data_type} data"
+        )
 
 date_str = selected_date.strftime('%Y-%m-%d')
 stored_insights = st.session_state.ai_insights_data[
@@ -85,15 +133,15 @@ for icon, section_name in sections.items():
         if st.button(f"Generate New", key=f"generate_{section_name}"):
             try:
                 if section_name == "Nutrition & Hydration":
-                    insights = ai_assistant.generate_insights("nutrition", {})
+                    insights = ai_assistant.generate_insights("nutrition", user_data.get("nutrition", pd.DataFrame()))
                 elif section_name == "Fitness Activities":
-                    insights = ai_assistant.generate_insights("fitness", {})
+                    insights = ai_assistant.generate_insights("fitness", user_data.get("fitness", pd.DataFrame()))
                 elif section_name == "Sleep Schedule":
-                    insights = ai_assistant.generate_insights("sleep", {})
+                    insights = ai_assistant.generate_insights("sleep", user_data.get("sleep", pd.DataFrame()))
                 elif section_name == "Growth & Reflection":
-                    insights = ai_assistant.generate_insights("growth", {})
+                    insights = ai_assistant.generate_insights("growth", user_data.get("growth", pd.DataFrame()))
                 else:
-                    insights = ai_assistant.generate_insights("daily_summary", {})
+                    insights = ai_assistant.generate_insights("daily_summary", user_data)
                 
                 ai_assistant.display_insights(insights)
                 
