@@ -36,7 +36,8 @@ daily_log_pages = create_pages([
     ("fitness_activities.py", "Fitness Activities", "⚽"),
     ("sleep_schedule.py", "Sleep Schedule", "🧸"),
     ("body_composition.py", "Body Composition", "💪"),
-    ("growth_and_reflection.py", "Growth & Reflection", "🌱"),
+    ("professional_and_personal_development.py", "Professional & Personal Development", "📚"),
+    ("mood_and_gratitude.py", "Mood & Gratitude", "🌱"),
     ("daily_ai_summary.py", "Daily AI Summary", "🦉"),
 ])
 
@@ -50,7 +51,8 @@ life_mastery_pages = create_pages([
 ])
 
 challenges_pages = create_pages([
-    ("the_great_canadian_run.py", "The Great Canadian Run", "🍁"),
+    ("the_great_canadian_7800k.py", "The Great Canadian 7,800K", "🍁"),
+    ("the_yukon_63k.py", "The Yukon 63K", "❄️"),
 ])
 
 pages = {
@@ -71,7 +73,7 @@ footer_html = f"""
 <div style="text-align:center;">
     <span style="font-size:12px; color:gray;">Powered by</span>
     <img src="data:image/svg+xml;base64,{load_svg(FOOTER_SVG)}" width="150">
-    <div style="font-size:12px; color:gray;">© 2025 BeWell360. All rights reserved.</div>
+    <div style="font-size:12px; color:gray;">© 2026 BeWell360. All rights reserved.</div>
 </div>
 """
 st.markdown(footer_html, unsafe_allow_html=True)

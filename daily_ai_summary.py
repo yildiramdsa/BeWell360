@@ -48,7 +48,7 @@ def get_user_data_for_date(selected_date):
         "nutrition": "nutrition_and_hydration",
         "fitness": "fitness_activities", 
         "sleep": "sleep_schedule",
-        "growth": "growth_and_reflection",
+        "growth": "mood_and_gratitude",
         "body_composition": "body_composition"
     }
     

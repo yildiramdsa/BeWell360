@@ -1,0 +1,11 @@
+# Secrets (DO NOT COMMIT)
+.streamlit/secrets.toml
+.streamlit/secrets*.toml
+bewell360-472920-b70482a7bed1.json
+
+# Python
+__pycache__/
+*.pyc
+
+# macOS
+.DS_Store

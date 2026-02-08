@@ -6,6 +6,7 @@ import base64
 from io import BytesIO
 from PIL import Image
 
+
 SCOPES = [
     "https://www.googleapis.com/auth/spreadsheets",
     "https://www.googleapis.com/auth/drive"

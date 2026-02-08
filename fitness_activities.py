@@ -3,7 +3,6 @@ import pandas as pd
 import gspread
 from google.oauth2.service_account import Credentials
 from datetime import date
-from ai_assistant_api import ai_assistant
 
 SCOPES = [
     "https://www.googleapis.com/auth/spreadsheets",
@@ -48,7 +47,7 @@ def as_int(val, default=0):
         if val is None or str(val).strip() == "":
             return default
         return int(float(val))
-    except:
+    except (ValueError, TypeError):
         return default
 
 def as_float(val, default=0.0):
@@ -56,7 +55,7 @@ def as_float(val, default=0.0):
         if val is None or str(val).strip() == "":
             return default
         return float(val)
-    except:
+    except (ValueError, TypeError):
         return default
 
 prefill_sets = as_int(existing_row.get("sets")) if existing_row else 0
@@ -75,7 +74,7 @@ with col3:
 
 col4, col5 = st.columns(2)
 with col4:
-    duration_sec = st.number_input("Duration (sec)", min_value=0, step=10, value=int(prefill_duration))
+    duration_min = st.number_input("Duration (min)", min_value=0, step=1, value=int(prefill_duration))
 with col5:
     distance_km = st.number_input("Distance (km)", min_value=0.0, step=0.1, value=float(prefill_distance))
 
@@ -92,7 +91,7 @@ if save_clicked:
         else:
             if existing_row_idx:
                 ws.update(
-                    values=[[exercise, int(sets), int(reps), float(weight_lb), int(duration_sec), float(distance_km)]],
+                    values=[[exercise, int(sets), int(reps), float(weight_lb), int(duration_min), float(distance_km)]],
                     range_name=f"B{existing_row_idx}:G{existing_row_idx}"
                 )
                 st.success(f"Updated fitness log for {entry_date} - {exercise}.")
@@ -103,7 +102,7 @@ if save_clicked:
                     int(sets),
                     int(reps),
                     float(weight_lb),
-                    int(duration_sec),
+                    int(duration_min),
                     float(distance_km)
                 ])
                 st.success(f"Added new fitness log for {entry_date} - {exercise}.")
@@ -142,14 +141,7 @@ if not st.session_state.fitness_df.empty:
         min_date = today_val
         max_date = today_val
 
-    # Results Section
     st.write("")
-    st.write("")
-    
-    # AI Insights Section
-    insights = ai_assistant.generate_insights("fitness", st.session_state.fitness_df)
-    ai_assistant.display_insights(insights)
-    
     st.write("")
     header_col, filter_col1, filter_col2 = st.columns([2, 1, 1])
     
@@ -367,15 +359,17 @@ if not st.session_state.fitness_df.empty:
             st.info("No exercises with distance data in the selected range.")
 
         # Interactive table
-        df_display = filtered_df.rename(columns={
+        df_display = filtered_df.copy()
+        df_display = df_display.rename(columns={
             "date": "Date",
             "exercise": "Exercise",
             "sets": "Sets",
             "reps": "Reps",
             "weight_lb": "Weight (lb)",
-            "duration_sec": "Duration (sec)",
             "distance_km": "Distance (km)"
         })
+        df_display["Duration (min)"] = filtered_df["duration_sec"]
+        df_display = df_display.drop(columns=["duration_sec"])
         df_display["Date"] = pd.to_datetime(df_display["Date"]).dt.date
         with st.expander("Log Entries", expanded=False):
             st.dataframe(df_display.sort_values(["Date", "Exercise"], ascending=[False, True]), width="stretch")

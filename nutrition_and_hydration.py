@@ -3,7 +3,6 @@ import pandas as pd
 import gspread
 from google.oauth2.service_account import Credentials
 from datetime import date
-from ai_assistant_api import ai_assistant
 
 SCOPES = [
     "https://www.googleapis.com/auth/spreadsheets",
@@ -33,6 +32,8 @@ for i, row in enumerate(df_records):
         existing_row_idx = i + 2
         existing_row = row
         break
+
+
 def resolve_col(record_keys, candidates):
     for c in candidates:
         if c in record_keys:
@@ -57,7 +58,7 @@ prefill_supplements = str(prefill_value(existing_row, ["supplements", "supplemen
 prefill_water = prefill_value(existing_row, ["water_ml", "water"], 0)
 try:
     prefill_water = int(prefill_water) if str(prefill_water).strip() != "" else 0
-except:
+except (ValueError, TypeError):
     prefill_water = 0
 
 col1, col2 = st.columns(2)
@@ -118,14 +119,7 @@ if not st.session_state.nutrition_df.empty:
         min_date = today_val
         max_date = today_val
 
-    # Results Section
     st.write("")
-    st.write("")
-    
-    # AI Insights Section
-    insights = ai_assistant.generate_insights("nutrition", st.session_state.nutrition_df)
-    ai_assistant.display_insights(insights)
-    
     st.write("")
     header_col, filter_col1, filter_col2 = st.columns([2, 1, 1])
     

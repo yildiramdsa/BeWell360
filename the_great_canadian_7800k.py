@@ -1,8 +1,6 @@
 import streamlit as st
 import pandas as pd
-import plotly.express as px
-import plotly.graph_objects as go
-from datetime import date, datetime
+from datetime import date
 import gspread
 from google.oauth2.service_account import Credentials
 
@@ -17,7 +15,7 @@ creds = Credentials.from_service_account_info(
     scopes=SCOPES
 )
 client = gspread.authorize(creds)
-ws = client.open("the_great_canadian_run").sheet1
+ws = client.open("the_great_canadian_7800k").sheet1
 
 # Challenge configuration with detailed checkpoints
 CHALLENGE_CHECKPOINTS = {
@@ -36,7 +34,7 @@ CHALLENGE_CHECKPOINTS = {
     "Eastern Challenge": {
         "total_km": 2000,
         "route": "Port aux Basques → Québec City",
-        "description": "Travel through Nova Scotia, New Brunswick, and into Québec. City checkpoints, such as Halifax, Moncton, and Québec City, keep your progress visible and motivating.",
+        "description": "Travel through Nova Scotia, New Brunswick, and into Québec.",
         "checkpoints": [
             {"km": 600, "location": "Sydney, NS"},
             {"km": 1000, "location": "Halifax, NS"},
@@ -50,7 +48,7 @@ CHALLENGE_CHECKPOINTS = {
     "Central Challenge": {
         "total_km": 4000,
         "route": "Québec City → Sault Ste. Marie",
-        "description": "Cross Québec into Ontario. Major milestones in Montréal, Ottawa, and Toronto mark steady growth and endurance.",
+        "description": "Cross Québec into Ontario. Major milestones in Montréal, Ottawa, and Toronto.",
         "checkpoints": [
             {"km": 2250, "location": "Trois-Rivières, QC"},
             {"km": 2500, "location": "Montréal, QC"},
@@ -64,7 +62,7 @@ CHALLENGE_CHECKPOINTS = {
     "Prairies & Rockies": {
         "total_km": 6000,
         "route": "Sault Ste. Marie → Calgary",
-        "description": "Move across the Prairies into the Rocky Mountains. Celebrate key milestones in Winnipeg, Regina, and Calgary as you head west to the western provinces.",
+        "description": "Move across the Prairies into the Rocky Mountains.",
         "checkpoints": [
             {"km": 4250, "location": "Thunder Bay, ON"},
             {"km": 4500, "location": "Enter Manitoba"},
@@ -78,7 +76,7 @@ CHALLENGE_CHECKPOINTS = {
     "Full Coast-to-Coast": {
         "total_km": 7800,
         "route": "Calgary → Victoria",
-        "description": "Enter British Columbia and the Rockies' final stretch. Complete the journey in Kamloops, Vancouver, and Victoria, achieving coast-to-coast success.",
+        "description": "Enter British Columbia. Complete the journey in Kamloops, Vancouver, and Victoria.",
         "checkpoints": [
             {"km": 6250, "location": "Banff, AB"},
             {"km": 6500, "location": "Kicking Horse Pass (AB/BC border)"},
@@ -90,8 +88,12 @@ CHALLENGE_CHECKPOINTS = {
     }
 }
 
+st.title("🍁 The Great Canadian 7,800K")
 
-st.title("🍁 The Great Canadian Run")
+st.info(
+    "**Did you know?**\n\nThe total distance across Canada from St. John's, NL to Victoria, BC is approximately 7,800 km.\n\n"
+    "To celebrate this coast-to-coast journey, log 7,800 km in total using distance-based activities such as running, walking, cycling, hiking, or any activity that tracks distance."
+)
 
 # Initialize session state
 if "challenge_data" not in st.session_state:
@@ -100,25 +102,22 @@ if "challenge_data" not in st.session_state:
 # Load user data
 try:
     st.session_state.challenge_data = pd.DataFrame(ws.get_all_records())
-except:
+except Exception:
     st.session_state.challenge_data = pd.DataFrame()
 
 # Calculate total distance logged
 total_logged = 0
 if not st.session_state.challenge_data.empty:
-    if 'distance_km' in st.session_state.challenge_data.columns:
-        total_logged = st.session_state.challenge_data['distance_km'].fillna(0).astype(float).sum()
+    if "distance_km" in st.session_state.challenge_data.columns:
+        total_logged = st.session_state.challenge_data["distance_km"].fillna(0).astype(float).sum()
     elif len(st.session_state.challenge_data.columns) >= 2:
         total_logged = st.session_state.challenge_data.iloc[:, 1].fillna(0).astype(float).sum()
 
 st.markdown("### Your Journey Progress")
 
-# Progress information grouped together
 col1, col2, col3 = st.columns(3)
-
 with col1:
     st.write(f"**Total Distance:** {total_logged:,.0f} km")
-
 with col2:
     if total_logged < 200:
         st.write("**Current Location:** St. John's, NL")
@@ -184,7 +183,6 @@ with col2:
         st.write("**Current Location:** Vancouver, BC")
     else:
         st.write("**Current Location:** Victoria, BC")
-
 with col3:
     if total_logged < 200:
         st.write("**Next Milestone:** Gander, NL (200 km)")
@@ -239,7 +237,7 @@ with col3:
     elif total_logged < 6250:
         st.write("**Next Milestone:** Banff, AB (6,250 km)")
     elif total_logged < 6500:
-        st.write("**Next Milestone:** Kicking Horse Pass (AB/BC border) (6,500 km)")
+        st.write("**Next Milestone:** Kicking Horse Pass (6,500 km)")
     elif total_logged < 7000:
         st.write("**Next Milestone:** Kamloops, BC (7,000 km)")
     elif total_logged < 7250:
@@ -251,76 +249,62 @@ with col3:
     else:
         st.write("**Status:** Journey Complete!")
 
-
 # Progress bar
 progress_percentage = min((total_logged / 7800) * 100, 100)
 st.progress(progress_percentage / 100)
 st.caption(f"Progress: {progress_percentage:.1f}%")
 
-# Completion celebration
 if total_logged >= 7800:
     st.write("**Congratulations!** You've completed the coast-to-coast journey!")
 
 st.markdown("### Log Your Kilometers")
 
-# Function to get existing distance for a date
+
 def get_existing_distance(selected_date):
     date_str = str(selected_date)
     existing_data = st.session_state.challenge_data
-    
-    if not existing_data.empty and 'date' in existing_data.columns:
-        date_exists = existing_data['date'].astype(str).str.contains(date_str).any()
+    if not existing_data.empty and "date" in existing_data.columns:
+        date_exists = existing_data["date"].astype(str).str.contains(date_str).any()
         if date_exists:
-            row = existing_data[existing_data['date'].astype(str) == date_str].iloc[0]
-            if 'distance_km' in existing_data.columns:
-                return float(row['distance_km']) if pd.notna(row['distance_km']) else 0.0
-            else:
-                return float(row.iloc[1]) if len(row) > 1 and pd.notna(row.iloc[1]) else 0.0
+            row = existing_data[existing_data["date"].astype(str) == date_str].iloc[0]
+            if "distance_km" in existing_data.columns:
+                return float(row["distance_km"]) if pd.notna(row["distance_km"]) else 0.0
+            return float(row.iloc[1]) if len(row) > 1 and pd.notna(row.iloc[1]) else 0.0
     return 0.0
 
-activity_date = st.date_input("Date", value=date.today())
 
-# Get existing distance for the selected date
+activity_date = st.date_input("Date", value=date.today())
 existing_distance = get_existing_distance(activity_date)
 
-# Show existing distance in the input
 if existing_distance > 0:
-    distance = st.number_input("Distance (km)", min_value=0.0, step=0.1, 
-                             value=existing_distance,
-                             help=f"Currently logged: {existing_distance} km for {activity_date}")
+    distance = st.number_input("Distance (km)", min_value=0.0, step=0.1, value=existing_distance,
+                               help=f"Currently logged: {existing_distance} km for {activity_date}")
 else:
-    distance = st.number_input("Distance (km)", min_value=0.0, step=0.1, 
-                             value=0.0,
-                             help=f"No run logged for {activity_date}")
+    distance = st.number_input("Distance (km)", min_value=0.0, step=0.1, value=0.0,
+                               help="No run logged for this date")
 
 if st.button("Log Run"):
     if distance > 0:
         try:
-            # Check if date already exists
             date_str = str(activity_date)
             existing_data = st.session_state.challenge_data
-            
-            if not existing_data.empty and 'date' in existing_data.columns:
-                # Check if date already exists
-                date_exists = existing_data['date'].astype(str).str.contains(date_str).any()
-                
+
+            if not existing_data.empty and "date" in existing_data.columns:
+                date_exists = existing_data["date"].astype(str).str.contains(date_str).any()
                 if date_exists:
-                    # Update existing row
-                    row_index = existing_data[existing_data['date'].astype(str) == date_str].index[0]
-                    if 'distance_km' in existing_data.columns:
+                    row_index = existing_data[existing_data["date"].astype(str) == date_str].index[0]
+                    if "distance_km" in existing_data.columns:
                         ws.update(f"B{row_index + 2}", [[distance]])
                     else:
                         ws.update(f"A{row_index + 2}:B{row_index + 2}", [[date_str, distance]])
                     st.success(f"Updated run for {activity_date}!")
                 else:
-                    # Add new row
                     ws.append_row([date_str, distance])
                     st.success("Run logged successfully!")
             else:
-                # First entry
                 ws.append_row([date_str, distance])
                 st.success("Run logged successfully!")
-            
+
             st.session_state.challenge_data = pd.DataFrame(ws.get_all_records())
             st.rerun()
         except Exception as e:
@@ -328,46 +312,33 @@ if st.button("Log Run"):
 
 if not st.session_state.challenge_data.empty:
     with st.expander("Recent Runs", expanded=False):
-        # Convert to DataFrame for display
         df_display = st.session_state.challenge_data.copy()
-        
-        # Ensure we have the right column names
-        if 'date' not in df_display.columns and len(df_display.columns) > 0:
-            df_display.columns = ['date', 'distance_km'] if len(df_display.columns) == 2 else ['date'] + list(df_display.columns[1:])
-        
-        # Convert date column to datetime for proper sorting and display
-        if 'date' in df_display.columns:
-            df_display['date'] = pd.to_datetime(df_display['date'], errors='coerce')
-            df_display = df_display.sort_values('date', ascending=False)
-            df_display['date'] = df_display['date'].dt.strftime('%Y-%m-%d')
-        
-        # Display read-only dataframe
+        if "date" not in df_display.columns and len(df_display.columns) >= 2:
+            df_display.columns = ["date", "distance_km"] + list(df_display.columns[2:])
+        if "date" in df_display.columns:
+            df_display["date"] = pd.to_datetime(df_display["date"], errors="coerce")
+            df_display = df_display.sort_values("date", ascending=False)
+            df_display = df_display.drop(columns=["date"])
         st.dataframe(df_display, use_container_width=True)
 
 st.markdown("### Your Badges")
 
-# Badge images mapping (replace with your actual SVG file paths)
 BADGE_IMAGES = {
     "Atlantic Explorer": "images/badges/atlantic_explorer.svg",
-    "Eastern Adventurer": "images/badges/eastern_adventurer.svg", 
+    "Eastern Adventurer": "images/badges/eastern_adventurer.svg",
     "Central Challenger": "images/badges/central_challenger.svg",
     "Prairie Voyager": "images/badges/prairie_voyager.svg",
     "True North Finisher": "images/badges/true_north_finisher.svg"
 }
 
+
 def load_badge_image(badge_name, is_earned=True):
-    """Load and display badge image, with fallback to emoji if file not found."""
     try:
         if badge_name in BADGE_IMAGES:
             with open(BADGE_IMAGES[badge_name], "r") as f:
                 svg_content = f.read()
-            
-            # Remove CSS styles that cause issues in Streamlit
             import re
-            svg_content = re.sub(r'<style.*?</style>', '', svg_content, flags=re.DOTALL)
-            
-            # Convert CSS classes to inline styles to preserve colors
-            # Replace common fill colors
+            svg_content = re.sub(r"<style.*?</style>", "", svg_content, flags=re.DOTALL)
             svg_content = svg_content.replace('class="cls-3"', 'style="fill: #6c1b14;"')
             svg_content = svg_content.replace('class="cls-4"', 'style="fill: #c83d2d;"')
             svg_content = svg_content.replace('class="cls-5"', 'style="fill: #b6291b;"')
@@ -375,99 +346,61 @@ def load_badge_image(badge_name, is_earned=True):
             svg_content = svg_content.replace('class="cls-8"', 'style="fill: #b6291b;"')
             svg_content = svg_content.replace('class="cls-6"', 'style="fill: none; stroke: #23262e; stroke-dasharray: .89 .89 .89 .89 .89 .89; stroke-miterlimit: 10; stroke-width: .89px;"')
             svg_content = svg_content.replace('class="cls-2"', 'style="font-family: Montserrat-SemiBoldItalic, \'Montserrat SemiBoldItalic\'; font-size: 11.06px; font-style: italic; font-weight: 600; letter-spacing: .1em;"')
-            
-            # Add inline styling for locked badges
             if not is_earned:
-                svg_content = svg_content.replace('<svg', '<svg style="filter: grayscale(100%); opacity: 0.5;"')
-            
-            # Ensure SVG has proper size
-            svg_content = svg_content.replace('<svg', '<svg width="150" height="150"')
-            
+                svg_content = svg_content.replace("<svg", '<svg style="filter: grayscale(100%); opacity: 0.5;"')
+            svg_content = svg_content.replace("<svg", '<svg width="150" height="150"')
             st.markdown(svg_content, unsafe_allow_html=True)
         else:
-            # Fallback to emoji if no image file found
             st.markdown("🏆" if is_earned else "🔒")
     except FileNotFoundError:
-        # Fallback to emoji if file doesn't exist
         st.markdown("🏆" if is_earned else "🔒")
+
 
 earned_badges = []
 locked_badges = []
-
 for tier_name, tier_info in CHALLENGE_CHECKPOINTS.items():
-    tier_completed = total_logged >= tier_info['total_km']
-    if 'badge' in tier_info['checkpoints'][-1]:
-        badge_name = tier_info['checkpoints'][-1]['badge']
+    tier_completed = total_logged >= tier_info["total_km"]
+    if "badge" in tier_info["checkpoints"][-1]:
+        badge_name = tier_info["checkpoints"][-1]["badge"]
         if tier_completed:
-            earned_badges.append({
-                'name': badge_name,
-                'challenge': tier_name,
-                'km': tier_info['total_km'],
-                'route': tier_info['route']
-            })
+            earned_badges.append({"name": badge_name, "challenge": tier_name, "km": tier_info["total_km"], "route": tier_info["route"]})
         else:
-            locked_badges.append({
-                'name': badge_name,
-                'challenge': tier_name,
-                'km': tier_info['total_km'],
-                'route': tier_info['route']
-            })
+            locked_badges.append({"name": badge_name, "challenge": tier_name, "km": tier_info["total_km"], "route": tier_info["route"]})
 
-# Display earned badges only
 if earned_badges:
-    # Display badges in a horizontal row to save space
     cols = st.columns(len(earned_badges))
     for i, badge in enumerate(earned_badges):
         with cols[i]:
-            load_badge_image(badge['name'], is_earned=True)
-elif locked_badges:
-    st.info("Complete challenges to earn badges!")
+            load_badge_image(badge["name"], is_earned=True)
 else:
     st.info("Complete challenges to earn badges!")
 
 st.markdown("### Challenge Progress")
 for tier_name, tier_info in CHALLENGE_CHECKPOINTS.items():
-    tier_completed = total_logged >= tier_info['total_km']
-    
-    # Combined achievement status and checkpoints in one expander
+    tier_completed = total_logged >= tier_info["total_km"]
     if tier_completed:
-        if 'badge' in tier_info['checkpoints'][-1]:
+        if "badge" in tier_info["checkpoints"][-1]:
             status_text = f"✅ **{tier_name} {tier_info['total_km']:,} km** | 🍁 {tier_info['checkpoints'][-1]['badge']}"
         else:
             status_text = f"✅ **{tier_name} {tier_info['total_km']:,} km**"
     else:
-        remaining = tier_info['total_km'] - total_logged
         status_text = f"⏳ **{tier_name} {tier_info['total_km']:,} km**"
-    
+
     with st.expander(status_text, expanded=False):
-        # Route
         st.markdown(f"**Route:** {tier_info['route']}")
-        
         st.markdown("**Checkpoints:**")
-        
-        # Checkpoints in a more organized format
-        for i, checkpoint in enumerate(tier_info['checkpoints']):
-            checkpoint_reached = total_logged >= checkpoint['km']
-            remaining_to_tier = tier_info['total_km'] - checkpoint['km']
-            
-            if 'badge' in checkpoint:
-                if checkpoint_reached:
-                    st.markdown(f"✅ {checkpoint['km']:,} km – {checkpoint['location']}")
-                else:
-                    st.markdown(f"⏳ {checkpoint['km']:,} km – {checkpoint['location']}")
+        for i, checkpoint in enumerate(tier_info["checkpoints"]):
+            checkpoint_reached = total_logged >= checkpoint["km"]
+            remaining_to_tier = tier_info["total_km"] - checkpoint["km"]
+            if "badge" in checkpoint:
+                st.markdown(f"✅ {checkpoint['km']:,} km – {checkpoint['location']}" if checkpoint_reached else f"⏳ {checkpoint['km']:,} km – {checkpoint['location']}")
             else:
-                if checkpoint_reached:
-                    st.markdown(f"✅ {checkpoint['km']:,} km – {checkpoint['location']} | {remaining_to_tier:,} km to go")
-                else:
-                    st.markdown(f"⏳ {checkpoint['km']:,} km – {checkpoint['location']} | {remaining_to_tier:,} km to go")
-            
-            # Add spacing between checkpoints (except for the last one)
-            if i < len(tier_info['checkpoints']) - 1:
+                st.markdown(f"✅ {checkpoint['km']:,} km – {checkpoint['location']} | {remaining_to_tier:,} km to go" if checkpoint_reached else f"⏳ {checkpoint['km']:,} km – {checkpoint['location']} | {remaining_to_tier:,} km to go")
+            if i < len(tier_info["checkpoints"]) - 1:
                 st.markdown("")
 
-# Challenge completion celebration
 if total_logged >= 7800:
     st.balloons()
-    st.success("Congratulations! You've completed The Great Canadian Run!")
+    st.success("Congratulations! You've completed The Great Canadian 7,800K!")
     st.markdown("### Coast-to-Coast Finisher!")
     st.write("You've successfully journeyed from St. John's to Victoria across Canada!")

@@ -3,7 +3,6 @@ import pandas as pd
 import gspread
 from google.oauth2.service_account import Credentials
 from datetime import date
-from ai_assistant_api import ai_assistant
 
 SCOPES = [
     "https://www.googleapis.com/auth/spreadsheets",
@@ -15,12 +14,12 @@ creds = Credentials.from_service_account_info(
     scopes=SCOPES
 )
 client = gspread.authorize(creds)
-ws = client.open("growth_and_reflection").sheet1
+ws = client.open("professional_development_and_personal_growth").sheet1
 
 if "growth_df" not in st.session_state:
     st.session_state.growth_df = pd.DataFrame(ws.get_all_records())
 
-st.title("🌱 Growth & Reflection")
+st.title("📚 Professional & Personal Development")
 
 today = date.today()
 
@@ -39,41 +38,27 @@ for i, row in enumerate(df_records):
 def find_cols(record: dict):
     prof_key = None
     pers_key = None
-    mood_key = None
-    gratitude_key = None
     for col in record.keys():
         cl = col.lower()
         if prof_key is None and ("professional" in cl or "dev" in cl):
             prof_key = col
         if pers_key is None and ("personal" in cl or "growth" in cl):
             pers_key = col
-        if mood_key is None and "mood" in cl:
-            mood_key = col
-        if gratitude_key is None and "gratitude" in cl:
-            gratitude_key = col
     # Fallback order-based if not found
     keys = list(record.keys())
     if prof_key is None and len(keys) > 1:
         prof_key = keys[1]
     if pers_key is None and len(keys) > 2:
         pers_key = keys[2]
-    if mood_key is None and len(keys) > 3:
-        mood_key = keys[3]
-    if gratitude_key is None and len(keys) > 4:
-        gratitude_key = keys[4]
-    return prof_key, pers_key, mood_key, gratitude_key
+    return prof_key, pers_key
 
 if existing_row:
-    prof_col, pers_col, mood_col, gratitude_col = find_cols(existing_row)
+    prof_col, pers_col = find_cols(existing_row)
     prefill_prof = str(existing_row.get(prof_col, "")) if prof_col else ""
     prefill_pers = str(existing_row.get(pers_col, "")) if pers_col else ""
-    prefill_mood = str(existing_row.get(mood_col, "")) if mood_col else ""
-    prefill_gratitude = str(existing_row.get(gratitude_col, "")) if gratitude_col else ""
 else:
     prefill_prof = ""
     prefill_pers = ""
-    prefill_mood = ""
-    prefill_gratitude = ""
 
 col1, col2 = st.columns(2)
 with col1:
@@ -89,40 +74,6 @@ with col2:
         height=120
     )
 
-col3, col4 = st.columns(2)
-with col3:
-    mood_options = [
-        "😀 cheerful and upbeat",
-        "😄 good and content", 
-        "😊 calm and satisfied",
-        "😍 joyful or enthusiastic",
-        "🥰 grateful or affectionate",
-        "🙂 okay, balanced",
-        "😐 neither good nor bad",
-        "😶 indifferent or unsure",
-        "😌 relaxed or at peace",
-        "😞 sad or let down",
-        "😔 down or reflective",
-        "😟 anxious or concerned",
-        "😢 upset or emotional",
-        "😫 drained or overwhelmed"
-    ]
-    mood_index = 0
-    if prefill_mood and prefill_mood in mood_options:
-        mood_index = mood_options.index(prefill_mood)
-    mood = st.selectbox(
-        "Mood",
-        options=mood_options,
-        index=mood_index
-    )
-with col4:
-    gratitude = st.text_area(
-        "Gratitude",
-        value=prefill_gratitude,
-        height=100,
-        placeholder="What are you grateful for today?"
-    )
-
 col_save, col_delete = st.columns([1, 1])
 with col_save:
     save_clicked = st.button("☁️ Save")
@@ -132,10 +83,13 @@ with col_delete:
 if save_clicked:
     try:
         if existing_row_idx:
-            ws.update(values=[[professional_development, personal_growth, mood, gratitude]], range_name=f"B{existing_row_idx}:E{existing_row_idx}")
+            ws.update(
+                values=[[professional_development, personal_growth]],
+                range_name=f"B{existing_row_idx}:C{existing_row_idx}",
+            )
             st.success(f"Updated growth log for {entry_date}.")
         else:
-            ws.append_row([str(entry_date), professional_development, personal_growth, mood, gratitude])
+            ws.append_row([str(entry_date), professional_development, personal_growth])
             st.success(f"Added new growth log for {entry_date}.")
         st.session_state.growth_df = pd.DataFrame(ws.get_all_records())
     except Exception as e:
@@ -166,14 +120,7 @@ if not st.session_state.growth_df.empty:
         min_date = today_val
         max_date = today_val
 
-    # Results Section
     st.write("")
-    st.write("")
-    
-    # AI Insights Section
-    insights = ai_assistant.generate_insights("growth", st.session_state.growth_df)
-    ai_assistant.display_insights(insights)
-    
     st.write("")
     header_col, filter_col1, filter_col2 = st.columns([2, 1, 1])
     
@@ -208,23 +155,15 @@ if not st.session_state.growth_df.empty:
 
         prof_candidates = ["professional_development", "professional", "development"]
         pers_candidates = ["personal_growth", "personal", "growth"]
-        mood_candidates = ["mood"]
-        gratitude_candidates = ["gratitude"]
 
         prof_col = resolve_col(filtered_df.columns, prof_candidates)
         pers_col = resolve_col(filtered_df.columns, pers_candidates)
-        mood_col = resolve_col(filtered_df.columns, mood_candidates)
-        gratitude_col = resolve_col(filtered_df.columns, gratitude_candidates)
 
         rename_map = {}
         if prof_col:
             rename_map[prof_col] = "Professional Development"
         if pers_col:
             rename_map[pers_col] = "Personal Growth"
-        if mood_col:
-            rename_map[mood_col] = "Mood"
-        if gratitude_col:
-            rename_map[gratitude_col] = "Gratitude"
         if rename_map:
             df_display = df_display.rename(columns=rename_map)
 

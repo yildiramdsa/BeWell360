@@ -4,19 +4,12 @@ import gspread
 from google.oauth2.service_account import Credentials
 from datetime import date
 import plotly.express as px
-from ai_assistant_api import ai_assistant
+
 
 def find_body_composition_columns(df):
     weight_col = None
     body_fat_col = None
     muscle_col = None
-    
-    expected_columns = {
-        'weight': ['weight_lb', 'weight', 'weight_pounds'],
-        'body_fat': ['body_fat_percent', 'body_fat', 'bodyfat_percent', 'fat_percent'],
-        'muscle': ['skeletal_muscle_percent', 'muscle_percent', 'muscle', 'skeletal_muscle']
-    }
-    
     for col in df.columns:
         col_lower = col.lower()
         if any(keyword in col_lower for keyword in ['weight', 'lb', 'pound']):
@@ -93,7 +86,7 @@ def get_prefill_values(existing_row):
         muscle_val = float(existing_row.get(muscle_col, 0)) if muscle_col and existing_row.get(muscle_col) else 0.0
         
         return weight_val, body_fat_val, muscle_val
-    except:
+    except (ValueError, TypeError, KeyError):
         return 0.0, 0.0, 0.0
 
 
@@ -221,16 +214,8 @@ if not st.session_state.body_comp_df.empty:
         min_date = today
         max_date = today
     
-    # ---------------- Results Section ----------------
     st.write("")
     st.write("")
-    
-    # AI Insights Section
-    insights = ai_assistant.generate_insights("body_composition", st.session_state.body_comp_df)
-    ai_assistant.display_insights(insights)
-    
-    st.write("")
-    # Header and date filters on the same line
     header_col, filter_col1, filter_col2 = st.columns([2, 1, 1])
     
     with header_col:
