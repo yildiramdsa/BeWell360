@@ -297,18 +297,18 @@ if st.button("Log Run"):
                         ws.update(f"B{row_index + 2}", [[distance]])
                     else:
                         ws.update(f"A{row_index + 2}:B{row_index + 2}", [[date_str, distance]])
-                    st.success(f"Updated run for {activity_date}!")
+                    st.success(f"Updated run for {activity_date}.")
                 else:
                     ws.append_row([date_str, distance])
-                    st.success("Run logged successfully!")
+                    st.success(f"Added new run for {activity_date}.")
             else:
                 ws.append_row([date_str, distance])
-                st.success("Run logged successfully!")
+                st.success(f"Added new run for {activity_date}.")
 
             st.session_state.challenge_data = pd.DataFrame(ws.get_all_records())
             st.rerun()
         except Exception as e:
-            st.error(f"Error logging run: {str(e)}")
+            st.error(f"Error saving data: {str(e)}")
 
 if not st.session_state.challenge_data.empty:
     with st.expander("Recent Runs", expanded=False):
