@@ -9,7 +9,7 @@ class AIAssistantAPI:
     def __init__(self):
         # Initialize cache, client will be created when needed
         self.client = None
-        self.insights_cache = {}
+        self.ai_insights_cache = {}
     
     def _get_client(self):
         """Get OpenAI client, creating it if needed"""
@@ -23,13 +23,13 @@ class AIAssistantAPI:
                 raise ValueError(f"Failed to initialize OpenAI client: {str(e)}")
         return self.client
         
-    def generate_insights(self, page_type, user_data, recent_data=None):
+    def generate_ai_insights(self, page_type, user_data, recent_data=None):
         """Generate AI insights using OpenAI API"""
         
         # Check cache first
         cache_key = f"{page_type}_{date.today().strftime('%Y-%m-%d')}"
-        if cache_key in self.insights_cache:
-            return self.insights_cache[cache_key]
+        if cache_key in self.ai_insights_cache:
+            return self.ai_insights_cache[cache_key]
         
         try:
             # Prepare data for AI analysis
@@ -45,7 +45,7 @@ class AIAssistantAPI:
                 messages=[
                     {
                         "role": "system", 
-                        "content": "You are a wellness coach AI assistant. Provide personalized, actionable insights based on user data. Be encouraging, specific, and helpful. Format responses as JSON with insights array containing type, icon, title, and message fields."
+                        "content": "You are a wellness coach AI assistant. Provide personalized, actionable insights based on user data. Be encouraging, specific, and helpful. Format responses as JSON with ai_insights array containing type, icon, title, and message fields."
                     },
                     {
                         "role": "user",
@@ -61,24 +61,24 @@ class AIAssistantAPI:
             
             # Try to parse as JSON, fallback to structured format
             try:
-                insights_data = json.loads(ai_content)
-                insights = insights_data.get('insights', [])
+                ai_insights_data = json.loads(ai_content)
+                ai_insights = ai_insights_data.get('ai_insights', [])
             except json.JSONDecodeError:
                 # Fallback: create structured insight from text response
-                insights = [{
+                ai_insights = [{
                     "type": "info",
                     "icon": "🤖",
                     "title": "AI Insight",
                     "message": ai_content
                 }]
             
-            # Cache the insights
-            self.insights_cache[cache_key] = insights
-            return insights
+            # Cache the ai_insights
+            self.ai_insights_cache[cache_key] = ai_insights
+            return ai_insights
             
         except Exception as e:
             st.error(f"AI Analysis Error: {str(e)}")
-            # Return fallback insights
+            # Return fallback ai_insights
             return [{
                 "type": "warning",
                 "icon": "⚠️",
@@ -189,7 +189,7 @@ Analyze the following {page_type} data and provide 2-3 personalized insights and
 
 Please provide insights in this JSON format:
 {{
-  "insights": [
+  "ai_insights": [
     {{
       "type": "success|warning|info|motivation",
       "icon": "appropriate emoji",
@@ -211,14 +211,14 @@ Be personal, helpful, and motivating. Use appropriate emojis and keep messages c
         
         return base_prompt
     
-    def display_insights(self, insights):
-        """Display insights in a beautiful format"""
-        if not insights:
+    def display_ai_insights(self, ai_insights):
+        """Display AI insights in a beautiful format"""
+        if not ai_insights:
             return
         
         st.markdown("### 🤖 AI Insights & Recommendations")
         
-        for insight in insights:
+        for insight in ai_insights:
             icon = insight.get("icon", "💡")
             title = insight.get("title", "Insight")
             message = insight.get("message", "")
@@ -283,13 +283,13 @@ Return only 3 suggestions, each starting with an emoji and being 1-2 sentences. 
             st.error(f"AI Suggestions Error: {str(e)}")
             return ["🤖 AI suggestions temporarily unavailable"]
     
-    def generate_comprehensive_daily_insights(self, selected_data, daily_summary_text, selected_date):
-        """Generate comprehensive daily insights using OpenAI API"""
+    def generate_comprehensive_daily_ai_insights(self, selected_data, daily_summary_text, selected_date):
+        """Generate comprehensive daily AI insights using OpenAI API"""
         
         # Check cache first
         cache_key = f"daily_summary_{selected_date.strftime('%Y-%m-%d')}"
-        if cache_key in self.insights_cache:
-            return self.insights_cache[cache_key]
+        if cache_key in self.ai_insights_cache:
+            return self.ai_insights_cache[cache_key]
         
         try:
             # Create comprehensive AI prompt
@@ -300,7 +300,7 @@ Analyze this comprehensive daily wellness data and provide personalized insights
 
 Please provide insights in this JSON format:
 {{
-  "insights": [
+  "ai_insights": [
     {{
       "type": "success|warning|info|motivation",
       "icon": "appropriate emoji",
@@ -328,7 +328,7 @@ Be personal, comprehensive, and motivating. Provide 3-4 key insights that help t
                 messages=[
                     {
                         "role": "system", 
-                        "content": "You are an expert wellness coach AI. Analyze comprehensive daily wellness data and provide personalized, actionable insights. Be encouraging, specific, and helpful. Format responses as JSON with insights array."
+                        "content": "You are an expert wellness coach AI. Analyze comprehensive daily wellness data and provide personalized, actionable insights. Be encouraging, specific, and helpful. Format responses as JSON with ai_insights array."
                     },
                     {
                         "role": "user",
@@ -344,20 +344,20 @@ Be personal, comprehensive, and motivating. Provide 3-4 key insights that help t
             
             # Try to parse as JSON, fallback to structured format
             try:
-                insights_data = json.loads(ai_content)
-                insights = insights_data.get('insights', [])
+                ai_insights_data = json.loads(ai_content)
+                ai_insights = ai_insights_data.get('ai_insights', [])
             except json.JSONDecodeError:
                 # Fallback: create structured insight from text response
-                insights = [{
+                ai_insights = [{
                     "type": "info",
                     "icon": "🤖",
                     "title": "Daily AI Summary",
                     "message": ai_content
                 }]
             
-            # Cache the insights
-            self.insights_cache[cache_key] = insights
-            return insights
+            # Cache the ai_insights
+            self.ai_insights_cache[cache_key] = ai_insights
+            return ai_insights
             
         except Exception as e:
             return [{

@@ -34,7 +34,7 @@ if not st.session_state.morning_routine_df.empty:
     
     for idx, row in df.iterrows():
         routine_key = f"routine_{idx}"
-        routine_name = row.get('routine', 'N/A')
+        routine_name = row.get('empowering_morning_routine', 'N/A')
         
         if st.session_state.get("show_management", False):
             col1, col2, col3 = st.columns([4, 1, 1])

@@ -34,7 +34,7 @@ if not st.session_state.daily_habits_df.empty:
     
     for idx, row in df.iterrows():
         habit_key = f"habit_{idx}"
-        habit_name = row.get('habit', 'N/A')
+        habit_name = row.get('daily_empowering_habits', 'N/A')
         
         if st.session_state.get("show_management", False):
             col1, col2, col3 = st.columns([4, 1, 1])

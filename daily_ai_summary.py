@@ -33,7 +33,7 @@ def save_ai_insights(date, section, insights):
         except gspread.SpreadsheetNotFound:
             sh = client.create("daily_ai_insights")
             ws = sh.sheet1
-            ws.append_row(["date", "section", "insights"])
+            ws.append_row(["date", "section", "ai_insights"])
         
         ws.append_row([date.strftime('%Y-%m-%d'), section, insights])
         return True
@@ -125,7 +125,7 @@ for icon, section_name in sections.items():
     with col1:
         if not section_insights.empty:
             st.markdown("**Stored Insights:**")
-            st.write(section_insights['insights'].iloc[0])
+            st.write(section_insights['ai_insights'].iloc[0])
         else:
             st.info("No stored insights available for this section and date.")
     
@@ -133,17 +133,17 @@ for icon, section_name in sections.items():
         if st.button(f"Generate New", key=f"generate_{section_name}"):
             try:
                 if section_name == "Nutrition & Hydration":
-                    insights = ai_assistant.generate_insights("nutrition", user_data.get("nutrition", pd.DataFrame()))
+                    insights = ai_assistant.generate_ai_insights("nutrition", user_data.get("nutrition", pd.DataFrame()))
                 elif section_name == "Fitness Activities":
-                    insights = ai_assistant.generate_insights("fitness", user_data.get("fitness", pd.DataFrame()))
+                    insights = ai_assistant.generate_ai_insights("fitness", user_data.get("fitness", pd.DataFrame()))
                 elif section_name == "Sleep Schedule":
-                    insights = ai_assistant.generate_insights("sleep", user_data.get("sleep", pd.DataFrame()))
+                    insights = ai_assistant.generate_ai_insights("sleep", user_data.get("sleep", pd.DataFrame()))
                 elif section_name == "Growth & Reflection":
-                    insights = ai_assistant.generate_insights("growth", user_data.get("growth", pd.DataFrame()))
+                    insights = ai_assistant.generate_ai_insights("growth", user_data.get("growth", pd.DataFrame()))
                 else:
-                    insights = ai_assistant.generate_insights("daily_summary", user_data)
+                    insights = ai_assistant.generate_ai_insights("daily_summary", user_data)
                 
-                ai_assistant.display_insights(insights)
+                ai_assistant.display_ai_insights(insights)
                 
                 if save_ai_insights(selected_date, section_name, str(insights)):
                     st.success("Insights saved!")

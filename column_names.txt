@@ -1,0 +1,44 @@
+body_composition:
+date	weight_kg	body_fat_percent	skeletal_muscle_percent
+
+daily_ai_insights:
+date	section	ai_insights
+
+daily_empowering_habits:
+daily_empowering_habits
+
+empowering_evening_routine:
+empowering_evening_routine
+
+empowering_morning_routine:
+empowering_morning_routine
+
+fitness_activities:
+date	exercise	sets	reps	weight_lb	duration_min	distance_km
+
+goals_for_the_year:
+life_area	what_i_want	why_i_want_it
+
+long_term_life_goals:
+long_term_life_goals
+
+mood_and_gratitude:
+date	mood	gratitude
+
+nutrition_and_hydration:
+date	breakfast	lunch	dinner	snacks	supplements	water_ml
+
+professional_development_and_personal_growth:
+date	professional_development	personal_growth
+
+sleep_schedule:
+sleep_start_datetime	sleep_end_datetime
+
+the_great_canadian_7800k:
+date	distance_km
+
+the_yukon_63k:
+date	distance_km
+
+vision_board:
+image_data
