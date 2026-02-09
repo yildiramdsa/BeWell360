@@ -25,9 +25,14 @@ today_str = today.strftime("%Y-%m-%d")
 if f"daily_checklist_{today_str}" not in st.session_state:
     st.session_state[f"daily_checklist_{today_str}"] = {}
 
+if st.session_state.pop("_clear_new_routine_input", None):
+    st.session_state["new_routine_input"] = ""
+if st.session_state.pop("_clear_new_routine_input_empty", None):
+    st.session_state["new_routine_input_empty"] = ""
+
 st.title("🌙 Empowering Evening Routine")
 
-st.subheader(f"Today's Checklist - {today.strftime('%B %d, %Y')}")
+st.subheader(today.strftime('%B %d, %Y'))
 
 if not st.session_state.evening_routine_df.empty:
     df = st.session_state.evening_routine_df.copy()
@@ -110,6 +115,7 @@ if not st.session_state.evening_routine_df.empty:
                     ws.append_row([new_routine.strip()])
                     st.success(f"Added '{new_routine}' to your evening routine!")
                     st.session_state.evening_routine_df = pd.DataFrame(ws.get_all_records())
+                    st.session_state["_clear_new_routine_input"] = True
                     st.rerun()
                 except Exception as e:
                     st.error(f"Error adding routine: {str(e)}")
@@ -163,6 +169,7 @@ else:
                     ws.append_row([new_routine.strip()])
                     st.success(f"Added '{new_routine}' to your evening routine!")
                     st.session_state.evening_routine_df = pd.DataFrame(ws.get_all_records())
+                    st.session_state["_clear_new_routine_input_empty"] = True
                     st.rerun()
                 except Exception as e:
                     st.error(f"Error adding routine: {str(e)}")
