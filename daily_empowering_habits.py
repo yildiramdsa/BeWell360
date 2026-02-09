@@ -39,7 +39,10 @@ if not st.session_state.daily_habits_df.empty:
     
     for idx, row in df.iterrows():
         habit_key = f"habit_{idx}"
-        habit_name = row.get('daily_empowering_habits', 'N/A')
+        habit_name = str(row.get('daily_empowering_habits', '')).strip()
+        
+        if habit_name == '':
+            continue
         
         if st.session_state.get("show_management", False):
             col1, col2, col3 = st.columns([4, 1, 1])
@@ -122,7 +125,7 @@ if not st.session_state.daily_habits_df.empty:
             else:
                 st.error("Please enter a habit.")
     
-    total_items = len(df)
+    total_items = len([row for _, row in df.iterrows() if str(row.get('daily_empowering_habits', '')).strip()])
     checked_items = sum(st.session_state[f"daily_checklist_{today_str}"].values())
     progress = min(checked_items / total_items, 1.0) if total_items > 0 else 0
     
@@ -175,3 +178,7 @@ else:
                     st.error(f"Error adding habit: {str(e)}")
             else:
                 st.error("Please enter a habit.")
+        
+        if st.button("☁️ Save", help="Close management section"):
+            st.session_state["show_management"] = False
+            st.rerun()

@@ -39,7 +39,10 @@ if not st.session_state.evening_routine_df.empty:
     
     for idx, row in df.iterrows():
         routine_key = f"routine_{idx}"
-        routine_name = row.get('empowering_evening_routine', 'N/A')
+        routine_name = str(row.get('empowering_evening_routine', '')).strip()
+        
+        if routine_name == '':
+            continue
         
         if st.session_state.get("show_management", False):
             col1, col2, col3 = st.columns([4, 1, 1])
@@ -60,7 +63,7 @@ if not st.session_state.evening_routine_df.empty:
                 if st.button("🗑️", key=f"delete_{idx}", help="Delete", use_container_width=True):
                     try:
                         ws.delete_rows(idx + 2)
-                        st.success(f"Deleted '{routine_name}' from routine!")
+                        st.success(f"Deleted '{routine_name}' from routines!")
                         st.session_state.evening_routine_df = pd.DataFrame(ws.get_all_records())
                         st.rerun()
                     except Exception as e:
@@ -113,7 +116,7 @@ if not st.session_state.evening_routine_df.empty:
             if new_routine.strip():
                 try:
                     ws.append_row([new_routine.strip()])
-                    st.success(f"Added '{new_routine}' to your evening routine!")
+                    st.success(f"Added '{new_routine}' to your evening routines!")
                     st.session_state.evening_routine_df = pd.DataFrame(ws.get_all_records())
                     st.session_state["_clear_new_routine_input"] = True
                     st.rerun()
@@ -122,7 +125,7 @@ if not st.session_state.evening_routine_df.empty:
             else:
                 st.error("Please enter a routine.")
     
-    total_items = len(df)
+    total_items = len([row for _, row in df.iterrows() if str(row.get('empowering_evening_routine', '')).strip()])
     checked_items = sum(st.session_state[f"daily_checklist_{today_str}"].values())
     progress = min(checked_items / total_items, 1.0) if total_items > 0 else 0
     
@@ -167,7 +170,7 @@ else:
             if new_routine.strip():
                 try:
                     ws.append_row([new_routine.strip()])
-                    st.success(f"Added '{new_routine}' to your evening routine!")
+                    st.success(f"Added '{new_routine}' to your evening routines!")
                     st.session_state.evening_routine_df = pd.DataFrame(ws.get_all_records())
                     st.session_state["_clear_new_routine_input_empty"] = True
                     st.rerun()
@@ -176,3 +179,6 @@ else:
             else:
                 st.error("Please enter a routine.")
         
+        if st.button("☁️ Save", help="Close management section"):
+            st.session_state["show_management"] = False
+            st.rerun()

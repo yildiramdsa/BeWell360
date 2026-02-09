@@ -21,6 +21,11 @@ if "life_goals_df" not in st.session_state:
 if "life_goals_completed" not in st.session_state:
     st.session_state.life_goals_completed = {}
 
+if st.session_state.pop("_clear_new_goal_input", None):
+    st.session_state["new_goal_input"] = ""
+if st.session_state.pop("_clear_new_goal_input_empty", None):
+    st.session_state["new_goal_input_empty"] = ""
+
 st.title("📌 Long-Term Life Goals")
 
 if not st.session_state.life_goals_df.empty:
@@ -119,6 +124,7 @@ if not st.session_state.life_goals_df.empty:
                         ws.append_row([new_goal.strip()])
                         st.success(f"Added '{new_goal}' to your life goals!")
                         st.session_state.life_goals_df = pd.DataFrame(ws.get_all_records())
+                        st.session_state["_clear_new_goal_input"] = True
                         st.rerun()
                     except Exception as e:
                         st.error(f"Error adding goal: {str(e)}")
@@ -172,6 +178,7 @@ else:
                     ws.append_row([new_goal.strip()])
                     st.success(f"Added '{new_goal}' to your life goals!")
                     st.session_state.life_goals_df = pd.DataFrame(ws.get_all_records())
+                    st.session_state["_clear_new_goal_input_empty"] = True
                     st.rerun()
                 except Exception as e:
                     st.error(f"Error adding goal: {str(e)}")

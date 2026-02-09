@@ -15,69 +15,30 @@ creds = Credentials.from_service_account_info(
 client = gspread.authorize(creds)
 ws = client.open("goals_for_the_year").sheet1
 
-CATEGORIES = [
-    "Health & Vitality",
-    "Fun, Free Time & Family", 
-    "Relationships",
-    "Career & Business",
-    "Financial",
-    "Personal Growth & Learning",
-    "Spiritual & Emotional Well-Being",
-    "Lifestyle & Environment"
-]
-
-CATEGORY_ICONS = {
-    "Health & Vitality": "⚽",
-    "Fun, Free Time & Family": "🎈",
-    "Relationships": "❤️",
-    "Career & Business": "💼",
-    "Financial": "💰",
-    "Personal Growth & Learning": "📚",
-    "Spiritual & Emotional Well-Being": "🌱",
-    "Lifestyle & Environment": "🏠"
-}
-
-CATEGORY_EXAMPLES = {
-    "Health & Vitality": "exercising regularly, eating well, improving sleep, managing stress",
-    "Fun, Free Time & Family": "planning trips, enjoying hobbies, celebrating special moments",
-    "Relationships": "weekly date nights, reconnecting with friends, expanding networks",
-    "Career & Business": "earning a promotion, launching a project, building collaborations",
-    "Financial": "saving consistently, reducing debt, growing investments",
-    "Personal Growth & Learning": "completing courses, reading more, developing new skills",
-    "Spiritual & Emotional Well-Being": "meditating daily, practicing gratitude, volunteering",
-    "Lifestyle & Environment": "decluttering spaces, upgrading home, creating healthy routines"
-}
-
 if "yearly_goals_df" not in st.session_state:
-    st.session_state.yearly_goals_df = pd.DataFrame(ws.get_all_records(expected_headers=["life_area", "what_i_want", "why_i_want_it"]))
+    st.session_state.yearly_goals_df = pd.DataFrame(ws.get_all_records())
 
 if "yearly_goals_completed" not in st.session_state:
     st.session_state.yearly_goals_completed = {}
+
+if st.session_state.pop("_clear_new_goal_input", None):
+    st.session_state["new_goal_input"] = ""
+if st.session_state.pop("_clear_new_goal_input_empty", None):
+    st.session_state["new_goal_input_empty"] = ""
 
 st.title("🎯 Goals for the Year")
 
 if not st.session_state.yearly_goals_df.empty:
     df = st.session_state.yearly_goals_df.copy()
     
-    category_col = None
     goal_col = None
-    why_col = None
-    
     for col in df.columns:
-        col_lower = col.lower()
-        if col_lower in ['category', 'life_area']:
-            category_col = col
-        elif col_lower in ['goal', 'what_i_want']:
+        if col.lower() in ['goal', 'goals']:
             goal_col = col
-        elif col_lower in ['why_i_want_it', 'why i want it']:
-            why_col = col
+            break
     
-    if category_col is None and len(df.columns) > 0:
-        category_col = df.columns[0] if len(df.columns) > 0 else None
-    if goal_col is None and len(df.columns) > 1:
-        goal_col = df.columns[1] if len(df.columns) > 1 else None
-    if why_col is None and len(df.columns) > 2:
-        why_col = df.columns[2] if len(df.columns) > 2 else None
+    if goal_col is None and len(df.columns) > 0:
+        goal_col = df.columns[0]
     
     if goal_col is None:
         st.error("No data found in the Google Sheet. Please add some goals.")
@@ -85,8 +46,6 @@ if not st.session_state.yearly_goals_df.empty:
         for idx, row in df.iterrows():
             goal_key = f"goal_{idx}"
             goal_name = str(row.get(goal_col, '')).strip()
-            category = str(row.get(category_col, '')).strip() if category_col else ""
-            why = str(row.get(why_col, '')).strip() if why_col else ""
             
             if goal_name == '':
                 continue
@@ -95,83 +54,82 @@ if not st.session_state.yearly_goals_df.empty:
                 col1, col2, col3 = st.columns([4, 1, 1])
                 
                 with col1:
-                    # Create display text with improved formatting
-                    display_parts = [f"**{goal_name}**"]
-                    if category:
-                        category_icon = CATEGORY_ICONS.get(category, "📋")
-                        display_parts.append(f"{category_icon} *{category}*")
-                    if why:
-                        display_parts.append(f"{why}")
-                    
-                    display_text = " | ".join(display_parts)
-                    
                     checked = st.checkbox(
-                        display_text,
+                        goal_name,
                         value=st.session_state.yearly_goals_completed.get(goal_key, False),
                         key=f"check_{goal_key}"
                     )
                     st.session_state.yearly_goals_completed[goal_key] = checked
-                
+
                 with col2:
-                    if st.button("✏️", key=f"edit_{idx}", help="Edit", width='stretch'):
+                    if st.button("✏️", key=f"edit_{idx}", help="Edit", use_container_width=True):
                         st.session_state[f"editing_{idx}"] = True
                 
                 with col3:
-                    if st.button("🗑️", key=f"delete_{idx}", help="Delete", width='stretch'):
+                    if st.button("🗑️", key=f"delete_{idx}", help="Delete", use_container_width=True):
                         try:
                             ws.delete_rows(idx + 2)
-                            st.success("Goal deleted successfully!")
-                            st.session_state.yearly_goals_df = pd.DataFrame(ws.get_all_records(expected_headers=["life_area", "what_i_want", "why_i_want_it"]))
+                            st.success(f"Deleted '{goal_name}' from goals!")
+                            st.session_state.yearly_goals_df = pd.DataFrame(ws.get_all_records())
                             st.rerun()
                         except Exception as e:
                             st.error(f"Error deleting goal: {str(e)}")
+                
+                if st.session_state.get(f"editing_{idx}", False):
+                    with st.expander(f"Edit: {goal_name}", expanded=True):
+                        edit_goal = st.text_input("Goal", value=goal_name, key=f"edit_goal_{idx}")
+                        
+                        edit_save_col, edit_cancel_col = st.columns([1, 1])
+                        with edit_save_col:
+                            if st.button("☁️ Save Changes", key=f"save_edit_{idx}"):
+                                try:
+                                    ws.update(values=[[edit_goal]], 
+                                             range_name=f"A{idx+2}")
+                                    st.success("Goal updated successfully!")
+                                    st.session_state[f"editing_{idx}"] = False
+                                    st.session_state.yearly_goals_df = pd.DataFrame(ws.get_all_records())
+                                    st.rerun()
+                                except Exception as e:
+                                    st.error(f"Error updating goal: {str(e)}")
+                        
+                        with edit_cancel_col:
+                            if st.button("❌ Cancel", key=f"cancel_edit_{idx}"):
+                                st.session_state[f"editing_{idx}"] = False
+                                st.rerun()
             else:
-                # Create display text with improved formatting
-                display_parts = [f"**{goal_name}**"]
-                if category:
-                    category_icon = CATEGORY_ICONS.get(category, "📋")
-                    display_parts.append(f"{category_icon} *{category}*")
-                if why:
-                    display_parts.append(f"{why}")
-                
-                display_text = " | ".join(display_parts)
-                
                 checked = st.checkbox(
-                    display_text,
+                    goal_name,
                     value=st.session_state.yearly_goals_completed.get(goal_key, False),
                     key=f"check_{goal_key}"
                 )
                 st.session_state.yearly_goals_completed[goal_key] = checked
+        
+        if st.session_state.get("show_management", False):
+            col1, col2, col3 = st.columns([4, 1, 1])
             
-            if st.session_state.get(f"editing_{idx}", False):
-                with st.expander(f"Edit: {goal_name}", expanded=True):
-                    # Create category options with icons and examples for edit form
-                    edit_category_options = [f"{CATEGORY_ICONS.get(cat, '📋')} {cat} ({CATEGORY_EXAMPLES.get(cat, '')})" for cat in CATEGORIES]
-                    edit_selected_category = st.selectbox("Life Area", edit_category_options, 
-                                                        index=CATEGORIES.index(category) if category in CATEGORIES else 0, 
-                                                        key=f"edit_category_{idx}")
-                    # Extract the actual category name (remove icon, space, and examples)
-                    edit_category = edit_selected_category.split(" (")[0].split(" ", 1)[1] if " " in edit_selected_category.split(" (")[0] else edit_selected_category.split(" (")[0]
-                    edit_goal = st.text_input("What I Want", value=goal_name, key=f"edit_goal_{idx}")
-                    edit_why = st.text_area("Why I Want It", value=why, key=f"edit_why_{idx}")
-                    
-                    edit_save_col, edit_cancel_col = st.columns([1, 1])
-                    with edit_save_col:
-                        if st.button("☁️ Save Changes", key=f"save_edit_{idx}"):
-                            try:
-                                ws.update(values=[[edit_category, edit_goal, edit_why]], 
-                                         range_name=f"A{idx+2}:C{idx+2}")
-                                st.success("Goal updated successfully!")
-                                st.session_state[f"editing_{idx}"] = False
-                                st.session_state.yearly_goals_df = pd.DataFrame(ws.get_all_records(expected_headers=["life_area", "what_i_want", "why_i_want_it"]))
-                                st.rerun()
-                            except Exception as e:
-                                st.error(f"Error updating goal: {str(e)}")
-                    
-                    with edit_cancel_col:
-                        if st.button("❌ Cancel", key=f"cancel_edit_{idx}"):
-                            st.session_state[f"editing_{idx}"] = False
-                            st.rerun()
+            with col1:
+                new_goal = st.text_input("", placeholder="Add new goal...", key="new_goal_input", label_visibility="collapsed")
+            
+            with col2:
+                add_clicked = st.button("➕", key="add_new_goal", help="Add goal", use_container_width=True)
+            
+            with col3:
+                if st.button("🗑️", key="clear_new_goal", help="Clear", use_container_width=True):
+                    st.session_state["new_goal_input"] = ""
+                    st.rerun()
+            
+            if add_clicked:
+                if new_goal.strip():
+                    try:
+                        ws.append_row([new_goal.strip()])
+                        st.success(f"Added '{new_goal}' to your yearly goals!")
+                        st.session_state.yearly_goals_df = pd.DataFrame(ws.get_all_records())
+                        st.session_state["_clear_new_goal_input"] = True
+                        st.rerun()
+                    except Exception as e:
+                        st.error(f"Error adding goal: {str(e)}")
+                else:
+                    st.error("Please enter a goal.")
         
         total_items = len([row for _, row in df.iterrows() if str(row.get(goal_col, '')).strip()])
         checked_items = sum(st.session_state.yearly_goals_completed.values())
@@ -179,20 +137,6 @@ if not st.session_state.yearly_goals_df.empty:
         
         st.progress(progress)
         st.caption(f"Completed: {checked_items}/{total_items} goals ({progress:.0%})")
-        
-        if st.session_state.get("show_management", False):
-            st.subheader("Add New Goal")
-            
-            # Create category options with icons and examples
-            category_options = [f"{CATEGORY_ICONS.get(cat, '📋')} {cat} ({CATEGORY_EXAMPLES.get(cat, '')})" for cat in CATEGORIES]
-            selected_category = st.selectbox("Life Area", category_options, key="new_category_input")
-            # Extract the actual category name (remove icon, space, and examples)
-            new_category = selected_category.split(" (")[0].split(" ", 1)[1] if " " in selected_category.split(" (")[0] else selected_category.split(" (")[0]
-            new_goal = st.text_input("What I Want", key="new_goal_input")
-            new_why = st.text_area("Why I Want It", key="new_why_input")
-            
-            if new_goal.strip():
-                st.session_state["pending_goal"] = [new_category, new_goal.strip(), new_why.strip()]
         
         col1, col2 = st.columns([1, 1])
         
@@ -203,24 +147,7 @@ if not st.session_state.yearly_goals_df.empty:
         
         with col2:
             if st.session_state.get("show_management", False):
-                if st.button("☁️ Save", help="Save and close management section"):
-                    if st.session_state.get("pending_goal"):
-                        try:
-                            ws.append_row(st.session_state["pending_goal"])
-                            st.success(f"Added '{st.session_state['pending_goal'][1]}' to your yearly goals!")
-                            st.session_state.yearly_goals_df = pd.DataFrame(ws.get_all_records(expected_headers=["life_area", "what_i_want", "why_i_want_it"]))
-                            st.session_state["pending_goal"] = []
-                        except Exception as e:
-                            st.error(f"Error adding goal: {str(e)}")
-                    
-                    # Close all edit modes
-                    for key in list(st.session_state.keys()):
-                        if key.startswith("editing_"):
-                            st.session_state[key] = False
-                    
-                    # Clear form inputs by clearing pending goal
-                    st.session_state["pending_goal"] = []
-                    
+                if st.button("☁️ Save", help="Close management section"):
                     st.session_state["show_management"] = False
                     st.rerun()
 
@@ -232,36 +159,32 @@ else:
         st.rerun()
     
     if st.session_state.get("show_management", False):
-        st.subheader("Add New Goal")
+        col1, col2, col3 = st.columns([4, 1, 1])
         
-        # Create category options with icons for empty state
-        category_options_empty = [f"{CATEGORY_ICONS.get(cat, '📋')} {cat}" for cat in CATEGORIES]
-        selected_category_empty = st.selectbox("Life Area", category_options_empty, key="new_category_input_empty")
-        # Extract the actual category name (remove icon and space)
-        new_category = selected_category_empty.split(" ", 1)[1] if " " in selected_category_empty else selected_category_empty
-        new_goal = st.text_input("What I Want", key="new_goal_input_empty")
-        new_why = st.text_area("Why I Want It", key="new_why_input_empty")
+        with col1:
+            new_goal = st.text_input("", placeholder="Add new goal...", key="new_goal_input_empty", label_visibility="collapsed")
         
-        if new_goal.strip():
-            st.session_state["pending_goal"] = [new_category, new_goal.strip(), new_why.strip()]
+        with col2:
+            add_clicked = st.button("➕", key="add_new_goal_empty", help="Add goal", use_container_width=True)
         
-        if st.button("☁️ Save", help="Save and close management section"):
-            if st.session_state.get("pending_goal"):
+        with col3:
+            if st.button("🗑️", key="clear_new_goal_empty", help="Clear", use_container_width=True):
+                st.session_state["new_goal_input_empty"] = ""
+                st.rerun()
+        
+        if add_clicked:
+            if new_goal.strip():
                 try:
-                    ws.append_row(st.session_state["pending_goal"])
-                    st.success(f"Added '{st.session_state['pending_goal'][1]}' to your yearly goals!")
-                    st.session_state.yearly_goals_df = pd.DataFrame(ws.get_all_records(expected_headers=["life_area", "what_i_want", "why_i_want_it"]))
-                    st.session_state["pending_goal"] = []
+                    ws.append_row([new_goal.strip()])
+                    st.success(f"Added '{new_goal}' to your yearly goals!")
+                    st.session_state.yearly_goals_df = pd.DataFrame(ws.get_all_records())
+                    st.session_state["_clear_new_goal_input_empty"] = True
+                    st.rerun()
                 except Exception as e:
                     st.error(f"Error adding goal: {str(e)}")
-            
-            # Close all edit modes
-            for key in list(st.session_state.keys()):
-                if key.startswith("editing_"):
-                    st.session_state[key] = False
-            
-            # Clear form inputs by clearing pending goal
-            st.session_state["pending_goal"] = []
-            
+            else:
+                st.error("Please enter a goal.")
+        
+        if st.button("☁️ Save", help="Close management section"):
             st.session_state["show_management"] = False
             st.rerun()
