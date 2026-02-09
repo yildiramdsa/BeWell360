@@ -60,7 +60,7 @@ def as_float(val, default=0.0):
 
 prefill_sets = as_int(existing_row.get("sets")) if existing_row else 0
 prefill_reps = as_int(existing_row.get("reps")) if existing_row else 0
-prefill_weight = as_float(existing_row.get("weight_lb")) if existing_row else 0.0
+prefill_weight = as_float(existing_row.get("weight_kg")) if existing_row else 0.0
 prefill_duration = as_int(existing_row.get("duration_sec")) if existing_row else 0
 prefill_distance = as_float(existing_row.get("distance_km")) if existing_row else 0.0
 
@@ -70,7 +70,7 @@ with col1:
 with col2:
     reps = st.number_input("Reps", min_value=0, step=1, value=int(prefill_reps))
 with col3:
-    weight_lb = st.number_input("Weight (lb)", min_value=0.0, step=1.0, value=float(prefill_weight))
+    weight_kg = st.number_input("Weight (kg)", min_value=0.0, step=1.0, value=float(prefill_weight))
 
 col4, col5 = st.columns(2)
 with col4:
@@ -91,7 +91,7 @@ if save_clicked:
         else:
             if existing_row_idx:
                 ws.update(
-                    values=[[exercise, int(sets), int(reps), float(weight_lb), int(duration_min), float(distance_km)]],
+                    values=[[exercise, int(sets), int(reps), float(weight_kg), int(duration_min), float(distance_km)]],
                     range_name=f"B{existing_row_idx}:G{existing_row_idx}"
                 )
                 st.success(f"Updated fitness log for {entry_date} - {exercise}.")
@@ -101,7 +101,7 @@ if save_clicked:
                     exercise,
                     int(sets),
                     int(reps),
-                    float(weight_lb),
+                    float(weight_kg),
                     int(duration_min),
                     float(distance_km)
                 ])
@@ -123,7 +123,7 @@ if not st.session_state.fitness_df.empty:
     df["date"] = pd.to_datetime(df["date"])
     df["sets"] = pd.to_numeric(df.get("sets", 0), errors="coerce")
     df["reps"] = pd.to_numeric(df.get("reps", 0), errors="coerce")
-    df["weight_lb"] = pd.to_numeric(df.get("weight_lb", 0), errors="coerce")
+    df["weight_kg"] = pd.to_numeric(df.get("weight_kg", 0), errors="coerce")
     df["duration_sec"] = pd.to_numeric(df.get("duration_sec", 0), errors="coerce")
     df["distance_km"] = pd.to_numeric(df.get("distance_km", 0.0), errors="coerce")
 
@@ -161,9 +161,9 @@ if not st.session_state.fitness_df.empty:
     if not filtered_df.empty:
         # Weight Progression Chart
         weighted_df = filtered_df.copy()
-        weighted_df["weight_lb"] = pd.to_numeric(weighted_df.get("weight_lb", 0), errors="coerce")
-        weighted_df = weighted_df.dropna(subset=["weight_lb"]) 
-        weighted_df = weighted_df[weighted_df["weight_lb"] > 0]
+        weighted_df["weight_kg"] = pd.to_numeric(weighted_df.get("weight_kg", 0), errors="coerce")
+        weighted_df = weighted_df.dropna(subset=["weight_kg"]) 
+        weighted_df = weighted_df[weighted_df["weight_kg"] > 0]
 
         exercises_with_weight = (
             weighted_df["exercise"].dropna().astype(str).sort_values().unique().tolist()
@@ -182,34 +182,34 @@ if not st.session_state.fitness_df.empty:
             if exercises_with_weight and selected_exercise != "No weight data":
                 selected_exercise_data = weighted_df[weighted_df["exercise"].astype(str) == selected_exercise]
                 if not selected_exercise_data.empty:
-                    min_weight_selected = selected_exercise_data["weight_lb"].min()
-                    st.metric("Min Weight (lb)", f"{min_weight_selected:.1f}")
+                    min_weight_selected = selected_exercise_data["weight_kg"].min()
+                    st.metric("Min Weight (kg)", f"{min_weight_selected:.1f}")
                 else:
-                    st.metric("Min Weight (lb)", "N/A")
+                    st.metric("Min Weight (kg)", "N/A")
             else:
-                st.metric("Min Weight (lb)", "N/A")
+                st.metric("Min Weight (kg)", "N/A")
         
         with weight_col2:
             if exercises_with_weight and selected_exercise != "No weight data":
                 selected_exercise_data = weighted_df[weighted_df["exercise"].astype(str) == selected_exercise]
                 if not selected_exercise_data.empty:
-                    avg_weight_selected = selected_exercise_data["weight_lb"].mean()
-                    st.metric("Avg Weight (lb)", f"{avg_weight_selected:.1f}")
+                    avg_weight_selected = selected_exercise_data["weight_kg"].mean()
+                    st.metric("Avg Weight (kg)", f"{avg_weight_selected:.1f}")
                 else:
-                    st.metric("Avg Weight (lb)", "N/A")
+                    st.metric("Avg Weight (kg)", "N/A")
             else:
-                st.metric("Avg Weight (lb)", "N/A")
+                st.metric("Avg Weight (kg)", "N/A")
         
         with weight_col3:
             if exercises_with_weight and selected_exercise != "No weight data":
                 selected_exercise_data = weighted_df[weighted_df["exercise"].astype(str) == selected_exercise]
                 if not selected_exercise_data.empty:
-                    max_weight_selected = selected_exercise_data["weight_lb"].max()
-                    st.metric("Max Weight (lb)", f"{max_weight_selected:.1f}")
+                    max_weight_selected = selected_exercise_data["weight_kg"].max()
+                    st.metric("Max Weight (kg)", f"{max_weight_selected:.1f}")
                 else:
-                    st.metric("Max Weight (lb)", "N/A")
+                    st.metric("Max Weight (kg)", "N/A")
             else:
-                st.metric("Max Weight (lb)", "N/A")
+                st.metric("Max Weight (kg)", "N/A")
         
         if exercises_with_weight and selected_exercise != "No weight data":
             ex_df = weighted_df[weighted_df["exercise"].astype(str) == selected_exercise].copy()
@@ -219,22 +219,22 @@ if not st.session_state.fitness_df.empty:
                 fig_w = px.line(
                     ex_df,
                     x="date",
-                    y="weight_lb",
+                    y="weight_kg",
                     markers=True,
                     color_discrete_sequence=["#028283"],
                     title=f"Weight Over Time • {selected_exercise}"
                 )
-                avg_weight = ex_df["weight_lb"].mean()
+                avg_weight = ex_df["weight_kg"].mean()
                 fig_w.add_hline(
                     y=avg_weight,
                     line_dash="dash",
                     line_color="#e7541e",
-                    annotation_text=f"Avg: {avg_weight:.1f} lb",
+                    annotation_text=f"Avg: {avg_weight:.1f} kg",
                     annotation_position="top left"
                 )
                 fig_w.update_layout(
                     xaxis_title="Date",
-                    yaxis_title="Weight (lb)",
+                    yaxis_title="Weight (kg)",
                     xaxis=dict(
                         tickformat="%d %b",
                         tickangle=0,
@@ -365,7 +365,7 @@ if not st.session_state.fitness_df.empty:
             "exercise": "Exercise",
             "sets": "Sets",
             "reps": "Reps",
-            "weight_lb": "Weight (lb)",
+            "weight_kg": "Weight (kg)",
             "distance_km": "Distance (km)"
         })
         df_display["Duration (min)"] = filtered_df["duration_sec"]

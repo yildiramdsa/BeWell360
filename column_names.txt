@@ -14,10 +14,10 @@ empowering_morning_routine:
 empowering_morning_routine
 
 fitness_activities:
-date	exercise	sets	reps	weight_lb	duration_min	distance_km
+date	exercise	sets	reps	weight_kg	duration_min	distance_km
 
 goals_for_the_year:
-life_area	what_i_want	why_i_want_it
+goals_for_the_year
 
 long_term_life_goals:
 long_term_life_goals
