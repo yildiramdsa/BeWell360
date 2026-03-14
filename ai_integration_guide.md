@@ -23,8 +23,6 @@ ai_assistant.display_insights(insights)
 - `"sleep"` - for sleep schedule analysis
 - `"nutrition"` - for nutrition & hydration analysis  
 - `"fitness"` - for fitness activities analysis
-- `"growth"` - for growth & reflection analysis
-- `"body_composition"` - for body composition analysis
 
 ### 4. Example Integration
 
@@ -38,25 +36,12 @@ insights = ai_assistant.generate_insights("fitness", st.session_state.fitness_df
 ai_assistant.display_insights(insights)
 ```
 
-#### For Body Composition Page:
-```python
-# Add import  
-from ai_assistant import ai_assistant
-
-# Add AI insights section before analysis
-insights = ai_assistant.generate_insights("body_composition", st.session_state.body_comp_df)
-ai_assistant.display_insights(insights)
-```
-
 ## Features
 
 ### Smart Insights
 - **Sleep Analysis**: Sleep duration tracking, consistency patterns
 - **Nutrition Analysis**: Hydration levels, meal patterns
 - **Fitness Analysis**: Activity consistency, progress tracking
-- **Growth Analysis**: Mood patterns, gratitude practice
-- **Body Composition**: Weight trends, progress tracking
-
 ### Insight Types
 - **Success** (green): Positive patterns and achievements
 - **Warning** (yellow): Areas that need attention

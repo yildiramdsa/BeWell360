@@ -58,16 +58,6 @@ Run your app and check if AI insights appear. You should see:
 - Recommends workout improvements
 - Motivates when inactive
 
-### Growth Analysis
-- Analyzes mood patterns
-- Reviews gratitude practice
-- Provides encouragement
-
-### Body Composition Analysis
-- Tracks weight trends
-- Suggests progress strategies
-- Provides motivation
-
 ## API Costs
 
 **OpenAI GPT-3.5-turbo pricing:**

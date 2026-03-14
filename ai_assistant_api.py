@@ -101,10 +101,6 @@ class AIAssistantAPI:
             return self._summarize_nutrition_data(recent_data)
         elif page_type == "fitness":
             return self._summarize_fitness_data(recent_data)
-        elif page_type == "growth":
-            return self._summarize_growth_data(recent_data)
-        elif page_type == "body_composition":
-            return self._summarize_body_comp_data(recent_data)
         else:
             return f"Recent {page_type} data: {recent_data.to_dict('records')}"
     
@@ -148,35 +144,6 @@ class AIAssistantAPI:
                 summary += f"  Duration: {duration_min:.1f} minutes\n"
             if 'distance_km' in row:
                 summary += f"  Distance: {row.get('distance_km', 0)}km\n"
-        
-        return summary
-    
-    def _summarize_growth_data(self, data):
-        """Summarize growth data for AI"""
-        summary = f"Growth & reflection data for last {len(data)} entries:\n"
-        
-        for _, row in data.iterrows():
-            summary += f"- Date: {row.get('date', 'Unknown')}\n"
-            if 'mood' in row:
-                summary += f"  Mood: {row.get('mood', 'N/A')}\n"
-            if 'gratitude' in row and pd.notna(row.get('gratitude')):
-                gratitude = str(row.get('gratitude', ''))[:100]  # Limit length
-                summary += f"  Gratitude: {gratitude}\n"
-        
-        return summary
-    
-    def _summarize_body_comp_data(self, data):
-        """Summarize body composition data for AI"""
-        summary = f"Body composition data for last {len(data)} entries:\n"
-        
-        for _, row in data.iterrows():
-            summary += f"- Date: {row.get('date', 'Unknown')}\n"
-            if 'weight_lb' in row:
-                summary += f"  Weight: {row.get('weight_lb', 'N/A')} lbs\n"
-            if 'body_fat_percent' in row:
-                summary += f"  Body Fat: {row.get('body_fat_percent', 'N/A')}%\n"
-            if 'skeletal_muscle_percent' in row:
-                summary += f"  Muscle: {row.get('skeletal_muscle_percent', 'N/A')}%\n"
         
         return summary
     
@@ -386,9 +353,6 @@ Be personal, comprehensive, and motivating. Provide 3-4 key insights that help t
                         elif data_type == "fitness":
                             if row.get('exercise'):
                                 summary += f"- Exercise: {row.get('exercise')}\n"
-                        elif data_type == "growth":
-                            if row.get('mood'):
-                                summary += f"- Mood: {row.get('mood')}\n"
             
             prompt = f"""
 Based on today's wellness data, provide 3 specific, actionable suggestions for tomorrow:

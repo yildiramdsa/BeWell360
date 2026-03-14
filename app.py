@@ -35,18 +35,23 @@ daily_log_pages = create_pages([
     ("nutrition_and_hydration.py", "Nutrition & Hydration", "🍎"),
     ("fitness_activities.py", "Fitness Activities", "⚽"),
     ("sleep_schedule.py", "Sleep Schedule", "🧸"),
-    ("body_composition.py", "Body Composition", "💪"),
     ("professional_and_personal_development.py", "Professional & Personal Development", "📚"),
-    ("mood_and_gratitude.py", "Mood & Gratitude", "🌱"),
-    ("daily_ai_summary.py", "Daily AI Summary", "🦉"),
+])
+
+ai_pages = create_pages([
+    ("daily_ai_summary.py", "Daily AI Insights", "🦉"),
+    ("ai_chat_coach.py", "AI Coach Chat", "💬"),
 ])
 
 life_mastery_pages = create_pages([
     ("empowering_morning_routine.py", "Empowering Morning Routine", "☀️"),
     ("empowering_evening_routine.py", "Empowering Evening Routine", "🌙"),
     ("daily_empowering_habits.py", "Daily Empowering Habits", "⭐"),
-    ("goals_for_the_year.py", "Goals for the Year", "🎯"),
-    ("long_term_life_goals.py", "Long-Term Life Goals", "📌"),
+])
+
+goals_pages = create_pages([
+    ("goals_for_the_year.py", "Annual Goals", "🎯"),
+    ("long_term_life_goals.py", "Long-Term Goals", "📌"),
     ("vision_board.py", "Vision Board", "🎨"),
 ])
 
@@ -55,12 +60,20 @@ challenges_pages = create_pages([
     ("the_yukon_63k.py", "The Yukon 63K", "❄️"),
 ])
 
+progress_pages = create_pages([
+    ("progress_dashboard.py", "Progress Dashboard", "📊"),
+    ("habit_consistency.py", "Habit Consistency", "📅"),
+    ("health_trends.py", "Health Trends", "📈"),
+])
+
 pages = {
     "Daily Log": daily_log_pages,
     "Life Mastery Planner": life_mastery_pages,
+    "AI Coach": ai_pages,
+    "Goals": goals_pages,
     "Challenges": challenges_pages,
+    "Progress & Analytics": progress_pages,
 }
-
 # ---------------- Navigation ----------------
 pg = st.navigation(pages)
 pg.run()  # Execute the selected page

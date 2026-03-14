@@ -1,6 +1,3 @@
-body_composition:
-date	weight_kg	body_fat_percent	skeletal_muscle_percent
-
 daily_ai_insights:
 date	section	ai_insights
 
@@ -21,9 +18,6 @@ goals_for_the_year
 
 long_term_life_goals:
 long_term_life_goals
-
-mood_and_gratitude:
-date	mood	gratitude
 
 nutrition_and_hydration:
 date	breakfast	lunch	dinner	snacks	supplements	water_ml

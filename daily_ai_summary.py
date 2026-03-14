@@ -48,8 +48,6 @@ def get_user_data_for_date(selected_date):
         "nutrition": "nutrition_and_hydration",
         "fitness": "fitness_activities", 
         "sleep": "sleep_schedule",
-        "growth": "mood_and_gratitude",
-        "body_composition": "body_composition"
     }
     
     for data_type, sheet_name in sheets_data.items():
@@ -86,7 +84,6 @@ sections = {
     "🍎": "Nutrition & Hydration",
     "⚽": "Fitness Activities", 
     "🧸": "Sleep Schedule",
-    "🌱": "Growth & Reflection"
 }
 
 user_data = get_user_data_for_date(selected_date)
@@ -97,9 +94,9 @@ if not has_data:
     st.stop()
 
 st.markdown("### 📊 Data Available for Analysis")
-data_cols = st.columns(5)
-data_types = ["nutrition", "fitness", "sleep", "growth", "body_composition"]
-data_icons = ["🍎", "⚽", "🧸", "🌱", "💪"]
+data_cols = st.columns(3)
+data_types = ["nutrition", "fitness", "sleep"]
+data_icons = ["🍎", "⚽", "🧸"]
 
 for i, (data_type, icon) in enumerate(zip(data_types, data_icons)):
     with data_cols[i]:
@@ -138,8 +135,6 @@ for icon, section_name in sections.items():
                     insights = ai_assistant.generate_ai_insights("fitness", user_data.get("fitness", pd.DataFrame()))
                 elif section_name == "Sleep Schedule":
                     insights = ai_assistant.generate_ai_insights("sleep", user_data.get("sleep", pd.DataFrame()))
-                elif section_name == "Growth & Reflection":
-                    insights = ai_assistant.generate_ai_insights("growth", user_data.get("growth", pd.DataFrame()))
                 else:
                     insights = ai_assistant.generate_ai_insights("daily_summary", user_data)
                 
