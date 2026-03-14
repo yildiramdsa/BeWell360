@@ -1,50 +1,38 @@
+import json
+import random
+from datetime import date, datetime, timedelta
 import streamlit as st
 import pandas as pd
-from datetime import date, datetime, timedelta
-import json
 
 class AIAssistant:
     def __init__(self):
         self.insights_cache = {}
     
     def generate_insights(self, page_type, user_data, recent_data=None):
-        """Generate AI insights based on page type and user data"""
-        
-        # Check cache first
+        """Generate rule-based insights for the given page type and data."""
         cache_key = f"{page_type}_{date.today().strftime('%Y-%m-%d')}"
         if cache_key in self.insights_cache:
             return self.insights_cache[cache_key]
-        
         insights = []
-        
         if page_type == "sleep":
             insights.extend(self._sleep_insights(user_data, recent_data))
         elif page_type == "nutrition":
             insights.extend(self._nutrition_insights(user_data, recent_data))
         elif page_type == "fitness":
             insights.extend(self._fitness_insights(user_data, recent_data))
-        
-        # Add general motivational message
         insights.append(self._get_motivational_message())
-        
-        # Cache the insights
         self.insights_cache[cache_key] = insights
         return insights
     
     def _sleep_insights(self, data, recent_data):
         insights = []
-        
         if not data.empty and 'sleep_start' in data.columns and 'sleep_end' in data.columns:
-            # Calculate average sleep duration
             recent_data = data.tail(7) if len(data) >= 7 else data
-            
             durations = []
             for _, row in recent_data.iterrows():
                 try:
                     start_time = pd.to_datetime(row['sleep_start'], format='%H:%M').time()
                     end_time = pd.to_datetime(row['sleep_end'], format='%H:%M').time()
-                    
-                    # Handle overnight sleep
                     start_dt = datetime.combine(date.today(), start_time)
                     end_dt = datetime.combine(date.today(), end_time)
                     
@@ -53,7 +41,7 @@ class AIAssistant:
                     
                     duration = (end_dt - start_dt).total_seconds() / 3600
                     durations.append(duration)
-                except:
+                except (ValueError, TypeError, KeyError):
                     continue
             
             if durations:
@@ -143,8 +131,6 @@ class AIAssistant:
             "🔥 You're building habits that will serve you for life!",
             "✨ Your commitment to wellness is your superpower!"
         ]
-        
-        import random
         return {
             "type": "motivation",
             "icon": random.choice(["🌟", "💪", "🎯", "⭐", "🚀", "🌈", "🔥", "✨"]),
@@ -153,19 +139,15 @@ class AIAssistant:
         }
     
     def display_insights(self, insights):
-        """Display insights in a beautiful format"""
+        """Render insight cards in the UI."""
         if not insights:
             return
-        
-        st.markdown("### 🤖 AI Insights & Recommendations")
-        
+        st.markdown("### 🤖 AI insights & recommendations")
         for insight in insights:
             icon = insight.get("icon", "💡")
             title = insight.get("title", "Insight")
             message = insight.get("message", "")
             insight_type = insight.get("type", "info")
-            
-            # Choose color based on type
             if insight_type == "success":
                 color = "#d4edda"
                 border_color = "#c3e6cb"
@@ -194,7 +176,7 @@ class AIAssistant:
             """, unsafe_allow_html=True)
     
     def get_smart_suggestions(self, page_type, user_data):
-        """Generate smart suggestions based on current data"""
+        """Return up to 2 static suggestions for the given page type."""
         suggestions = []
         
         if page_type == "sleep":
@@ -216,6 +198,6 @@ class AIAssistant:
                 "🧘‍♀️ Do some stretching exercises"
             ])
         
-        return suggestions[:2]  # Return top 2 suggestions
+        return suggestions[:2]
 
 ai_assistant = AIAssistant()

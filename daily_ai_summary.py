@@ -1,8 +1,8 @@
-import streamlit as st
-import pandas as pd
+from datetime import date
 import gspread
 from google.oauth2.service_account import Credentials
-from datetime import date
+import pandas as pd
+import streamlit as st
 from ai_assistant_api import ai_assistant
 
 SCOPES = [
@@ -23,7 +23,7 @@ def load_ai_insights():
         if not df.empty:
             df["date"] = pd.to_datetime(df["date"])
         return df
-    except:
+    except (gspread.SpreadsheetNotFound, gspread.APIError, KeyError, ValueError):
         return pd.DataFrame()
 
 def save_ai_insights(date, section, insights):
@@ -37,13 +37,12 @@ def save_ai_insights(date, section, insights):
         
         ws.append_row([date.strftime('%Y-%m-%d'), section, insights])
         return True
-    except:
+    except (gspread.SpreadsheetNotFound, gspread.APIError, KeyError, ValueError):
         return False
 
 def get_user_data_for_date(selected_date):
-    """Load actual user data for the selected date from all sheets"""
+    """Load user data for the given date from nutrition, fitness, and sleep sheets."""
     user_data = {}
-    
     sheets_data = {
         "nutrition": "nutrition_and_hydration",
         "fitness": "fitness_activities", 
@@ -60,7 +59,7 @@ def get_user_data_for_date(selected_date):
                 user_data[data_type] = date_filtered
             else:
                 user_data[data_type] = pd.DataFrame()
-        except:
+        except (gspread.SpreadsheetNotFound, gspread.APIError, KeyError, ValueError):
             user_data[data_type] = pd.DataFrame()
     
     return user_data
@@ -68,15 +67,15 @@ def get_user_data_for_date(selected_date):
 if "ai_insights_data" not in st.session_state:
     st.session_state.ai_insights_data = load_ai_insights()
 
-st.title("🦉 Daily AI Summary")
+st.title("🦉 Daily Summary")
 
 selected_date = st.date_input(
-    "Select Date for Summary", 
+    "Select date for summary",
     value=date.today(),
-    help="Choose the date you want an AI summary for"
+    help="Choose the date for your AI summary."
 )
 
-if st.button("🔄 Refresh Insights"):
+if st.button("🔄 Refresh insights"):
     st.session_state.ai_insights_data = load_ai_insights()
     st.rerun()
 
@@ -90,10 +89,10 @@ user_data = get_user_data_for_date(selected_date)
 
 has_data = any(not df.empty for df in user_data.values())
 if not has_data:
-    st.info(f"No data logged for {selected_date.strftime('%B %d, %Y')}. Please log some activities first!")
+    st.info(f"No data logged for {selected_date.strftime('%B %d, %Y')}. Please log some activities first.")
     st.stop()
 
-st.markdown("### 📊 Data Available for Analysis")
+st.markdown("### 📊 Data available for analysis")
 data_cols = st.columns(3)
 data_types = ["nutrition", "fitness", "sleep"]
 data_icons = ["🍎", "⚽", "🧸"]
@@ -107,7 +106,6 @@ for i, (data_type, icon) in enumerate(zip(data_types, data_icons)):
             help=f"{data_type.title()} data logged" if has_data_for_type else f"No {data_type} data"
         )
 
-date_str = selected_date.strftime('%Y-%m-%d')
 stored_insights = st.session_state.ai_insights_data[
     st.session_state.ai_insights_data['date'].dt.date == selected_date
 ] if not st.session_state.ai_insights_data.empty else pd.DataFrame()
@@ -121,13 +119,13 @@ for icon, section_name in sections.items():
     
     with col1:
         if not section_insights.empty:
-            st.markdown("**Stored Insights:**")
+            st.markdown("**Stored insights:**")
             st.write(section_insights['ai_insights'].iloc[0])
         else:
-            st.info("No stored insights available for this section and date.")
+            st.info("No stored insights for this section and date.")
     
     with col2:
-        if st.button(f"Generate New", key=f"generate_{section_name}"):
+        if st.button("Generate new", key=f"generate_{section_name}"):
             try:
                 if section_name == "Nutrition & Hydration":
                     insights = ai_assistant.generate_ai_insights("nutrition", user_data.get("nutrition", pd.DataFrame()))

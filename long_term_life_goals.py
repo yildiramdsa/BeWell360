@@ -41,7 +41,7 @@ if not st.session_state.life_goals_df.empty:
         goal_col = df.columns[0]
     
     if goal_col is None:
-        st.error("No data found in the Google Sheet. Please add some goals.")
+        st.error("No data found. Please add some goals.")
     else:
         for idx, row in df.iterrows():
             goal_key = f"goal_{idx}"
@@ -69,7 +69,7 @@ if not st.session_state.life_goals_df.empty:
                     if st.button("🗑️", key=f"delete_{idx}", help="Delete", use_container_width=True):
                         try:
                             ws.delete_rows(idx + 2)
-                            st.success(f"Deleted '{goal_name}' from goals!")
+                            st.success(f"Deleted from goals.")
                             st.session_state.life_goals_df = pd.DataFrame(ws.get_all_records())
                             st.rerun()
                         except Exception as e:
@@ -81,11 +81,11 @@ if not st.session_state.life_goals_df.empty:
                         
                         edit_save_col, edit_cancel_col = st.columns([1, 1])
                         with edit_save_col:
-                            if st.button("☁️ Save Changes", key=f"save_edit_{idx}"):
+                            if st.button("☁️ Save changes", key=f"save_edit_{idx}"):
                                 try:
                                     ws.update(values=[[edit_goal]], 
                                              range_name=f"A{idx+2}")
-                                    st.success("Goal updated successfully!")
+                                    st.success("Goal updated.")
                                     st.session_state[f"editing_{idx}"] = False
                                     st.session_state.life_goals_df = pd.DataFrame(ws.get_all_records())
                                     st.rerun()
@@ -122,7 +122,7 @@ if not st.session_state.life_goals_df.empty:
                 if new_goal.strip():
                     try:
                         ws.append_row([new_goal.strip()])
-                        st.success(f"Added '{new_goal}' to your life goals!")
+                        st.success("Added to your life goals.")
                         st.session_state.life_goals_df = pd.DataFrame(ws.get_all_records())
                         st.session_state["_clear_new_goal_input"] = True
                         st.rerun()
@@ -141,20 +141,20 @@ if not st.session_state.life_goals_df.empty:
         col1, col2 = st.columns([1, 1])
         
         with col1:
-            if st.button("⚙️ Manage Goals", help="Edit or delete goal items", disabled=st.session_state.get("show_management", False)):
+            if st.button("⚙️ Manage goals", help="Edit or delete goals", disabled=st.session_state.get("show_management", False)):
                 st.session_state["show_management"] = True
                 st.rerun()
         
         with col2:
             if st.session_state.get("show_management", False):
-                if st.button("☁️ Save", help="Close management section"):
+                if st.button("☁️ Done", help="Close management"):
                     st.session_state["show_management"] = False
                     st.rerun()
 
 else:
-    st.info("No life goals yet. Click 'Manage Goals' below to add your first goal!")
+    st.info("No life goals yet. Click **Manage goals** to add your first.")
     
-    if st.button("⚙️ Manage Goals", help="Add your first goal"):
+    if st.button("⚙️ Manage goals", help="Add your first goal"):
         st.session_state["show_management"] = True
         st.rerun()
     
@@ -185,6 +185,6 @@ else:
             else:
                 st.error("Please enter a goal.")
         
-        if st.button("☁️ Save", help="Close management section"):
+        if st.button("☁️ Done", help="Close management"):
             st.session_state["show_management"] = False
             st.rerun()

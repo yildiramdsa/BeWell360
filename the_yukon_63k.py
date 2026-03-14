@@ -49,7 +49,7 @@ if not st.session_state.challenge_data.empty:
         winter_rows = df[df["_parsed_date"].apply(lambda x: x.month in WINTER_MONTHS if pd.notna(x) else False)]
         total_logged = winter_rows[dist_col].fillna(0).astype(float).sum()
 
-st.markdown("### Your Progress")
+st.markdown("### Your progress")
 
 col1, col2, col3 = st.columns(3)
 with col1:
@@ -71,7 +71,7 @@ st.caption(f"Progress: {progress_pct:.1f}%")
 if total_logged >= GOAL_KM:
     st.success("**Congratulations!** You've completed The Yukon 63K!")
 
-st.markdown("### Log Your Kilometers")
+st.markdown("### Log your kilometers")
 
 
 def get_existing_distance(selected_date):
@@ -106,7 +106,7 @@ in_winter = activity_date.month in WINTER_MONTHS
 if not in_winter:
     st.caption("ℹ️ Only December, January, and February count toward the 63 km goal. You can still log other months for your records.")
 
-if st.button("Log Activity"):
+if st.button("Log activity"):
     if distance >= 0:
         try:
             date_str = str(activity_date)

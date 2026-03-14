@@ -125,14 +125,14 @@ if not st.session_state.growth_df.empty:
     header_col, filter_col1, filter_col2 = st.columns([2, 1, 1])
     
     with header_col:
-        st.subheader("Professional & Personal Growth Analysis")
+        st.subheader("Professional & personal growth analysis")
     with filter_col1:
-        start_filter = st.date_input("Start Date", min_value=min_date, max_value=max_date, value=min_date)
+        start_filter = st.date_input("Start date", min_value=min_date, max_value=max_date, value=min_date)
     with filter_col2:
-        end_filter = st.date_input("End Date", min_value=min_date, max_value=max_date, value=max_date)
+        end_filter = st.date_input("End date", min_value=min_date, max_value=max_date, value=max_date)
 
     if start_filter > end_filter:
-        st.warning("⚠️ Invalid date range: Start Date cannot be after End Date.")
+        st.warning("Invalid date range: the start date cannot be after the end date.")
         filtered_df = pd.DataFrame()
     else:
         filtered_df = df[(df["date"].dt.date >= start_filter) & (df["date"].dt.date <= end_filter)].copy()
@@ -168,9 +168,9 @@ if not st.session_state.growth_df.empty:
             df_display = df_display.rename(columns=rename_map)
 
         df_display["Date"] = pd.to_datetime(df_display["Date"]).dt.date
-        with st.expander("Log Entries", expanded=False):
+        with st.expander("Log entries", expanded=False):
             st.dataframe(df_display.sort_values("Date", ascending=False), width="stretch")
     else:
-        st.info("No records in selected date range.")
+        st.info("No records in the selected date range.")
 else:
-    st.info("No growth logs yet.")
+    st.info("No development logs yet.")

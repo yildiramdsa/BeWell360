@@ -148,12 +148,12 @@ if not st.session_state.fitness_df.empty:
     with header_col:
         st.subheader("Fitness Activities Analysis")
     with filter_col1:
-        start_filter = st.date_input("Start Date", min_value=min_date, max_value=max_date, value=min_date)
+        start_filter = st.date_input("Start date", min_value=min_date, max_value=max_date, value=min_date)
     with filter_col2:
-        end_filter = st.date_input("End Date", min_value=min_date, max_value=max_date, value=max_date)
+        end_filter = st.date_input("End date", min_value=min_date, max_value=max_date, value=max_date)
 
     if start_filter > end_filter:
-        st.warning("⚠️ Invalid date range: Start Date cannot be after End Date.")
+        st.warning("Invalid date range: the start date cannot be after the end date.")
         filtered_df = pd.DataFrame()
     else:
         filtered_df = df[(df["date"].dt.date >= start_filter) & (df["date"].dt.date <= end_filter)].copy()
@@ -374,6 +374,6 @@ if not st.session_state.fitness_df.empty:
         with st.expander("Log Entries", expanded=False):
             st.dataframe(df_display.sort_values(["Date", "Exercise"], ascending=[False, True]), width="stretch")
     else:
-        st.info("No records in selected date range.")
+        st.info("No records in the selected date range.")
 else:
     st.info("No fitness logs yet.")

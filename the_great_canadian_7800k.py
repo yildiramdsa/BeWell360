@@ -113,7 +113,7 @@ if not st.session_state.challenge_data.empty:
     elif len(st.session_state.challenge_data.columns) >= 2:
         total_logged = st.session_state.challenge_data.iloc[:, 1].fillna(0).astype(float).sum()
 
-st.markdown("### Your Journey Progress")
+st.markdown("### Your journey progress")
 
 col1, col2, col3 = st.columns(3)
 with col1:
@@ -257,7 +257,7 @@ st.caption(f"Progress: {progress_percentage:.1f}%")
 if total_logged >= 7800:
     st.write("**Congratulations!** You've completed the coast-to-coast journey!")
 
-st.markdown("### Log Your Kilometers")
+st.markdown("### Log your kilometers")
 
 
 def get_existing_distance(selected_date):
@@ -283,7 +283,7 @@ else:
     distance = st.number_input("Distance (km)", min_value=0.0, step=0.1, value=0.0,
                                help="No run logged for this date")
 
-if st.button("Log Run"):
+if st.button("Log run"):
     if distance > 0:
         try:
             date_str = str(activity_date)
@@ -321,7 +321,7 @@ if not st.session_state.challenge_data.empty:
             df_display = df_display.drop(columns=["date"])
         st.dataframe(df_display, use_container_width=True)
 
-st.markdown("### Your Badges")
+st.markdown("### Your badges")
 
 BADGE_IMAGES = {
     "Atlantic Explorer": "images/badges/atlantic_explorer.svg",
@@ -373,9 +373,9 @@ if earned_badges:
         with cols[i]:
             load_badge_image(badge["name"], is_earned=True)
 else:
-    st.info("Complete challenges to earn badges!")
+    st.info("Complete challenges to earn badges.")
 
-st.markdown("### Challenge Progress")
+st.markdown("### Challenge progress")
 for tier_name, tier_info in CHALLENGE_CHECKPOINTS.items():
     tier_completed = total_logged >= tier_info["total_km"]
     if tier_completed:

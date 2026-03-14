@@ -179,8 +179,8 @@ for i, row in enumerate(df_records):
 prefill_start, prefill_end = get_prefill_datetimes(existing_row, default_start, default_end)
 
 col1, col2 = st.columns(2)
-sleep_start = col1.datetime_input("Sleep Start", value=prefill_start)
-sleep_end = col2.datetime_input("Sleep End", value=prefill_end)
+sleep_start = col1.datetime_input("Sleep start", value=prefill_start)
+sleep_end = col2.datetime_input("Sleep end", value=prefill_end)
 
 col_save, col_delete = st.columns([1, 1])
 with col_save:
@@ -262,13 +262,13 @@ if not st.session_state.sleep_df.empty:
         max_date = today
     
     with col1:
-        start_filter = st.date_input("Start Date", min_value=min_date, max_value=max_date, value=min_date)
+        start_filter = st.date_input("Start date", min_value=min_date, max_value=max_date, value=min_date)
     with col2:
-        end_filter = st.date_input("End Date", min_value=min_date, max_value=max_date, value=max_date)
+        end_filter = st.date_input("End date", min_value=min_date, max_value=max_date, value=max_date)
 
     filtered_df = pd.DataFrame()
     if start_filter > end_filter:
-        st.warning("⚠️ Invalid date range: Start Date cannot be after End Date.")
+        st.warning("Invalid date range: the start date cannot be after the end date.")
     else:
         filtered_df = df[(df["date"].dt.date >= start_filter) & (df["date"].dt.date <= end_filter)].copy()
 

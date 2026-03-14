@@ -1,18 +1,16 @@
+import json
+from datetime import date
 import streamlit as st
 import pandas as pd
 import openai
-import json
-from datetime import date, datetime
-import os
 
 class AIAssistantAPI:
     def __init__(self):
-        # Initialize cache, client will be created when needed
         self.client = None
         self.ai_insights_cache = {}
-    
+
     def _get_client(self):
-        """Get OpenAI client, creating it if needed"""
+        """Return OpenAI client, creating it if needed."""
         if self.client is None:
             try:
                 api_key = st.secrets.get("openai_api_key")
@@ -24,21 +22,14 @@ class AIAssistantAPI:
         return self.client
         
     def generate_ai_insights(self, page_type, user_data, recent_data=None):
-        """Generate AI insights using OpenAI API"""
-        
-        # Check cache first
+        """Generate AI insights using OpenAI API."""
         cache_key = f"{page_type}_{date.today().strftime('%Y-%m-%d')}"
         if cache_key in self.ai_insights_cache:
             return self.ai_insights_cache[cache_key]
-        
+
         try:
-            # Prepare data for AI analysis
             data_summary = self._prepare_data_summary(page_type, user_data)
-            
-            # Create AI prompt
             prompt = self._create_ai_prompt(page_type, data_summary)
-            
-            # Call OpenAI API
             client = self._get_client()
             response = client.chat.completions.create(
                 model="gpt-3.5-turbo",
@@ -55,30 +46,21 @@ class AIAssistantAPI:
                 temperature=0.7,
                 max_tokens=1000
             )
-            
-            # Parse AI response
             ai_content = response.choices[0].message.content
-            
-            # Try to parse as JSON, fallback to structured format
             try:
                 ai_insights_data = json.loads(ai_content)
                 ai_insights = ai_insights_data.get('ai_insights', [])
             except json.JSONDecodeError:
-                # Fallback: create structured insight from text response
                 ai_insights = [{
                     "type": "info",
                     "icon": "🤖",
                     "title": "AI Insight",
                     "message": ai_content
                 }]
-            
-            # Cache the ai_insights
             self.ai_insights_cache[cache_key] = ai_insights
             return ai_insights
-            
         except Exception as e:
             st.error(f"AI Analysis Error: {str(e)}")
-            # Return fallback ai_insights
             return [{
                 "type": "warning",
                 "icon": "⚠️",
@@ -87,14 +69,10 @@ class AIAssistantAPI:
             }]
     
     def _prepare_data_summary(self, page_type, user_data):
-        """Prepare data summary for AI analysis"""
+        """Build a text summary of user data for AI analysis."""
         if user_data.empty:
             return f"No {page_type} data available yet."
-        
-        # Get recent data (last 7 entries)
         recent_data = user_data.tail(7) if len(user_data) >= 7 else user_data
-        
-        # Create summary based on page type
         if page_type == "sleep":
             return self._summarize_sleep_data(recent_data)
         elif page_type == "nutrition":
@@ -105,7 +83,7 @@ class AIAssistantAPI:
             return f"Recent {page_type} data: {recent_data.to_dict('records')}"
     
     def _summarize_sleep_data(self, data):
-        """Summarize sleep data for AI"""
+        """Format sleep data as text for the AI prompt."""
         summary = f"Sleep data for last {len(data)} entries:\n"
         
         for _, row in data.iterrows():
@@ -115,7 +93,7 @@ class AIAssistantAPI:
         return summary
     
     def _summarize_nutrition_data(self, data):
-        """Summarize nutrition data for AI"""
+        """Format nutrition data as text for the AI prompt."""
         summary = f"Nutrition data for last {len(data)} entries:\n"
         
         for _, row in data.iterrows():
@@ -132,7 +110,7 @@ class AIAssistantAPI:
         return summary
     
     def _summarize_fitness_data(self, data):
-        """Summarize fitness data for AI"""
+        """Format fitness data as text for the AI prompt."""
         summary = f"Fitness activities for last {len(data)} entries:\n"
         
         for _, row in data.iterrows():
@@ -148,7 +126,7 @@ class AIAssistantAPI:
         return summary
     
     def _create_ai_prompt(self, page_type, data_summary):
-        """Create AI prompt based on page type"""
+        """Build the system + user prompt for insight generation."""
         base_prompt = f"""
 Analyze the following {page_type} data and provide 2-3 personalized insights and recommendations:
 
@@ -179,19 +157,15 @@ Be personal, helpful, and motivating. Use appropriate emojis and keep messages c
         return base_prompt
     
     def display_ai_insights(self, ai_insights):
-        """Display AI insights in a beautiful format"""
+        """Render insight cards in the UI."""
         if not ai_insights:
             return
-        
-        st.markdown("### 🤖 AI Insights & Recommendations")
-        
+        st.markdown("### 🤖 AI insights & recommendations")
         for insight in ai_insights:
             icon = insight.get("icon", "💡")
             title = insight.get("title", "Insight")
             message = insight.get("message", "")
             insight_type = insight.get("type", "info")
-            
-            # Choose color based on type
             if insight_type == "success":
                 color = "#d4edda"
                 border_color = "#c3e6cb"
@@ -220,7 +194,7 @@ Be personal, helpful, and motivating. Use appropriate emojis and keep messages c
             """, unsafe_allow_html=True)
     
     def get_smart_suggestions(self, page_type, user_data):
-        """Get AI-powered smart suggestions"""
+        """Return up to 3 AI-generated suggestions for the given page type."""
         try:
             data_summary = self._prepare_data_summary(page_type, user_data)
             
@@ -251,15 +225,11 @@ Return only 3 suggestions, each starting with an emoji and being 1-2 sentences. 
             return ["🤖 AI suggestions temporarily unavailable"]
     
     def generate_comprehensive_daily_ai_insights(self, selected_data, daily_summary_text, selected_date):
-        """Generate comprehensive daily AI insights using OpenAI API"""
-        
-        # Check cache first
+        """Generate daily AI insights from combined wellness data."""
         cache_key = f"daily_summary_{selected_date.strftime('%Y-%m-%d')}"
         if cache_key in self.ai_insights_cache:
             return self.ai_insights_cache[cache_key]
-        
         try:
-            # Create comprehensive AI prompt
             prompt = f"""
 Analyze this comprehensive daily wellness data and provide personalized insights:
 
@@ -287,8 +257,6 @@ Focus on:
 
 Be personal, comprehensive, and motivating. Provide 3-4 key insights that help the user understand their daily wellness journey.
 """
-            
-            # Call OpenAI API
             client = self._get_client()
             response = client.chat.completions.create(
                 model="gpt-3.5-turbo",
@@ -305,27 +273,19 @@ Be personal, comprehensive, and motivating. Provide 3-4 key insights that help t
                 temperature=0.7,
                 max_tokens=1200
             )
-            
-            # Parse AI response
             ai_content = response.choices[0].message.content
-            
-            # Try to parse as JSON, fallback to structured format
             try:
                 ai_insights_data = json.loads(ai_content)
                 ai_insights = ai_insights_data.get('ai_insights', [])
             except json.JSONDecodeError:
-                # Fallback: create structured insight from text response
                 ai_insights = [{
                     "type": "info",
                     "icon": "🤖",
                     "title": "Daily AI Summary",
                     "message": ai_content
                 }]
-            
-            # Cache the ai_insights
             self.ai_insights_cache[cache_key] = ai_insights
             return ai_insights
-            
         except Exception as e:
             return [{
                 "type": "warning",
@@ -335,9 +295,8 @@ Be personal, comprehensive, and motivating. Provide 3-4 key insights that help t
             }]
     
     def get_daily_suggestions(self, selected_data, selected_date):
-        """Get AI-powered suggestions for tomorrow"""
+        """Return AI suggestions for tomorrow based on today's data."""
         try:
-            # Create summary for suggestions
             summary = f"Daily data for {selected_date.strftime('%B %d, %Y')}:\n"
             
             for data_type, df in selected_data.items():

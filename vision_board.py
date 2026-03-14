@@ -103,7 +103,7 @@ if not df.empty:
         image_col = df.columns[0]
     
     if image_col is None:
-        st.error("No data found in the Google Sheet. Please add some images.")
+        st.error("No data found. Please add some images.")
     else:
         images_per_row = 3
         for i in range(0, len(df), images_per_row):
@@ -132,7 +132,7 @@ if not df.empty:
                                         if st.button("🗑️", key=f"delete_{idx}", help="Delete", width='stretch'):
                                             try:
                                                 ws.delete_rows(idx + 2)
-                                                st.success("Image deleted from vision board!")
+                                                st.success("Image deleted.")
                                                 st.session_state.vision_board_df = pd.DataFrame(ws.get_all_records())
                                                 st.rerun()
                                             except Exception as e:
@@ -140,18 +140,18 @@ if not df.empty:
                                 
                                 if st.session_state.get(f"editing_{idx}", False):
                                     with st.expander(f"Edit Image {idx + 1}", expanded=True):
-                                        edit_image = st.file_uploader("Upload New Image", type=['png', 'jpg', 'jpeg'], key=f"edit_image_{idx}")
+                                        edit_image = st.file_uploader("Upload new image", type=['png', 'jpg', 'jpeg'], key=f"edit_image_{idx}")
                                         
                                         edit_save_col, edit_cancel_col = st.columns([1, 1])
                                         with edit_save_col:
-                                            if st.button("☁️ Save Changes", key=f"save_edit_{idx}"):
+                                            if st.button("☁️ Save changes", key=f"save_edit_{idx}"):
                                                 try:
                                                     if edit_image:
                                                         compressed_data = compress_image(edit_image)
                                                         if compressed_data:
                                                             ws.update(values=[[compressed_data]], 
                                                                      range_name=f"A{idx+2}")
-                                                            st.success("Image updated successfully!")
+                                                            st.success("Image updated.")
                                                             st.session_state[f"editing_{idx}"] = False
                                                             st.session_state.vision_board_df = pd.DataFrame(ws.get_all_records())
                                                             st.rerun()
@@ -170,7 +170,7 @@ if not df.empty:
                                 st.error(f"Image could not be displayed: {str(e)}")
         
         if st.session_state.get("show_management", False):
-            new_images = st.file_uploader("Upload Images", type=['png', 'jpg', 'jpeg'], key="new_image_input", accept_multiple_files=True)
+            new_images = st.file_uploader("Upload images", type=['png', 'jpg', 'jpeg'], key="new_image_input", accept_multiple_files=True)
             
             if new_images:
                 st.session_state["pending_images"] = new_images
@@ -178,13 +178,13 @@ if not df.empty:
         col1, col2 = st.columns([1, 1])
         
         with col1:
-            if st.button("⚙️ Manage Vision Board", help="Edit or delete images", disabled=st.session_state.get("show_management", False)):
+            if st.button("⚙️ Manage vision board", help="Edit or delete images", disabled=st.session_state.get("show_management", False)):
                 st.session_state["show_management"] = True
                 st.rerun()
         
         with col2:
             if st.session_state.get("show_management", False):
-                if st.button("☁️ Save", help="Save and close management section"):
+                if st.button("☁️ Done", help="Close management"):
                     if upload_pending_images():
                         st.rerun()
                     
@@ -194,9 +194,9 @@ if not df.empty:
                     st.rerun()
 
 else:
-    st.info("No images yet. Click 'Manage Vision Board' below to add your first image!")
+    st.info("No images yet. Click **Manage vision board** to add your first.")
     
-    if st.button("⚙️ Manage Vision Board", help="Add your first image"):
+    if st.button("⚙️ Manage vision board", help="Add your first image"):
         st.session_state["show_management"] = True
         st.rerun()
     
@@ -206,7 +206,7 @@ else:
         if new_images:
             st.session_state["pending_images"] = new_images
         
-        if st.button("☁️ Save", help="Save and close management section"):
+        if st.button("☁️ Done", help="Close management"):
             if upload_pending_images():
                 st.rerun()
             
