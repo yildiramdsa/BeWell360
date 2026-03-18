@@ -4,6 +4,8 @@
 
 BeWell360 is a modular, AI-driven platform that turns users’ daily holistic wellness logs into personalized, goal-focused guidance.
 
+![BeWell360](https://github.com/yildiramdsa/BeWell360/blob/main/images/BeWell360.png)
+
 ## How the Platform Works
 
 **Step 1 – Set Your Goals**  
